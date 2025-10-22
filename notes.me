@@ -1,0 +1,13 @@
+info boxes --------
+
+const info = new InfoBox("System initialized.");
+const jess = new JessicaBox("Jessica: Welcome.");
+const kiro = new KiroBox("Kiro: Let's do this.");
+const win = new WinBox("🎉 You Win!");
+
+document.getElementById("info-box-container")?.appendChild(info.getElement());
+document.getElementById("jessica-box-container")?.appendChild(jess.getElement());
+document.getElementById("kiro-box-container")?.appendChild(kiro.getElement());
+document.getElementById("win-box-container")?.appendChild(win.getElement());
+
+-----------------------
