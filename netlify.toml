@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = "dist" # or "public" or "build" — match your output folder
+
+[dev]
+  command = "vite" # or your dev server if not using Vite
+  port = 3000
+  targetPort = 5173 # if using Vite dev server
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
