@@ -3,7 +3,7 @@
   publish = "public"
 
 [functions]
-
+directory = "netlify/functions"
   node_bundler = "esbuild" # default on Netlify; fine even with no deps
 
 # API routes → Netlify Functions
