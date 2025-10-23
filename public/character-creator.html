@@ -1,16 +1,9 @@
-this is the code simiply do the 1 thing i asked 
-
-this is the code 
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Character Creator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       margin: 0;
@@ -23,19 +16,21 @@ this is the code
       height: 100vh;
     }
 
- .creator-wrapper {
-  border: 4px solid #444;
-  border-radius: 12px;
-  width: 800px;
-  background: #1a1a1a;
-  box-shadow: 0 0 30px rgba(0,0,0,0.6);
-  display: flex;
-  flex-direction: column;
-  overflow: visible;     /* allow content to expand naturally */
-  height: auto;          /* let it size to content */
-}
+    .wrap {
+      display: inline-block; /* lets inner box size to its content */
+    }
 
-
+    .creator-wrapper {
+      border: 4px solid #444;
+      border-radius: 12px;
+      width: 800px;
+      background: #1a1a1a;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      overflow: visible;
+      height: auto; /* automatically adjusts to fit content */
+    }
 
     .creator-header {
       background: #222;
@@ -68,14 +63,13 @@ this is the code
       background: #555;
     }
 
-  
-.creator-body {
-  padding: 20px;
-  background: #181818;
-  overflow: visible;     /* disable internal scroll */
-  height: auto;          /* let it grow */
-  flex: none;            /* remove flex shrink/stretch */
-}
+    .creator-body {
+      padding: 20px;
+      background: #181818;
+      overflow: visible;
+      height: auto;
+      flex: none;
+    }
 
     .option-row {
       display: flex;
@@ -153,54 +147,57 @@ this is the code
   </style>
 </head>
 <body>
-  <div class="creator-wrapper">
-    <div class="creator-header">Character Creator</div>
+  <div class="wrap">
+    <div class="creator-wrapper">
+      <div class="creator-header">Character Creator</div>
 
-    <div class="creator-nav">
-      <div class="creator-tab">Head</div>
-      <div class="creator-tab">Body</div>
-      <div class="creator-tab">Legs</div>
-      <div class="creator-tab">Shoes</div>
+      <div class="creator-nav">
+        <div class="creator-tab">Head</div>
+        <div class="creator-tab">Body</div>
+        <div class="creator-tab">Legs</div>
+        <div class="creator-tab">Shoes</div>
+      </div>
+
+      <div class="creator-body">
+        <div class="row-label">Head</div>
+        <div class="option-row">
+          <div class="arrow-btn" id="head-prev">‹</div>
+          <div class="option-side" id="head-left">Head Option 5</div>
+          <div class="option-display" id="head-display">Head Option 1</div>
+          <div class="option-side" id="head-right">Head Option 2</div>
+          <div class="arrow-btn" id="head-next">›</div>
+        </div>
+
+        <div class="row-label">Body</div>
+        <div class="option-row">
+          <div class="arrow-btn" id="body-prev">‹</div>
+          <div class="option-side" id="body-left">Body Option 5</div>
+          <div class="option-display" id="body-display">Body Option 1</div>
+          <div class="option-side" id="body-right">Body Option 2</div>
+          <div class="arrow-btn" id="body-next">›</div>
+        </div>
+
+        <div class="row-label">Legs</div>
+        <div class="option-row">
+          <div class="arrow-btn" id="legs-prev">‹</div>
+          <div class="option-side" id="legs-left">Legs Option 5</div>
+          <div class="option-display" id="legs-display">Legs Option 1</div>
+          <div class="option-side" id="legs-right">Legs Option 2</div>
+          <div class="arrow-btn" id="legs-next">›</div>
+        </div>
+
+        <div class="row-label">Shoes</div>
+        <div class="option-row">
+          <div class="arrow-btn" id="shoes-prev">‹</div>
+          <div class="option-side" id="shoes-left">Shoes Option 5</div>
+          <div class="option-display" id="shoes-display">Shoes Option 1</div>
+          <div class="option-side" id="shoes-right">Shoes Option 2</div>
+          <div class="arrow-btn" id="shoes-next">›</div>
+        </div>
+      </div>
     </div>
 
-    <div class="creator-body">
-      <div class="row-label">Head</div>
-      <div class="option-row">
-        <div class="arrow-btn" id="head-prev">‹</div>
-        <div class="option-side" id="head-left">Head Option 5</div>
-        <div class="option-display" id="head-display">Head Option 1</div>
-        <div class="option-side" id="head-right">Head Option 2</div>
-        <div class="arrow-btn" id="head-next">›</div>
-      </div>
 
-      <div class="row-label">Body</div>
-      <div class="option-row">
-        <div class="arrow-btn" id="body-prev">‹</div>
-        <div class="option-side" id="body-left">Body Option 5</div>
-        <div class="option-display" id="body-display">Body Option 1</div>
-        <div class="option-side" id="body-right">Body Option 2</div>
-        <div class="arrow-btn" id="body-next">›</div>
-      </div>
-
-      <div class="row-label">Legs</div>
-      <div class="option-row">
-        <div class="arrow-btn" id="legs-prev">‹</div>
-        <div class="option-side" id="legs-left">Legs Option 5</div>
-        <div class="option-display" id="legs-display">Legs Option 1</div>
-        <div class="option-side" id="legs-right">Legs Option 2</div>
-        <div class="arrow-btn" id="legs-next">›</div>
-      </div>
-
-      <div class="row-label">Shoes</div>
-      <div class="option-row">
-        <div class="arrow-btn" id="shoes-prev">‹</div>
-        <div class="option-side" id="shoes-left">Shoes Option 5</div>
-        <div class="option-display" id="shoes-display">Shoes Option 1</div>
-        <div class="option-side" id="shoes-right">Shoes Option 2</div>
-        <div class="arrow-btn" id="shoes-next">›</div>
-      </div>
-    </div>
-  </div>
 
   <script>
     const headOptions = [
