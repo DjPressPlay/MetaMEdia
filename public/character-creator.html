@@ -127,12 +127,57 @@
       color: #fff;
       margin-bottom: 5px;
     }
+
+        .action-btn {
+      padding: 12px 30px;
+      font-size: 16px;
+      font-weight: bold;
+      border: 2px solid #666;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin: 10px 5px;
+    }
+
+    .confirm-btn {
+      background: #4CAF50;
+      color: #fff;
+    }
+
+    .confirm-btn:hover {
+      background: #45a049;
+      border-color: #888;
+    }
+
+    .homeroom-btn {
+      background: #2196F3;
+      color: #fff;
+    }
+
+    .homeroom-btn:hover {
+      background: #0b7dda;
+      border-color: #888;
+    }
+
+    .action-btn:active {
+      transform: scale(0.98);
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
   <div class="creator-wrapper">
     <div class="creator-header">Character Creator</div>
-
+    <div class="button-container">
+        <button class="action-btn confirm-btn" id="confirm-btn">Confirm Selections</button>
+        <button class="action-btn homeroom-btn" id="homeroom-btn">Home Room</button>
+      </div>
     <div class="creator-nav">
       <div class="creator-tab">Head</div>
       <div class="creator-tab">Body</div>
@@ -315,6 +360,25 @@
     shoesNextBtn.addEventListener('click', () => {
       currentShoesIndex = (currentShoesIndex + 1) % shoesOptions.length;
       updateShoesDisplay();
+    });
+
+///////////////
+        const confirmBtn = document.getElementById('confirm-btn');
+    const homeroomBtn = document.getElementById('homeroom-btn');
+
+    confirmBtn.addEventListener('click', () => {
+      const selections = {
+        head: headOptions[currentHeadIndex],
+        body: bodyOptions[currentBodyIndex],
+        legs: legsOptions[currentLegsIndex],
+        shoes: shoesOptions[currentShoesIndex]
+      };
+      console.log('Character selections confirmed:', selections);
+      alert('Character selections confirmed!\n\nHead: ' + selections.head + '\nBody: ' + selections.body + '\nLegs: ' + selections.legs + '\nShoes: ' + selections.shoes);
+    });
+
+    homeroomBtn.addEventListener('click', () => {
+      window.location.href = 'homeroom.html';
     });
   </script>
 </body>
