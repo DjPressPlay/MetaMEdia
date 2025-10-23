@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Home Room — Framed</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #222 0%, #000 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Segoe UI", sans-serif;
+  }
+
+  /* 🔩 METAL FRAME */
+  .frame {
+    position: relative;
+    width: 86vw;
+    height: 86vh;
+    border: 14px solid;
+    border-image: linear-gradient(145deg, #888, #ccc, #555, #999) 1;
+    border-radius: 16px;
+    box-shadow:
+      inset 0 0 20px rgba(255,255,255,0.15),
+      0 0 25px rgba(0,0,0,0.7),
+      0 4px 30px rgba(0,0,0,0.6);
+    overflow: hidden;
+    background: linear-gradient(145deg, #2c2c2c, #1a1a1a);
+  }
+
+  /* ROOM (from your original code) */
+  .room {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: url("https://avatars.mds.yandex.net/get-shedevrum/11478110/img_0ab20ad90d1611ef8ab99a1c9029de6d/orig")
+                center center no-repeat;
+    background-size: 100%;
+    cursor: none;
+  }
+
+  .character {
+    position: absolute;
+    width: 220px;
+    height: 340px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: transform 0.05s linear;
+  }
+
+  .character img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="frame">
+    <div class="room">
+      <div class="character">
+        <img src="https://i.imgur.com/3QFJZC7.png" alt="Character">
+      </div>
+    </div>
+  </div>
+
+<script>
+  const character = document.querySelector('.character');
+  document.addEventListener('mousemove', e => {
+    character.style.left = `${e.clientX}px`;
+    character.style.top = `${e.clientY}px`;
+  });
+</script>
+
+</body>
+</html>
