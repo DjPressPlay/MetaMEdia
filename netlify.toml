@@ -1,10 +1,10 @@
 [build]
-  publish = "public"         # Serve static files from /public
-  command = ""               # No build step
+  publish = "public"
+  command = ""
 
 [functions]
   directory = "netlify/functions"
-  node_bundler = "esbuild"   # Keep default (safe even with no deps)
+  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/api/*"
@@ -15,7 +15,3 @@
   from = "/*"
   to = "/index.html"
   status = 200
-
-[[scheduled]]
-  path = "/.netlify/functions/cleanup_deploys"
-  schedule = "@daily"
