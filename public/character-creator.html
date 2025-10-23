@@ -1,9 +1,16 @@
+this is the code simiply do the 1 thing i asked 
+
+this is the code 
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Character Creator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       margin: 0;
@@ -14,20 +21,21 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden; /* no scrollbars */
     }
 
-    .creator-wrapper {
-      border: 4px solid #444;
-      border-radius: 12px;
-      width: 95vw;  /* fills most of screen width */
-      height: 90vh; /* fills most of screen height */
-      background: #1a1a1a;
-      box-shadow: 0 0 30px rgba(0,0,0,0.6);
-      display: flex;
-      flex-direction: column;
-      overflow: visible; /* show all content */
-    }
+ .creator-wrapper {
+  border: 4px solid #444;
+  border-radius: 12px;
+  width: 800px;
+  background: #1a1a1a;
+  box-shadow: 0 0 30px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: visible;     /* allow content to expand naturally */
+  height: auto;          /* let it size to content */
+}
+
+
 
     .creator-header {
       background: #222;
@@ -37,44 +45,110 @@
       border-bottom: 2px solid #444;
     }
 
-    .creator-body {
-      flex: 1;
-      padding: 20px;
-      background: #181818;
+    .creator-nav {
       display: flex;
-      justify-content: space-around;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
-    .character-section {
-      flex: 1;
-      min-width: 200px;
-      background: #222;
-      border: 2px solid #444;
-      border-radius: 8px;
-      padding: 16px;
-      text-align: center;
-    }
-
-    .character-section h3 {
-      margin-bottom: 10px;
-      font-size: 20px;
-      color: #00bfff;
-    }
-
-    .option {
-      margin: 8px 0;
-      padding: 10px;
-      border-radius: 6px;
       background: #333;
+      border-bottom: 2px solid #444;
+    }
+
+    .creator-tab {
+      flex: 1;
+      text-align: center;
+      padding: 12px 0;
       cursor: pointer;
+      border-right: 1px solid #444;
       transition: background 0.2s;
     }
 
-    .option:hover {
+    .creator-tab:last-child {
+      border-right: none;
+    }
+
+    .creator-tab:hover {
       background: #555;
+    }
+
+  
+.creator-body {
+  padding: 20px;
+  background: #181818;
+  overflow: visible;     /* disable internal scroll */
+  height: auto;          /* let it grow */
+  flex: none;            /* remove flex shrink/stretch */
+}
+
+    .option-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+      background: #222;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      background: #444;
+      border: 2px solid #666;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .arrow-btn:hover {
+      background: #555;
+      border-color: #888;
+    }
+
+    .arrow-btn:active {
+      transform: scale(0.95);
+    }
+
+    .option-display {
+      width: 200px;
+      height: 200px;
+      background: #333;
+      border: 3px solid #555;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #aaa;
+      transition: all 0.3s;
+    }
+
+    .option-side {
+      width: 150px;
+      height: 150px;
+      background: #333;
+      border: 2px solid #444;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #666;
+      filter: blur(2px);
+      opacity: 0.5;
+      transition: all 0.3s;
+    }
+
+    .row-label {
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -82,35 +156,189 @@
   <div class="creator-wrapper">
     <div class="creator-header">Character Creator</div>
 
+    <div class="creator-nav">
+      <div class="creator-tab">Head</div>
+      <div class="creator-tab">Body</div>
+      <div class="creator-tab">Legs</div>
+      <div class="creator-tab">Shoes</div>
+    </div>
+
     <div class="creator-body">
-      <div class="character-section">
-        <h3>Head</h3>
-        <div class="option">Hair</div>
-        <div class="option">Eyes</div>
-        <div class="option">Mouth</div>
+      <div class="row-label">Head</div>
+      <div class="option-row">
+        <div class="arrow-btn" id="head-prev">‹</div>
+        <div class="option-side" id="head-left">Head Option 5</div>
+        <div class="option-display" id="head-display">Head Option 1</div>
+        <div class="option-side" id="head-right">Head Option 2</div>
+        <div class="arrow-btn" id="head-next">›</div>
       </div>
 
-      <div class="character-section">
-        <h3>Body</h3>
-        <div class="option">Shirt</div>
-        <div class="option">Jacket</div>
-        <div class="option">Armor</div>
+      <div class="row-label">Body</div>
+      <div class="option-row">
+        <div class="arrow-btn" id="body-prev">‹</div>
+        <div class="option-side" id="body-left">Body Option 5</div>
+        <div class="option-display" id="body-display">Body Option 1</div>
+        <div class="option-side" id="body-right">Body Option 2</div>
+        <div class="arrow-btn" id="body-next">›</div>
       </div>
 
-      <div class="character-section">
-        <h3>Legs</h3>
-        <div class="option">Pants</div>
-        <div class="option">Shorts</div>
-        <div class="option">Skirt</div>
+      <div class="row-label">Legs</div>
+      <div class="option-row">
+        <div class="arrow-btn" id="legs-prev">‹</div>
+        <div class="option-side" id="legs-left">Legs Option 5</div>
+        <div class="option-display" id="legs-display">Legs Option 1</div>
+        <div class="option-side" id="legs-right">Legs Option 2</div>
+        <div class="arrow-btn" id="legs-next">›</div>
       </div>
 
-      <div class="character-section">
-        <h3>Shoes</h3>
-        <div class="option">Sneakers</div>
-        <div class="option">Boots</div>
-        <div class="option">Sandals</div>
+      <div class="row-label">Shoes</div>
+      <div class="option-row">
+        <div class="arrow-btn" id="shoes-prev">‹</div>
+        <div class="option-side" id="shoes-left">Shoes Option 5</div>
+        <div class="option-display" id="shoes-display">Shoes Option 1</div>
+        <div class="option-side" id="shoes-right">Shoes Option 2</div>
+        <div class="arrow-btn" id="shoes-next">›</div>
       </div>
     </div>
   </div>
+
+  <script>
+    const headOptions = [
+      'Head Option 1',
+      'Head Option 2',
+      'Head Option 3',
+      'Head Option 4',
+      'Head Option 5'
+    ];
+
+    const bodyOptions = [
+      'Body Option 1',
+      'Body Option 2',
+      'Body Option 3',
+      'Body Option 4',
+      'Body Option 5'
+    ];
+
+    const legsOptions = [
+      'Legs Option 1',
+      'Legs Option 2',
+      'Legs Option 3',
+      'Legs Option 4',
+      'Legs Option 5'
+    ];
+
+    const shoesOptions = [
+      'Shoes Option 1',
+      'Shoes Option 2',
+      'Shoes Option 3',
+      'Shoes Option 4',
+      'Shoes Option 5'
+    ];
+    
+    let currentHeadIndex = 0;
+    let currentBodyIndex = 0;
+    let currentLegsIndex = 0;
+    let currentShoesIndex = 0;
+    
+    const headDisplay = document.getElementById('head-display');
+    const headLeft = document.getElementById('head-left');
+    const headRight = document.getElementById('head-right');
+    const headPrevBtn = document.getElementById('head-prev');
+    const headNextBtn = document.getElementById('head-next');
+
+    const bodyDisplay = document.getElementById('body-display');
+    const bodyLeft = document.getElementById('body-left');
+    const bodyRight = document.getElementById('body-right');
+    const bodyPrevBtn = document.getElementById('body-prev');
+    const bodyNextBtn = document.getElementById('body-next');
+
+    const legsDisplay = document.getElementById('legs-display');
+    const legsLeft = document.getElementById('legs-left');
+    const legsRight = document.getElementById('legs-right');
+    const legsPrevBtn = document.getElementById('legs-prev');
+    const legsNextBtn = document.getElementById('legs-next');
+
+    const shoesDisplay = document.getElementById('shoes-display');
+    const shoesLeft = document.getElementById('shoes-left');
+    const shoesRight = document.getElementById('shoes-right');
+    const shoesPrevBtn = document.getElementById('shoes-prev');
+    const shoesNextBtn = document.getElementById('shoes-next');
+    
+    function updateHeadDisplay() {
+      const prevIndex = (currentHeadIndex - 1 + headOptions.length) % headOptions.length;
+      const nextIndex = (currentHeadIndex + 1) % headOptions.length;
+      
+      headDisplay.textContent = headOptions[currentHeadIndex];
+      headLeft.textContent = headOptions[prevIndex];
+      headRight.textContent = headOptions[nextIndex];
+    }
+
+    function updateBodyDisplay() {
+      const prevIndex = (currentBodyIndex - 1 + bodyOptions.length) % bodyOptions.length;
+      const nextIndex = (currentBodyIndex + 1) % bodyOptions.length;
+      
+      bodyDisplay.textContent = bodyOptions[currentBodyIndex];
+      bodyLeft.textContent = bodyOptions[prevIndex];
+      bodyRight.textContent = bodyOptions[nextIndex];
+    }
+
+    function updateLegsDisplay() {
+      const prevIndex = (currentLegsIndex - 1 + legsOptions.length) % legsOptions.length;
+      const nextIndex = (currentLegsIndex + 1) % legsOptions.length;
+      
+      legsDisplay.textContent = legsOptions[currentLegsIndex];
+      legsLeft.textContent = legsOptions[prevIndex];
+      legsRight.textContent = legsOptions[nextIndex];
+    }
+
+    function updateShoesDisplay() {
+      const prevIndex = (currentShoesIndex - 1 + shoesOptions.length) % shoesOptions.length;
+      const nextIndex = (currentShoesIndex + 1) % shoesOptions.length;
+      
+      shoesDisplay.textContent = shoesOptions[currentShoesIndex];
+      shoesLeft.textContent = shoesOptions[prevIndex];
+      shoesRight.textContent = shoesOptions[nextIndex];
+    }
+    
+    headPrevBtn.addEventListener('click', () => {
+      currentHeadIndex = (currentHeadIndex - 1 + headOptions.length) % headOptions.length;
+      updateHeadDisplay();
+    });
+    
+    headNextBtn.addEventListener('click', () => {
+      currentHeadIndex = (currentHeadIndex + 1) % headOptions.length;
+      updateHeadDisplay();
+    });
+
+    bodyPrevBtn.addEventListener('click', () => {
+      currentBodyIndex = (currentBodyIndex - 1 + bodyOptions.length) % bodyOptions.length;
+      updateBodyDisplay();
+    });
+    
+    bodyNextBtn.addEventListener('click', () => {
+      currentBodyIndex = (currentBodyIndex + 1) % bodyOptions.length;
+      updateBodyDisplay();
+    });
+
+    legsPrevBtn.addEventListener('click', () => {
+      currentLegsIndex = (currentLegsIndex - 1 + legsOptions.length) % legsOptions.length;
+      updateLegsDisplay();
+    });
+    
+    legsNextBtn.addEventListener('click', () => {
+      currentLegsIndex = (currentLegsIndex + 1) % legsOptions.length;
+      updateLegsDisplay();
+    });
+
+    shoesPrevBtn.addEventListener('click', () => {
+      currentShoesIndex = (currentShoesIndex - 1 + shoesOptions.length) % shoesOptions.length;
+      updateShoesDisplay();
+    });
+    
+    shoesNextBtn.addEventListener('click', () => {
+      currentShoesIndex = (currentShoesIndex + 1) % shoesOptions.length;
+      updateShoesDisplay();
+    });
+  </script>
 </body>
 </html>
