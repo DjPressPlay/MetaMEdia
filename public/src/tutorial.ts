@@ -25,9 +25,10 @@ const continueBtn = document.getElementById("continue-btn") as HTMLButtonElement
 
 
 if (continueBtn) {
-continueBtn?.addEventListener("click", () => {
-  window.location.href = "character-creator.html";
-});
+  continueBtn.addEventListener("click", () => {
+    window.location.href = "character-creator.html";
+  });
+}
 
 const tutorialScreen = document.getElementById("tutorial-screen");
 

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "exit 0"
+    "build": "esbuild public/src/script.ts --bundle --outfile=public/script.js --format=esm && esbuild public/src/tutorial.ts --bundle --outfile=public/tutorial.js --format=esm"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.2"
   }
 }
