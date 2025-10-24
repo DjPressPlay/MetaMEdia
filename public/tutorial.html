@@ -21,27 +21,35 @@
     </button>
   </div>
 
-  <!-- Game controller -->
+  <!-- ✅ Full Game Controller Integration -->
   <script type="module">
     import { GameController } from "./src/gameController.js";
     import { QuestManager } from "./src/questManager.js";
 
-    // Initialize once
+    // === Initialize controller and subsystems ===
     const Game = new GameController();
     Game.questManager = new QuestManager(Game);
 
-    // Use Messenger for tutorial intro
-    Game.messenger.info("📘 Welcome to MetaMeda! Let’s learn how to play.");
+    // Wait for the Messenger to mount
+    window.addEventListener("DOMContentLoaded", () => {
+      // Route tutorial text through Messenger
+      Game.messenger.display([
+        "📘 Welcome to MetaMeda!",
+        "Use your mouse to move your character around.",
+        "Click objects like the PC or phone to interact.",
+        "Earn post points 💎, gain clout 🌐, and climb the MetaMeda ranks!"
+      ]);
 
-    // Replace static tutorial text with Messenger output
-    const tutorialText = document.getElementById("tutorial-text");
-    tutorialText.textContent =
-      "Move your character with your mouse. Click hotspots like the PC or phone to explore. Earn post points, gain clout, and climb the MetaMeda ranks.";
+      // Mirror summary in the on-page <p> (optional redundancy)
+      const tutorialText = document.getElementById("tutorial-text");
+      tutorialText.textContent =
+        "Use your mouse to move your character and interact with hotspots to progress.";
 
-    // Continue button example
-    document.getElementById("continue-btn").addEventListener("click", () => {
-      Game.messenger.info("🎨 Opening Character Creator...");
-      window.location.href = "character-creator.html";
+      // Continue button — next scene
+      document.getElementById("continue-btn").addEventListener("click", () => {
+        Game.messenger.info("🎨 Opening Character Creator...");
+        setTimeout(() => (window.location.href = "character-creator.html"), 1200);
+      });
     });
   </script>
 </body>
