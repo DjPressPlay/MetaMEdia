@@ -1,0 +1,49 @@
+.player-hud {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  background: rgba(0,0,0,0.65);
+  border: 2px solid #fff2;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-family: "Segoe UI", sans-serif;
+  color: #fff;
+  font-size: 14px;
+  min-width: 220px;
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+}
+
+.hud-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hud-rank {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.rank-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: contain;
+  border: 1px solid #fff4;
+}
+
+.hud-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+
+.hud-quest {
+  margin-top: 8px;
+  border-top: 1px solid #fff2;
+  padding-top: 6px;
+  text-align: center;
+  font-style: italic;
+}
