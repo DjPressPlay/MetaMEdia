@@ -4,64 +4,84 @@
 <meta charset="UTF-8">
 <title>Home Room — Framed</title>
 <style>
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+  * {box-sizing:border-box;margin:0;padding:0;}
 
   body {
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-    background: radial-gradient(circle at center, #222 0%, #000 100%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: "Segoe UI", sans-serif;
+    height:100vh;width:100vw;overflow:hidden;
+    background:radial-gradient(circle at center,#222 0%,#000 100%);
+    display:flex;justify-content:center;align-items:center;
+    font-family:"Segoe UI",sans-serif;
   }
 
-  /* 🔩 METAL FRAME */
   .frame {
-    position: relative;
-    width: 86vw;
-    height: 86vh;
-    border: 14px solid;
-    border-image: linear-gradient(145deg, #888, #ccc, #555, #999) 1;
-    border-radius: 16px;
+    position:relative;
+    width:clamp(320px,90vw,960px);
+    aspect-ratio:16/9;
+    border:14px solid;
+    border-image:linear-gradient(145deg,#888,#ccc,#555,#999) 1;
+    border-radius:16px;
     box-shadow:
       inset 0 0 20px rgba(255,255,255,0.15),
       0 0 25px rgba(0,0,0,0.7),
       0 4px 30px rgba(0,0,0,0.6);
-    overflow: hidden;
-    background: linear-gradient(145deg, #2c2c2c, #1a1a1a);
+    overflow:hidden;
+    background:linear-gradient(145deg,#2c2c2c,#1a1a1a);
+    display:flex;justify-content:center;align-items:center;
   }
 
-  /* ROOM (from your original code) */
   .room {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background: url("https://avatars.mds.yandex.net/get-shedevrum/11478110/img_0ab20ad90d1611ef8ab99a1c9029de6d/orig")
-                center center no-repeat;
-    background-size: 100%;
-    cursor: none;
+    position:relative;
+    width:100%;height:100%;
+    background:url("https://avatars.mds.yandex.net/get-shedevrum/11478110/img_0ab20ad90d1611ef8ab99a1c9029de6d/orig")
+               center/cover no-repeat;
+    cursor:none;
   }
 
   .character {
-    position: absolute;
-    width: 220px;
-    height: 340px;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    transition: transform 0.05s linear;
+    position:absolute;
+    width:14%;
+    aspect-ratio:220/390;
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+    transition:transform 0.05s linear;
+  }
+  .character img {
+    width:100%;height:100%;object-fit:cover;border-radius:12px;
   }
 
-  .character img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 12px;
+  /* ⚫ DEPTH MARKERS (invisible) */
+  .depth-dot {
+    position:absolute;
+    width:8px;height:8px;
+    background:red;
+    opacity:0;
+    border-radius:50%;
+    pointer-events:none;
+  }
+
+  #far   {top:50%;left:50%;transform:translate(-50%,-50%);}     
+  #close {bottom:-20px;left:50%;transform:translateX(-50%);}    
+
+  /* 🧱 INVISIBLE WALLS */
+  .wall-top,
+  .wall-left {
+    position:absolute;
+    background:rgba(255,0,0,0); /* invisible; use 0.2 for debug */
+    pointer-events:auto; /* must catch enter/leave for cursor */
+  }
+
+  .wall-top {
+    top:0;
+    left:0;
+    width:100%;
+    height:25%;
+  }
+
+  .wall-left {
+    top:0;
+    left:0;
+    width:10%;
+    height:100%;
   }
 </style>
 </head>
@@ -69,6 +89,12 @@
 
   <div class="frame">
     <div class="room">
+      <div class="wall-top"></div>
+      <div class="wall-left"></div>
+
+      <div id="far" class="depth-dot"></div>
+      <div id="close" class="depth-dot"></div>
+
       <div class="character">
         <img src="https://i.imgur.com/3QFJZC7.png" alt="Character">
       </div>
@@ -76,11 +102,49 @@
   </div>
 
 <script>
+  const room = document.querySelector('.room');
   const character = document.querySelector('.character');
+  const closeDot = document.getElementById('close');
+  const farDot = document.getElementById('far');
+  const wallTop = document.querySelector('.wall-top');
+  const wallLeft = document.querySelector('.wall-left');
+
   document.addEventListener('mousemove', e => {
-    character.style.left = `${e.clientX}px`;
-    character.style.top = `${e.clientY}px`;
+    const rect = room.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+
+    // 🧱 Clamp top area (25%) and left side (10%)
+    const wallTopHeight = rect.height * 0.55;
+    const wallLeftWidth = rect.width * 0.36;
+    const clampedY = Math.max(wallTopHeight, y);
+    const clampedX = Math.max(wallLeftWidth, x);
+
+    character.style.left = `${clampedX}px`;
+    character.style.top = `${clampedY}px`;
+
+    // depth scaling
+    const closeRect = closeDot.getBoundingClientRect();
+    const farRect = farDot.getBoundingClientRect();
+    const dxC = e.clientX - (closeRect.left + closeRect.width/2);
+    const dyC = e.clientY - (closeRect.top + closeRect.height/2);
+    const dxF = e.clientX - (farRect.left + farRect.width/2);
+    const dyF = e.clientY - (farRect.top + farRect.height/2);
+    const distClose = Math.hypot(dxC, dyC);
+    const distFar = Math.hypot(dxF, dyF);
+
+    const scale = 1.3 + (distFar - distClose) / 600;
+    character.style.transform = `translate(-50%, -50%) scale(${Math.max(0.4, Math.min(scale, 2.5))})`;
   });
+
+  // 👁️ show cursor inside the invisible walls
+  const showCursor = () => room.style.cursor = 'default';
+  const hideCursor = () => room.style.cursor = 'none';
+
+  wallTop.addEventListener('mouseenter', showCursor);
+  wallTop.addEventListener('mouseleave', hideCursor);
+  wallLeft.addEventListener('mouseenter', showCursor);
+  wallLeft.addEventListener('mouseleave', hideCursor);
 </script>
 
 </body>
