@@ -1,6 +1,4 @@
-// ===============================
-// 💬 MESSENGER MODULE
-// ===============================
+import { TextBox } from "./components/TextBox.js";
 
 export class Messenger {
   constructor(game) {
@@ -8,15 +6,12 @@ export class Messenger {
     this.container = document.createElement("div");
     this.container.className = "messenger";
     document.body.appendChild(this.container);
+
+    // internal text handler
+    this.textBox = new TextBox(this.container);
   }
 
   display(text) {
-    const msg = document.createElement("div");
-    msg.className = "message";
-    msg.textContent = text;
-    this.container.appendChild(msg);
-
-    // optional fade/remove
-    setTimeout(() => msg.remove(), 5000);
+    this.textBox.show(text);
   }
 }
