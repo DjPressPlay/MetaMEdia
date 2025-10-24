@@ -1,9 +1,9 @@
 // ===============================
-// 🧠 QUEST MANAGER — MetaMeda (v3)
+// 🧠 QUEST MANAGER — MetaMeda (v4)
 // 🏅 Rank uses badge images, not numbers
 // ===============================
 
-export class quest-manager {
+export class QuestManager {
   constructor(game) {
     this.game = game;
     this.active = null;
@@ -124,8 +124,9 @@ export class quest-manager {
     this.active = quest;
     this.game.state.quest = quest.id;
 
-    // Route message to correct speaker
-    const say = this.game.messenger[quest.speaker] || this.game.messenger.info;
+    // Route message to correct speaker box
+    const say =
+      this.game.messenger[quest.speaker] || this.game.messenger.info;
     say.call(this.game.messenger, `📜 Quest ${quest.id}: ${quest.text}`);
 
     this.game.hud.update(this.game.state);
@@ -141,7 +142,7 @@ export class quest-manager {
     this.completed.push(quest.id);
     this.active = null;
 
-    // Apply rewards (normal stats)
+    // Apply rewards
     Object.entries(quest.reward || {}).forEach(([key, val]) => {
       if (key === "rankBadge") {
         const newBadge = this.rankBadges[val];
@@ -151,7 +152,9 @@ export class quest-manager {
       }
     });
 
-    this.game.messenger.win(`✅ Quest ${quest.id} completed! Rewards applied.`);
+    this.game.messenger.win(
+      `✅ Quest ${quest.id} completed! Rewards applied.`
+    );
     this.game.hud.update(this.game.state);
   }
 
