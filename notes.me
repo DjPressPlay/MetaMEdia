@@ -11,6 +11,68 @@ document.getElementById("kiro-box-container")?.appendChild(kiro.getElement());
 document.getElementById("win-box-container")?.appendChild(win.getElement());
 
 -----------------------
+Each component can stay minimal until we fill them in later:
+
+components/InfoBox.js
+export class InfoBox {
+  constructor(parent) {
+    this.el = document.createElement("div");
+    this.el.className = "info-box";
+    parent.appendChild(this.el);
+  }
+  show(text) {
+    this.el.textContent = `[INFO] ${text}`;
+  }
+}
+
+components/JessicaBox.js
+export class JessicaBox {
+  constructor(parent) {
+    this.el = document.createElement("div");
+    this.el.className = "jessica-box";
+    parent.appendChild(this.el);
+  }
+  show(text) {
+    this.el.textContent = `💬 Jessica: ${text}`;
+  }
+}
+
+components/KiroBox.js
+export class KiroBox {
+  constructor(parent) {
+    this.el = document.createElement("div");
+    this.el.className = "kiro-box";
+    parent.appendChild(this.el);
+  }
+  show(text) {
+    this.el.textContent = `🤖 Kiro: ${text}`;
+  }
+}
+
+components/WinBox.js
+export class WinBox {
+  constructor(parent) {
+    this.el = document.createElement("div");
+    this.el.className = "win-box";
+    parent.appendChild(this.el);
+  }
+  show(text) {
+    this.el.textContent = `🏆 ${text}`;
+  }
+}
+
+components/TextBox.js
+export class TextBox {
+  constructor(parent) {
+    this.el = document.createElement("div");
+    this.el.className = "text-box";
+    parent.appendChild(this.el);
+  }
+  show(text) {
+    this.el.textContent = text;
+  }
+}
+----------------------
 
 call character -------
 
