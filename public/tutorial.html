@@ -11,8 +11,8 @@
 
   <div id="tutorial-screen" style="text-align: center; padding: 40px;">
     <h1>📘 Tutorial</h1>
-    <p>This is where you explain how the game works.</p>
-    
+    <p id="tutorial-text">Loading tutorial...</p>
+
     <button
       id="continue-btn"
       style="margin-top: 20px; padding: 10px 20px; font-size: 16px;"
@@ -21,9 +21,28 @@
     </button>
   </div>
 
-  <!-- Load compiled TypeScript for this page -->
-  <script type="module" src="/tutorial.js"></script>
-  <script type="module" src="src/gameController.js"></script>
+  <!-- Game controller -->
+  <script type="module">
+    import { GameController } from "./src/gameController.js";
+    import { QuestManager } from "./src/questManager.js";
 
+    // Initialize once
+    const Game = new GameController();
+    Game.questManager = new QuestManager(Game);
+
+    // Use Messenger for tutorial intro
+    Game.messenger.info("📘 Welcome to MetaMeda! Let’s learn how to play.");
+
+    // Replace static tutorial text with Messenger output
+    const tutorialText = document.getElementById("tutorial-text");
+    tutorialText.textContent =
+      "Move your character with your mouse. Click hotspots like the PC or phone to explore. Earn post points, gain clout, and climb the MetaMeda ranks.";
+
+    // Continue button example
+    document.getElementById("continue-btn").addEventListener("click", () => {
+      Game.messenger.info("🎨 Opening Character Creator...");
+      window.location.href = "character-creator.html";
+    });
+  </script>
 </body>
 </html>
