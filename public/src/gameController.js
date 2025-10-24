@@ -1,5 +1,5 @@
 // ===============================
-// 🎮 GAME CONTROLLER v3 — MetaMeda
+// 🎮 GAME CONTROLLER v4 — MetaMeda (Reddit DevKit)
 // ===============================
 
 import { PlayerHUD } from "./playerHUD.js";
@@ -7,96 +7,136 @@ import { Messenger } from "./messenger.js";
 
 export class GameController {
   constructor() {
-    console.log("✅ MetaMeda GameController initialized");
+    console.log("🚀 MetaMeda GameController — Reddit DevKit Mode");
 
-    // ====== 🎯 PLAYER STATE ======
+    // ===== 🎯 PLAYER STATE =====
     this.state = {
-      postPoints: 0,   // main currency / quest tokens
-      clout: 0,        // XP / influence growth
-      followers: 0,    // number of followers
-      likes: 0,        // total likes across posts
-      socialRank: 1,   // overall rank in the MetaMeda world
-      quest: 0,        // quest number or stage
-      messages: []     // logs or conversation history
+      postPoints: 0,   // quest tokens / currency
+      clout: 0,        // XP / reputation
+      followers: 0,    // audience size
+      likes: 0,        // cumulative likes
+      socialRank: 1,   // rank tier
+      quest: 0,        // current quest id
+      messages: []     // log history
     };
 
-    // ====== 🧩 CORE MODULES ======
+    // ===== 🧩 CORE SYSTEMS =====
     this.hud = new PlayerHUD(this);
     this.messenger = new Messenger(this);
 
-    // ====== 🧠 EVENT REGISTRY ======
+    // ===== 🧭 QUEST DATA =====
+    this.quests = [
+      { id: 1, name: "Tutorial Post", trigger: "onPostMade", text: "Make your first post on Meta Reddit." },
+      { id: 2, name: "Phone Key", trigger: "onPhoneOpen", text: "Enter the key your phone shows you." },
+      { id: 3, name: "Job Offer", trigger: "onMessageRead", text: "Reply to your first job offer from Jessica." },
+      { id: 4, name: "First Job Post", trigger: "onPostMade", text: "Post under your job category." },
+      { id: 5, name: "Answer Phone", trigger: "onPhoneCall", text: "Answer Jessica’s call." },
+      { id: 6, name: "SignalZ Intro", trigger: "onSignalZOpen", text: "Learn about SignalZ from Jessica." },
+      { id: 7, name: "Meet Kiro", trigger: "onPhotoLiked", text: "Like the tutorial photo to meet Kiro." },
+      { id: 8, name: "Work With Kiro", trigger: "onSignalZPost", text: "Help Kiro with SignalZ tasks." },
+      { id: 9, name: "MMRR Invite", trigger: "onMessageRead", text: "You’re invited to MMRR Con!" },
+      { id:10, name: "Final Prep", trigger: "onCameraOpen", text: "Rank up and earn ticket money for MMRR Con." }
+    ];
+
+    // ===== 🧠 EVENT REGISTRY =====
     this.events = {
-      onPostMade: (likes = 0) => this.handlePostMade(likes),
-      onFollowerGain: (count = 1) => this.handleFollowerGain(count),
-      onQuestAdvance: () => this.handleQuestAdvance(),
-      onCloutGain: (amount = 5) => this.handleCloutGain(amount),
-      onRankUp: () => this.handleRankUp(),
-      onMessage: (text) => this.handleMessage(text)
+      onPCOpen: () => this.triggerEvent("onPCOpen"),
+      onPhoneOpen: () => this.triggerEvent("onPhoneOpen"),
+      onClosetOpen: () => this.triggerEvent("onClosetOpen"),
+      onMessageRead: () => this.triggerEvent("onMessageRead"),
+      onPhoneCall: () => this.triggerEvent("onPhoneCall"),
+      onSignalZOpen: () => this.triggerEvent("onSignalZOpen"),
+      onSignalZPost: () => this.triggerEvent("onSignalZPost"),
+      onPhotoLiked: () => this.triggerEvent("onPhotoLiked"),
+      onCameraOpen: () => this.triggerEvent("onCameraOpen"),
+      onPostMade: (likes = 0) => this.handlePostMade(likes)
     };
 
-    // initial draw
+    // ===== 🏁 INITIAL SETUP =====
+    this.hud.update(this.state);
+    this.messenger.info("Welcome to MetaMeda — click your PC to begin.");
+  }
+
+  // =====================================================
+  // 🎯 EVENT / QUEST CORE
+  // =====================================================
+
+  triggerEvent(eventName) {
+    console.log(`📡 Trigger: ${eventName}`);
+    const quest = this.quests.find(q => q.id === this.state.quest + 1 && q.trigger === eventName);
+    if (quest) {
+      this.startQuest(quest);
+    } else {
+      this.handleAmbientEvent(eventName);
+    }
+  }
+
+  startQuest(quest) {
+    this.state.quest = quest.id;
+    this.messenger.info(`📜 Quest ${quest.id}: ${quest.text}`);
     this.hud.update(this.state);
   }
 
-  // ===========================
-  // 🎮 HANDLERS / GAME LOGIC
-  // ===========================
+  handleAmbientEvent(eventName) {
+    // fallback reactions for events not tied to active quest
+    switch (eventName) {
+      case "onPCOpen":
+        this.messenger.info("💻 Zetsu Online loaded.");
+        break;
+      case "onPhoneOpen":
+        this.messenger.info("📱 Phone interface opened.");
+        break;
+      case "onClosetOpen":
+        this.messenger.info("👕 Closet unlocked.");
+        break;
+      default:
+        break;
+    }
+  }
 
-  handlePostMade(likes) {
+  // =====================================================
+  // 🧩 GAMEPLAY HANDLERS
+  // =====================================================
+
+  handlePostMade(likes = 0) {
     this.state.postPoints += 5;
     this.state.likes += likes;
     this.state.clout += 2;
-    this.messenger.display(`🧠 Post uploaded — +5 post points, +${likes} likes!`);
     this.hud.update(this.state);
+    this.messenger.text(`🧠 Post uploaded — +5 points, +${likes} likes`);
+    this.triggerEvent("onPostMade");
   }
 
-  handleFollowerGain(count) {
+  handleFollowerGain(count = 1) {
     this.state.followers += count;
-    this.messenger.display(`👥 You gained ${count} new followers!`);
     this.hud.update(this.state);
-  }
-
-  handleQuestAdvance() {
-    this.state.quest += 1;
-    this.state.postPoints += 10;
-    this.messenger.display(`📜 Quest advanced to stage ${this.state.quest}!`);
-    this.hud.update(this.state);
-  }
-
-  handleCloutGain(amount) {
-    this.state.clout += amount;
-    this.messenger.display(`⭐ Clout +${amount}`);
-    this.hud.update(this.state);
+    this.messenger.info(`👥 +${count} followers`);
   }
 
   handleRankUp() {
     this.state.socialRank += 1;
-    this.messenger.display(`🚀 Rank Up! Now Level ${this.state.socialRank}`);
     this.hud.update(this.state);
+    this.messenger.win(`🚀 Rank Up! You’re now Level ${this.state.socialRank}`);
   }
 
   handleMessage(text) {
     this.state.messages.push(text);
-    this.messenger.display(text);
+    this.messenger.text(text);
   }
 
-  // ===========================
-  // ⚙️ GENERAL INTERFACE
-  // ===========================
+  // =====================================================
+  // 🧱 UTILITY
+  // =====================================================
 
   updateHUD(data) {
     this.state = { ...this.state, ...data };
     this.hud.update(this.state);
   }
 
-  sendMessage(text) {
-    this.messenger.display(text);
-  }
-
   tick() {
-    // Placeholder for frame or timed updates
+    // Reddit DevKit update loop hooks go here later
   }
 }
 
-// Auto-init global controller
-window.GameCon = new GameController();
+// Global init (Reddit DevKit entry point)
+window.MetaMeda = new GameController();
