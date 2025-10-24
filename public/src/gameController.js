@@ -1,5 +1,5 @@
 // ===============================
-// 🎮 GAME CONTROLLER v4 — MetaMeda (Reddit DevKit)
+// 🎮 GAME CONTROLLER v5 — MetaMeda (Reddit DevKit)
 // ===============================
 
 import { PlayerHUD } from "./playerHUD.js";
@@ -11,13 +11,13 @@ export class GameController {
 
     // ===== 🎯 PLAYER STATE =====
     this.state = {
-      postPoints: 0,   // quest tokens / currency
-      clout: 0,        // XP / reputation
-      followers: 0,    // audience size
-      likes: 0,        // cumulative likes
-      socialRank: 1,   // rank tier
-      quest: 0,        // current quest id
-      messages: []     // log history
+      postPoints: 0,    // quest tokens / currency
+      clout: 0,         // XP / reputation
+      followers: 0,     // audience size
+      likes: 0,         // cumulative likes
+      rankBadge: "assets/ranks/newbie.png", // visual rank icon
+      quest: 0,         // current quest id
+      messages: []      // log history
     };
 
     // ===== 🧩 CORE SYSTEMS =====
@@ -78,7 +78,6 @@ export class GameController {
   }
 
   handleAmbientEvent(eventName) {
-    // fallback reactions for events not tied to active quest
     switch (eventName) {
       case "onPCOpen":
         this.messenger.info("💻 Zetsu Online loaded.");
@@ -99,24 +98,25 @@ export class GameController {
   // =====================================================
 
   handlePostMade(likes = 0) {
-    this.state.postPoints += 5;
+    // scaled for leaderboard
+    this.state.postPoints += 100;
     this.state.likes += likes;
-    this.state.clout += 2;
+    this.state.clout += 500; // clout now measured in 1000s-scale increments
     this.hud.update(this.state);
-    this.messenger.text(`🧠 Post uploaded — +5 points, +${likes} likes`);
+    this.messenger.text(`🧠 Post uploaded — +100 post points, +${likes} likes, +500 clout.`);
     this.triggerEvent("onPostMade");
   }
 
-  handleFollowerGain(count = 1) {
+  handleFollowerGain(count = 10) {
     this.state.followers += count;
     this.hud.update(this.state);
     this.messenger.info(`👥 +${count} followers`);
   }
 
-  handleRankUp() {
-    this.state.socialRank += 1;
+  handleRankUp(newBadge) {
+    if (newBadge) this.state.rankBadge = newBadge;
     this.hud.update(this.state);
-    this.messenger.win(`🚀 Rank Up! You’re now Level ${this.state.socialRank}`);
+    this.messenger.win(`🚀 Rank Up! Your badge has evolved!`);
   }
 
   handleMessage(text) {
