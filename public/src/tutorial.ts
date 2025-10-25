@@ -1,38 +1,33 @@
-import { InfoBox } from "./components/InfoBox";
-import { JessicaBox } from "./components/JessicaBox";
-import { KiroBox } from "./components/KiroBox";
-import { WinBox } from "./components/WinBox";
-import { TextBox } from "./components/TextBox";
+well no we start at the bbegining 
+with the tutorial. as u can see text boxes are not routed through the messenger .. lets st it up 
 
 
-const info = new InfoBox("System initialized.");
-const jess = new JessicaBox("Jessica: Welcome.");
-const kiro = new KiroBox("Kiro: Let's do this.");
-const win = new WinBox("🎉 You Win!");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="info-box-container"></div>
 
-document.getElementById("info-box-container")?.appendChild(info.getElement());
-document.getElementById("jessica-box-container")?.appendChild(jess.getElement());
-document.getElementById("kiro-box-container")?.appendChild(kiro.getElement());
-document.getElementById("win-box-container")?.appendChild(win.getElement());
+  <div id="tutorial-screen" style="text-align: center; padding: 40px;">
+    <h1>📘 Tutorial</h1>
+    <p>This is where you explain how the game works.</p>
+    
+    <button
+      id="continue-btn"
+      style="margin-top: 20px; padding: 10px 20px; font-size: 16px;"
+    >
+      Continue to Character Creator
+    </button>
+  </div>
 
+  <!-- Load compiled TypeScript for this page -->
+  <script type="module" src="/tutorial.js"></script>
+  <script type="module" src="src/gameController.js"></script>
 
-
-
-const continueBtn = document.getElementById("continue-btn") as HTMLButtonElement | null;
-
-
-
-
-
-if (continueBtn) {
-  continueBtn.addEventListener("click", () => {
-    window.location.href = "character-creator.html";
-  });
-}
-
-const tutorialScreen = document.getElementById("tutorial-screen");
-
-if (tutorialScreen) {
-  const box = new TextBox("Welcome to the tutorial. Pay attention.");
-  tutorialScreen.appendChild(box.getElement());
-}
+</body>
+</html>
