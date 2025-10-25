@@ -1,29 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tutorial</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <div id="info-box-container"></div>
-
-  <div id="tutorial-screen" style="text-align: center; padding: 40px;">
-    <h1>📘 Tutorial</h1>
-    <p>This is where you explain how the game works.</p>
-    
-    <button
-      id="continue-btn"
-      style="margin-top: 20px; padding: 10px 20px; font-size: 16px;"
-    >
-      Continue to Character Creator
-    </button>
-  </div>
-
-  <!-- Load compiled TypeScript for this page -->
-  <script type="module" src="/tutorial.js"></script>
-  <script type="module" src="src/gameController.js"></script>
-
-</body>
-</html>
+const continueBtn = document.getElementById('continue-btn');
+if (continueBtn) {
+  continueBtn.addEventListener('click', () => {
+    window.location.href = '/character-creator.html';
+  });
+}
