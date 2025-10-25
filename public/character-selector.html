@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Character Selector</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #111;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .selector-wrapper {
+      border: 4px solid #444;
+      border-radius: 12px;
+      background: #1a1a1a;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      width: 360px;
+    }
+
+    .selector-header {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      background: #222;
+      padding: 10px 20px;
+      border-radius: 8px;
+    }
+
+    .style-display {
+      width: 200px;
+      height: 200px;
+      border: 3px solid #555;
+      border-radius: 8px;
+      background: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .style-display img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .arrow-btn {
+      width: 40px;
+      height: 40px;
+      background: #444;
+      border: 2px solid #666;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .arrow-btn:hover {
+      background: #555;
+      border-color: #888;
+    }
+
+    .arrow-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 15px;
+    }
+
+    .style-name {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .style-cost {
+      font-size: 14px;
+      color: #aaa;
+      margin-bottom: 15px;
+    }
+
+    .action-btn {
+      font-size: 14px;
+      font-weight: bold;
+      border: 2px solid #666;
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 10px 20px;
+      transition: all 0.2s;
+      margin: 5px;
+    }
+
+    .confirm-btn {
+      background: #4CAF50;
+      color: #fff;
+    }
+
+    .homeroom-btn {
+      background: #2196F3;
+      color: #fff;
+    }
+
+    .confirm-btn:hover { background: #45a049; }
+    .homeroom-btn:hover { background: #0b7dda; }
+  </style>
+</head>
+<body>
+  <div class="selector-wrapper">
+    <div class="selector-header">Select Your Style</div>
+
+    <div class="arrow-row">
+      <div class="arrow-btn" id="prev-style">‹</div>
+      <div class="style-display" id="style-display">
+        <img src="" alt="Character Style">
+      </div>
+      <div class="arrow-btn" id="next-style">›</div>
+    </div>
+
+    <div class="style-name" id="style-name">Loading...</div>
+    <div class="style-cost" id="style-cost">Cost: 0 Coins</div>
+
+    <div>
+      <button class="action-btn confirm-btn" id="select-btn">Select Style</button>
+      <button class="action-btn homeroom-btn" id="homeroom-btn">Home Room</button>
+    </div>
+  </div>
+
+  <script>
+  const styles = [
+  { name: "MetaMan", img: "mm1.png", cost: 0 },
+  { name: "ZettaGirl", img: "mm2.png", cost: 0 },
+  { name: "ByteRogue", img: "mm3.png", cost: 150 },
+  { name: "DreamCaster", img: "mm4.png", cost: 250 },
+  { name: "ShadowLink", img: "mm5.png", cost: 400 },
+  { name: "DataSaint", img: "mm6.png", cost: 600 },
+  { name: "EchoNova", img: "mm7.png", cost: 800 },
+  { name: "VibeDrifter", img: "mm8.png", cost: 1000 },
+  { name: "NullWarden", img: "mm9.png", cost: 1250 },
+  { name: "CryoCore", img: "mm10.png", cost: 1500 },
+  { name: "GlitchSoul", img: "mm11.png", cost: 2000 },
+  { name: "IronReign", img: "mm12.png", cost: 2500 },
+  { name: "OverseerZ", img: "mm13.png", cost: 3500 },
+  { name: "LegendZ", img: "mm14.png", cost: 5000 }
+];
+
+
+    let currentIndex = 0;
+    const display = document.getElementById("style-display");
+    const nameEl = document.getElementById("style-name");
+    const costEl = document.getElementById("style-cost");
+    const prevBtn = document.getElementById("prev-style");
+    const nextBtn = document.getElementById("next-style");
+
+    function updateStyle() {
+      const s = styles[currentIndex];
+      display.querySelector("img").src = s.img;
+      nameEl.textContent = s.name;
+      costEl.textContent = s.cost === 0 ? "Free Style" : `Cost: ${s.cost} Coins`;
+    }
+
+    prevBtn.onclick = () => {
+      currentIndex = (currentIndex - 1 + styles.length) % styles.length;
+      updateStyle();
+    };
+
+    nextBtn.onclick = () => {
+      currentIndex = (currentIndex + 1) % styles.length;
+      updateStyle();
+    };
+
+    document.getElementById("select-btn").onclick = () => {
+      const chosen = styles[currentIndex];
+      alert(`${chosen.name} selected! ${chosen.cost > 0 ? "Cost: " + chosen.cost + " coins." : "Free style unlocked!"}`);
+      // GameController integration example:
+      // Game.state.style = chosen.name;
+      // Game.messenger.info(`👕 Style changed to ${chosen.name}`);
+      window.location.href = "homeroom.html";
+    };
+
+    document.getElementById("homeroom-btn").onclick = () => {
+      window.location.href = "homeroom.html";
+    };
+
+    updateStyle();
+  </script>
+</body>
+</html>
