@@ -1,6 +1,3 @@
-well no we start at the bbegining 
-with the tutorial. as u can see text boxes are not routed through the messenger .. lets st it up 
-
 
 <!DOCTYPE html>
 <html lang="en">
