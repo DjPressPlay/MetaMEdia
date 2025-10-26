@@ -147,7 +147,7 @@
   <script src="src/gameController.js"></script>
 
   <script>
-  const Game = window.MetaMeda; // use global controller
+  const Game = window.MetaMeda;
   const styles = [
     { name: "MetaMan", img: "METAMEDIA/mm1.png", cost: 0 },
     { name: "ZettaGirl", img: "METAMEDIA/mm2.png", cost: 0 },
@@ -168,8 +168,6 @@
   const display = document.getElementById("style-display");
   const nameEl = document.getElementById("style-name");
   const costEl = document.getElementById("style-cost");
-  const prevBtn = document.getElementById("prev-style");
-  const nextBtn = document.getElementById("next-style");
 
   function updateStyle() {
     const s = styles[currentIndex];
@@ -178,21 +176,25 @@
     costEl.textContent = s.cost === 0 ? "Free Style" : `Cost: ${s.cost} Post Points`;
   }
 
-  prevBtn.onclick = () => {
+  document.getElementById("prev-style").onclick = () => {
     currentIndex = (currentIndex - 1 + styles.length) % styles.length;
     updateStyle();
   };
 
-  nextBtn.onclick = () => {
+  document.getElementById("next-style").onclick = () => {
     currentIndex = (currentIndex + 1) % styles.length;
     updateStyle();
   };
 
   document.getElementById("select-btn").onclick = () => {
     const chosen = styles[currentIndex];
-    Game.state.selectedStyle = chosen.name;
-    Game.messenger.info(`👕 Style changed to ${chosen.name}`);
-    localStorage.setItem("selectedStyle", JSON.stringify(chosen));
+    if (Game && Game.setSelectedCharacter) {
+      Game.setSelectedCharacter(chosen.name); // ✅ proper controller update
+    }
+    localStorage.setItem("selectedStyle", JSON.stringify(chosen)); // ✅ store full object
+    if (Game && Game.messenger) {
+      Game.messenger.info(`👕 Style changed to ${chosen.name}`);
+    }
     window.location.href = "homeroom.html";
   };
 
