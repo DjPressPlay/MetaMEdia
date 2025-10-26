@@ -293,27 +293,27 @@ document.addEventListener('mousemove', e => {
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
 
-  // Move character
   character.style.left = `${x}px`;
   character.style.top  = `${y}px`;
 
-  // Shadow logic
   const shadow = document.getElementById('shadow-img');
   const direction = x - lastX;
 
-  // Target rotation based on movement
+  // Target rotation (small tilt)
   let targetAngle = 0;
-  if (direction < -2) targetAngle = 10;   // moving left → rotate right
-  else if (direction > 2) targetAngle = -10; // moving right → rotate left
+  if (direction < -1) targetAngle = 8;   // move left → rotate slightly right
+  else if (direction > 1) targetAngle = -8; // move right → rotate slightly left
 
-  // Smoothly interpolate angle for fluid motion
-  currentAngle += (targetAngle - currentAngle) * 0.2;
+  // Smooth interpolate
+  currentAngle += (targetAngle - currentAngle) * 0.15;
 
+  // ✅ pivot around feet instead of center
   shadow.style.transform = 
     `translateX(-50%) scaleY(-0.3) rotate(${currentAngle}deg)`;
 
   lastX = x;
 });
+
 
 
 
