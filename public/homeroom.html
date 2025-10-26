@@ -283,6 +283,9 @@
         `translate(-50%, -50%) scale(${Math.max(0.4, Math.min(scale, 10.5))})`;
     });
 
+
+   document.getElementById('shadow-img').src = charImg.src;
+
     // 👁️ Cursor visibility
     const showCursor = () => room.style.cursor = 'default';
     const hideCursor = () => room.style.cursor = 'none';
