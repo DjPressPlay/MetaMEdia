@@ -285,6 +285,39 @@
 
 
    document.getElementById('shadow-img').src = charImg.src;
+let lastX = 0;
+
+document.addEventListener('mousemove', e => {
+  const rect = room.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  // Existing movement code
+  character.style.left = `${x}px`;
+  character.style.top = `${y}px`;
+
+  // 🔄 Shadow rotation logic
+  const shadow = document.getElementById('shadow-img');
+  const direction = x - lastX;
+
+  if (direction < 0) {
+    // moving left → shadow tilts right
+    shadow.style.transform = "translateX(-50%) scaleY(-0.3) rotate(10deg)";
+  } else if (direction > 0) {
+    // moving right → shadow tilts left
+    shadow.style.transform = "translateX(-50%) scaleY(-0.3) rotate(-10deg)";
+  } else {
+    // standing still → flat shadow
+    shadow.style.transform = "translateX(-50%) scaleY(-0.3) rotate(0deg)";
+  }
+
+  lastX = x;
+});
+
+
+
+
+   
 
     // 👁️ Cursor visibility
     const showCursor = () => room.style.cursor = 'default';
