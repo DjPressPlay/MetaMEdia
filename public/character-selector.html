@@ -73,10 +73,7 @@
       user-select: none;
     }
 
-    .arrow-btn:hover {
-      background: #555;
-      border-color: #888;
-    }
+    .arrow-btn:hover { background: #555; border-color: #888; }
 
     .arrow-row {
       display: flex;
@@ -86,16 +83,8 @@
       margin-bottom: 15px;
     }
 
-    .style-name {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-
-    .style-cost {
-      font-size: 14px;
-      color: #aaa;
-      margin-bottom: 15px;
-    }
+    .style-name { font-size: 18px; margin-bottom: 10px; }
+    .style-cost { font-size: 14px; color: #aaa; margin-bottom: 15px; }
 
     .action-btn {
       font-size: 14px;
@@ -108,16 +97,8 @@
       margin: 5px;
     }
 
-    .confirm-btn {
-      background: #4CAF50;
-      color: #fff;
-    }
-
-    .homeroom-btn {
-      background: #2196F3;
-      color: #fff;
-    }
-
+    .confirm-btn { background: #4CAF50; color: #fff; }
+    .homeroom-btn { background: #2196F3; color: #fff; }
     .confirm-btn:hover { background: #45a049; }
     .homeroom-btn:hover { background: #0b7dda; }
   </style>
@@ -135,7 +116,7 @@
     </div>
 
     <div class="style-name" id="style-name">Loading...</div>
-    <div class="style-cost" id="style-cost">Cost: 0 Coins</div>
+    <div class="style-cost" id="style-cost">Cost: 0 Post Points</div>
 
     <div>
       <button class="action-btn confirm-btn" id="select-btn">Select Style</button>
@@ -143,54 +124,62 @@
     </div>
   </div>
 
-  <script>
-  const styles = [
-  { name: "MetaMan", img: "METAMEDIA/mm1.png", cost: 0 },
-  { name: "ZettaGirl", img: "METAMEDIA/mm2.png", cost: 0 },
-  { name: "ByteRogue", img: "METAMEDIA/mm3.png", cost: 150 },
-  { name: "DreamCaster", img: "METAMEDIA/mm4.png", cost: 250 },
-  { name: "ShadowLink", img: "METAMEDIA/mm5.png", cost: 400 },
-  { name: "DataSaint", img: "METAMEDIA/mm6.png", cost: 600 },
-  { name: "EchoNova", img: "METAMEDIA/mm7.png", cost: 800 },
-  { name: "VibeDrifter", img: "METAMEDIA/mm8.png", cost: 1000 },
-  { name: "NullWarden", img: "METAMEDIA/mm9.png", cost: 1250 },
-  { name: "CryoCore", img: "METAMEDIA/mm10.png", cost: 1500 },
-  { name: "GlitchSoul", img: "METAMEDIA/mm11.png", cost: 2000 },
-  { name: "IronReign", img: "METAMEDIA/mm12.png", cost: 2500 },
-  { name: "OverseerZ", img: "METAMEDIA/mm13.png", cost: 3500 }
-];
+  <script type="module">
+    import { GameController } from "./src/gameController.js";
+    const Game = window.MetaMeda || new GameController();
 
+    const styles = [
+      { name: "MetaMan", img: "METAMEDIA/mm1.png", cost: 0 },
+      { name: "ZettaGirl", img: "METAMEDIA/mm2.png", cost: 0 },
+      { name: "ByteRogue", img: "METAMEDIA/mm3.png", cost: 150 },
+      { name: "DreamCaster", img: "METAMEDIA/mm4.png", cost: 250 },
+      { name: "ShadowLink", img: "METAMEDIA/mm5.png", cost: 400 },
+      { name: "DataSaint", img: "METAMEDIA/mm6.png", cost: 600 },
+      { name: "EchoNova", img: "METAMEDIA/mm7.png", cost: 800 },
+      { name: "VibeDrifter", img: "METAMEDIA/mm8.png", cost: 1000 },
+      { name: "NullWarden", img: "METAMEDIA/mm9.png", cost: 1250 },
+      { name: "CryoCore", img: "METAMEDIA/mm10.png", cost: 1500 },
+      { name: "GlitchSoul", img: "METAMEDIA/mm11.png", cost: 2000 },
+      { name: "IronReign", img: "METAMEDIA/mm12.png", cost: 2500 },
+      { name: "OverseerZ", img: "METAMEDIA/mm13.png", cost: 3500 }
+    ];
 
     let currentIndex = 0;
     const display = document.getElementById("style-display");
     const nameEl = document.getElementById("style-name");
     const costEl = document.getElementById("style-cost");
-    const prevBtn = document.getElementById("prev-style");
-    const nextBtn = document.getElementById("next-style");
 
     function updateStyle() {
       const s = styles[currentIndex];
       display.querySelector("img").src = s.img;
       nameEl.textContent = s.name;
-      costEl.textContent = s.cost === 0 ? "Free Style" : `Cost: ${s.cost} Coins`;
+      costEl.textContent = s.cost === 0 ? "Free Style" : `Cost: ${s.cost} Post Points`;
     }
 
-    prevBtn.onclick = () => {
+    document.getElementById("prev-style").onclick = () => {
       currentIndex = (currentIndex - 1 + styles.length) % styles.length;
       updateStyle();
     };
-
-    nextBtn.onclick = () => {
+    document.getElementById("next-style").onclick = () => {
       currentIndex = (currentIndex + 1) % styles.length;
       updateStyle();
     };
 
     document.getElementById("select-btn").onclick = () => {
       const chosen = styles[currentIndex];
-      alert(`${chosen.name} selected! ${chosen.cost > 0 ? "Cost: " + chosen.cost + " coins." : "Free style unlocked!"}`);
-      // GameController integration example:
-      // Game.state.style = chosen.name;
-      // Game.messenger.info(`👕 Style changed to ${chosen.name}`);
+      Game.state.character = chosen.name;
+      Game.state.characterImg = chosen.img;
+
+      Game.messenger.info(`🎭 Style selected: ${chosen.name}`);
+      Game.hud.update(Game.state);
+
+      if (chosen.cost > 0) {
+        Game.messenger.text(`🧾 This style costs ${chosen.cost} post points.`);
+      } else {
+        Game.messenger.text(`✅ Free style unlocked.`);
+      }
+
+      localStorage.setItem("MetaMedaCharacter", JSON.stringify(chosen));
       window.location.href = "homeroom.html";
     };
 
@@ -199,6 +188,7 @@
     };
 
     updateStyle();
+    Game.messenger.info("👕 Choose your MetaMeda style to begin.");
   </script>
 </body>
 </html>
