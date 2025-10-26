@@ -1,5 +1,5 @@
 // ===============================
-// 🎮 GAME CONTROLLER v5 — MetaMeda (Reddit DevKit)
+// 🎮 GAME CONTROLLER v6 — MetaMeda (Character Select Update)
 // ===============================
 
 import { PlayerHUD } from "./playerHUD.js";
@@ -7,17 +7,18 @@ import { Messenger } from "./messenger.js";
 
 export class GameController {
   constructor() {
-    console.log("🚀 MetaMeda GameController — Reddit DevKit Mode");
+    console.log("🚀 MetaMeda GameController v6 — Character Selector Enabled");
 
     // ===== 🎯 PLAYER STATE =====
     this.state = {
-      postPoints: 0,    // quest tokens / currency
-      clout: 0,         // XP / reputation
-      followers: 0,     // audience size
-      likes: 0,         // cumulative likes
-      rankBadge: "assets/ranks/newbie.png", // visual rank icon
-      quest: 0,         // current quest id
-      messages: []      // log history
+      postPoints: 0,
+      clout: 0,
+      followers: 0,
+      likes: 0,
+      rankBadge: "assets/ranks/newbie.png",
+      quest: 0,
+      messages: [],
+      selectedCharacter: localStorage.getItem("selectedCharacter") || null
     };
 
     // ===== 🧩 CORE SYSTEMS =====
@@ -54,13 +55,28 @@ export class GameController {
 
     // ===== 🏁 INITIAL SETUP =====
     this.hud.update(this.state);
-    this.messenger.info("Welcome to MetaMeda — click your PC to begin.");
+
+    // If character already chosen, greet user.
+    if (this.state.selectedCharacter) {
+      this.messenger.info(`👋 Welcome back, ${this.state.selectedCharacter}!`);
+    } else {
+      this.messenger.info("🎮 MetaMeda loaded. Select your character style to begin.");
+    }
+  }
+
+  // =====================================================
+  // 🎭 CHARACTER HANDLER
+  // =====================================================
+  setSelectedCharacter(name) {
+    this.state.selectedCharacter = name;
+    localStorage.setItem("selectedCharacter", name);
+    this.messenger.info(`👕 Character style set: ${name}`);
+    this.hud.update(this.state);
   }
 
   // =====================================================
   // 🎯 EVENT / QUEST CORE
   // =====================================================
-
   triggerEvent(eventName) {
     console.log(`📡 Trigger: ${eventName}`);
     const quest = this.quests.find(q => q.id === this.state.quest + 1 && q.trigger === eventName);
@@ -96,12 +112,10 @@ export class GameController {
   // =====================================================
   // 🧩 GAMEPLAY HANDLERS
   // =====================================================
-
   handlePostMade(likes = 0) {
-    // scaled for leaderboard
     this.state.postPoints += 100;
     this.state.likes += likes;
-    this.state.clout += 500; // clout now measured in 1000s-scale increments
+    this.state.clout += 500;
     this.hud.update(this.state);
     this.messenger.text(`🧠 Post uploaded — +100 post points, +${likes} likes, +500 clout.`);
     this.triggerEvent("onPostMade");
@@ -127,16 +141,15 @@ export class GameController {
   // =====================================================
   // 🧱 UTILITY
   // =====================================================
-
   updateHUD(data) {
     this.state = { ...this.state, ...data };
     this.hud.update(this.state);
   }
 
   tick() {
-    // Reddit DevKit update loop hooks go here later
+    // Future update loop hooks
   }
 }
 
-// Global init (Reddit DevKit entry point)
+// Global init
 window.MetaMeda = new GameController();
