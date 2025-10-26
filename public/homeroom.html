@@ -174,30 +174,37 @@
     const wallLeft = document.querySelector('.wall-left');
     const wallRight = document.querySelector('.wall-right');
 
-    // ✅ PULL CHARACTER FROM CONTROLLER OR STORAGE
     const controller = window.MetaMeda;
-    const selectedCharacter = controller?.state?.selectedCharacter || localStorage.getItem("selectedCharacter");
-    if (selectedCharacter) {
-      const styles = {
-        MetaMan: "METAMEDIA/mm1.png",
-        ZettaGirl: "METAMEDIA/mm2.png",
-        ByteRogue: "METAMEDIA/mm3.png",
-        DreamCaster: "METAMEDIA/mm4.png",
-        ShadowLink: "METAMEDIA/mm5.png",
-        DataSaint: "METAMEDIA/mm6.png",
-        EchoNova: "METAMEDIA/mm7.png",
-        VibeDrifter: "METAMEDIA/mm8.png",
-        NullWarden: "METAMEDIA/mm9.png",
-        CryoCore: "METAMEDIA/mm10.png",
-        GlitchSoul: "METAMEDIA/mm11.png",
-        IronReign: "METAMEDIA/mm12.png",
-        OverseerZ: "METAMEDIA/mm13.png"
-      };
-      const path = styles[selectedCharacter] || "METAMEDIA/mm1.png";
-      charImg.src = path;
+    const savedStyle = localStorage.getItem("selectedStyle");
+    let selectedCharacter = null;
+    
+    if (savedStyle) {
+      const styleObj = JSON.parse(savedStyle);
+      selectedCharacter = styleObj.name;
+      charImg.src = styleObj.img;
       controller?.messenger?.info?.(`🏠 Loaded ${selectedCharacter} into Home Room.`);
     } else {
-      charImg.src = "METAMEDIA/mm1.png";
+      selectedCharacter = controller?.state?.selectedCharacter;
+      if (selectedCharacter) {
+        const styles = {
+          MetaMan: "METAMEDIA/mm1.png",
+          ZettaGirl: "METAMEDIA/mm2.png",
+          ByteRogue: "METAMEDIA/mm3.png",
+          DreamCaster: "METAMEDIA/mm4.png",
+          ShadowLink: "METAMEDIA/mm5.png",
+          DataSaint: "METAMEDIA/mm6.png",
+          EchoNova: "METAMEDIA/mm7.png",
+          VibeDrifter: "METAMEDIA/mm8.png",
+          NullWarden: "METAMEDIA/mm9.png",
+          CryoCore: "METAMEDIA/mm10.png",
+          GlitchSoul: "METAMEDIA/mm11.png",
+          IronReign: "METAMEDIA/mm12.png",
+          OverseerZ: "METAMEDIA/mm13.png"
+        };
+        charImg.src = styles[selectedCharacter] || "METAMEDIA/mm1.png";
+      } else {
+        charImg.src = "METAMEDIA/mm1.png";
+      }
     }
 
     // 🧍 Move character with cursor depth
