@@ -291,16 +291,10 @@
    document.getElementById('shadow-img').src = charImg.src;
 
 
-const shadow = document.getElementById("shadow-img");
+const angleX = (e.clientX - window.innerWidth / 2) / 200;
+const angleY = (e.clientY - window.innerHeight / 2) / 200;
 
-// Shadow scale: inverse of character scale
-const shadowScale = 1 / scale;
-shadow.style.transform = `translateX(-50%) scale(${Math.min(shadowScale, 1.2)}, -0.3)`;
-
-// Shadow opacity: fade as character lifts
-const opacity = Math.max(0.2, 1 - (scale - 1) / 5);
-shadow.style.opacity = opacity.toFixed(2);
-
+shadow.style.transform = `translate(${angleX}px, ${angleY}px) scale(${Math.min(shadowScale, 1.2)}, -0.3)`;
 
    
 
