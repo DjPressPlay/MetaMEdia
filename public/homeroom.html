@@ -154,9 +154,9 @@
       const distClose = Math.hypot(dxC, dyC);
       const distFar   = Math.hypot(dxF, dyF);
 
-      const scale = 1.5 + (distFar - distClose) / 600;
+      const scale = 1.5 + (distFar - distClose) / 1000;
       character.style.transform =
-        `translate(-50%, -50%) scale(${Math.max(0.4, Math.min(scale, 5.5))})`;
+        `translate(-50%, -50%) scale(${Math.max(0.4, Math.min(scale, 2.5))})`;
     });
 
     // 👁️ Cursor visibility
