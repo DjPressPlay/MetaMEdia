@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <title>Home Room — Framed</title>
 <style>
-  * {box-sizing:border-box;margin:0;padding:0;}
+  * { box-sizing:border-box; margin:0; padding:0; }
 
   body {
-    height:100vh;width:100vw;overflow:hidden;
+    height:100vh; width:100vw; overflow:hidden;
     background:radial-gradient(circle at center,#222 0%,#000 100%);
-    display:flex;justify-content:center;align-items:center;
+    display:flex; justify-content:center; align-items:center;
     font-family:"Segoe UI",sans-serif;
   }
 
@@ -26,12 +26,12 @@
       0 4px 30px rgba(0,0,0,0.6);
     overflow:hidden;
     background:linear-gradient(145deg,#2c2c2c,#1a1a1a);
-    display:flex;justify-content:center;align-items:center;
+    display:flex; justify-content:center; align-items:center;
   }
 
   .room {
     position:relative;
-    width:100%;height:100%;
+    width:100%; height:100%;
     background:url("https://avatars.mds.yandex.net/get-shedevrum/11478110/img_0ab20ad90d1611ef8ab99a1c9029de6d/orig")
                center/cover no-repeat;
     cursor:none;
@@ -45,53 +45,32 @@
     pointer-events:none;
     transition:transform 0.05s linear;
   }
+
   .character img {
-    width:100%;height:100%;object-fit:cover;border-radius:12px;
+    width:100%; height:100%; object-fit:cover; border-radius:12px;
   }
 
-  /* ⚫ DEPTH MARKERS (invisible) */
+  /* Depth markers */
   .depth-dot {
     position:absolute;
-    width:8px;height:8px;
-    background:red;
-    opacity:0;
-    border-radius:50%;
-    pointer-events:none;
+    width:8px; height:8px;
+    background:red; opacity:0;
+    border-radius:50%; pointer-events:none;
   }
 
-  #far   {top:50%;left:50%;transform:translate(-50%,-50%);}     
-  #close {bottom:-20px;left:50%;transform:translateX(-50%);}    
+  #far   { top:50%; left:50%; transform:translate(-50%,-50%); }
+  #close { bottom:-20px; left:50%; transform:translateX(-50%); }
 
-  /* 🧱 INVISIBLE WALLS */
-  .wall-top,
-  .wall-left,
-  .wall-right {
+  /* Invisible walls */
+  .wall-top, .wall-left, .wall-right {
     position:absolute;
-    background:rgba(255,0,0,0); /* invisible; use 0.2 for debug */
-    pointer-events:auto; /* must catch enter/leave for cursor */
+    background:rgba(255,0,0,0);
+    pointer-events:auto;
   }
 
-  .wall-top {
-    top:0;
-    left:0;
-    width:100%;
-    height:25%;
-  }
-
-  .wall-left {
-    top:0;
-    left:0;
-    width:10%;
-    height:100%;
-  }
-
-  /* 🧱 RIGHT WALL */
-  .wall-right {
-    top:0;
-    right:0;
-    width:10%;
-    height:100%;
-  }
+  .wall-top { top:0; left:0; width:100%; height:25%; }
+  .wall-left { top:0; left:0; width:10%; height:100%; }
+  .wall-right { top:0; right:0; width:10%; height:100%; }
 </style>
 </head>
 <body>
@@ -105,28 +84,58 @@
       <div id="far" class="depth-dot"></div>
       <div id="close" class="depth-dot"></div>
 
-        <div class="character">
-    <img src="https://i.imgur.com/3QFJZC7.png" alt="Character">
+      <div class="character">
+        <img id="character-img" src="" alt="Character">
+      </div>
+    </div>
   </div>
-</div>
-</div>
 
-<script>
+  <!-- ✅ Load Game Controller -->
+  <script type="module" src="src/gameController.js"></script>
+
+  <script>
   window.addEventListener("DOMContentLoaded", () => {
-    const room      = document.querySelector('.room');
+    const room = document.querySelector('.room');
     const character = document.querySelector('.character');
-    const closeDot  = document.getElementById('close');
-    const farDot    = document.getElementById('far');
-    const wallTop   = document.querySelector('.wall-top');
-    const wallLeft  = document.querySelector('.wall-left');
+    const charImg = document.getElementById('character-img');
+    const closeDot = document.getElementById('close');
+    const farDot = document.getElementById('far');
+    const wallTop = document.querySelector('.wall-top');
+    const wallLeft = document.querySelector('.wall-left');
     const wallRight = document.querySelector('.wall-right');
 
+    // ✅ PULL CHARACTER FROM CONTROLLER OR STORAGE
+    const controller = window.MetaMeda;
+    const selectedCharacter = controller?.state?.selectedCharacter || localStorage.getItem("selectedCharacter");
+    if (selectedCharacter) {
+      const styles = {
+        MetaMan: "METAMEDIA/mm1.png",
+        ZettaGirl: "METAMEDIA/mm2.png",
+        ByteRogue: "METAMEDIA/mm3.png",
+        DreamCaster: "METAMEDIA/mm4.png",
+        ShadowLink: "METAMEDIA/mm5.png",
+        DataSaint: "METAMEDIA/mm6.png",
+        EchoNova: "METAMEDIA/mm7.png",
+        VibeDrifter: "METAMEDIA/mm8.png",
+        NullWarden: "METAMEDIA/mm9.png",
+        CryoCore: "METAMEDIA/mm10.png",
+        GlitchSoul: "METAMEDIA/mm11.png",
+        IronReign: "METAMEDIA/mm12.png",
+        OverseerZ: "METAMEDIA/mm13.png"
+      };
+      const path = styles[selectedCharacter] || "METAMEDIA/mm1.png";
+      charImg.src = path;
+      controller?.messenger?.info?.(`🏠 Loaded ${selectedCharacter} into Home Room.`);
+    } else {
+      charImg.src = "METAMEDIA/mm1.png";
+    }
+
+    // 🧍 Move character with cursor depth
     document.addEventListener('mousemove', e => {
       const rect = room.getBoundingClientRect();
       let x = e.clientX - rect.left;
       let y = e.clientY - rect.top;
 
-      // 🧱 Clamp top area (25%), left side (10%), and right side (10%)
       const wallTopHeight = rect.height * 0.55;
       const wallLeftWidth = rect.width * 0.36;
       const wallRightLimit = rect.width * 0.75;
@@ -136,9 +145,8 @@
       character.style.left = `${clampedX}px`;
       character.style.top  = `${clampedY}px`;
 
-      // depth scaling
       const closeRect = closeDot.getBoundingClientRect();
-      const farRect   = farDot.getBoundingClientRect();
+      const farRect = farDot.getBoundingClientRect();
       const dxC = e.clientX - (closeRect.left + closeRect.width/2);
       const dyC = e.clientY - (closeRect.top  + closeRect.height/2);
       const dxF = e.clientX - (farRect.left   + farRect.width/2);
@@ -151,18 +159,15 @@
         `translate(-50%, -50%) scale(${Math.max(0.4, Math.min(scale, 2.5))})`;
     });
 
-    // 👁️ show cursor inside the invisible walls
+    // 👁️ Cursor visibility
     const showCursor = () => room.style.cursor = 'default';
     const hideCursor = () => room.style.cursor = 'none';
-
-    [wallTop, wallLeft, wallRight].forEach(wall => {
-      wall.addEventListener('mouseenter', showCursor);
-      wall.addEventListener('mouseleave', hideCursor);
+    [wallTop, wallLeft, wallRight].forEach(w => {
+      w.addEventListener('mouseenter', showCursor);
+      w.addEventListener('mouseleave', hideCursor);
     });
   });
-</script>
-
-<script type="module" src="src/gameController.js"></script>
+  </script>
 
 </body>
 </html>
