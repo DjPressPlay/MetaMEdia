@@ -143,8 +143,17 @@ export class GameController {
 // =====================================================
 updateHUD(data) {
   this.state = { ...this.state, ...data };
-  this.hud.update(this.state);
+  const hud = document.getElementById("hud");
+  if (hud) {
+    document.getElementById("hud-postPoints").textContent = this.state.postPoints;
+    document.getElementById("hud-clout").textContent = this.state.clout;
+    document.getElementById("hud-followers").textContent = this.state.followers;
+    document.getElementById("hud-likes").textContent = this.state.likes;
+    document.getElementById("hud-quest").textContent = this.state.quest;
+    document.getElementById("hud-name").textContent = this.state.selectedCharacter || "Unknown";
+  }
 }
+
 
 tick() {
   // Future update loop hooks
