@@ -138,18 +138,32 @@ export class GameController {
     this.messenger.text(text);
   }
 
-  // =====================================================
-  // 🧱 UTILITY
-  // =====================================================
-  updateHUD(data) {
-    this.state = { ...this.state, ...data };
-    this.hud.update(this.state);
-  }
+ // =====================================================
+// 🧱 UTILITY
+// =====================================================
+updateHUD(data) {
+  this.state = { ...this.state, ...data };
+  this.hud.update(this.state);
+}
 
-  tick() {
-    // Future update loop hooks
-  }
+// ✅ inject live HUD when controller is loaded
+injectHUD() {
+  fetch("src/playerHUD.html")
+    .then(r => r.text())
+    .then(html => {
+      const hudContainer = document.createElement("div");
+      hudContainer.innerHTML = html;
+      document.body.appendChild(hudContainer);
+      console.log("🧩 Player HUD injected.");
+    })
+    .catch(err => console.error("HUD Load Failed:", err));
+}
+
+tick() {
+  // Future update loop hooks
+}
 }
 
 // Global init
 window.MetaMeda = new GameController();
+window.MetaMeda.injectHUD();
