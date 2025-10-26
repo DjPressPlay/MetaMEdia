@@ -189,16 +189,22 @@
   document.getElementById("select-btn").onclick = () => {
     const chosen = styles[currentIndex];
     if (Game && Game.setSelectedCharacter) {
-      Game.setSelectedCharacter(chosen.name); // ✅ proper controller update
+      Game.setSelectedCharacter(chosen.name);
     }
-    localStorage.setItem("selectedStyle", JSON.stringify(chosen)); // ✅ store full object
+    localStorage.setItem("selectedStyle", JSON.stringify(chosen));
     if (Game && Game.messenger) {
-      Game.messenger.info(`👕 Style changed to ${chosen.name}`);
+      Game.messenger.info(`👕 Style saved: ${chosen.name}`);
     }
-    window.location.href = "homeroom.html";
   };
 
   document.getElementById("homeroom-btn").onclick = () => {
+    const saved = localStorage.getItem("selectedStyle");
+    if (saved) {
+      const chosen = JSON.parse(saved);
+      if (Game && Game.messenger) {
+        Game.messenger.info(`✅ Confirmed style: ${chosen.name}`);
+      }
+    }
     window.location.href = "homeroom.html";
   };
 
