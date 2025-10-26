@@ -155,7 +155,7 @@
 
 .shadow-img {
   position: absolute;
-  bottom: -43%;             /* lift shadow up by 12% of height */
+  bottom: -43%;             /*bottom of feet */
   left: 50%;
   transform: translateX(-50%) scaleY(-0.3);
   width: 100%;
@@ -286,11 +286,12 @@
 
 
    document.getElementById('shadow-img').src = charImg.src;
-const shadow = document.getElementById("shadow-img");
-document.addEventListener("mousemove", (e) => {
-  const center = window.innerWidth / 2;
-  const offset = (e.clientX - center) / center; // left/right ratio
-  shadow.style.transform = `translateX(-50%) scaleY(-0.3) rotate(${offset * 10}deg)`; 
+
+const shadow = document.getElementById('shadow-img');
+document.addEventListener('mousemove', e => {
+  const mid = window.innerWidth / 2;
+  const tilt = ((e.clientX - mid) / mid) * 10; // smooth tilt angle
+  shadow.style.transform = `translateX(-50%) scaleY(-0.3) rotate(${tilt}deg)`;
 });
 
 
