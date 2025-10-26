@@ -71,6 +71,76 @@
   .wall-top { top:0; left:0; width:100%; height:25%; }
   .wall-left { top:0; left:0; width:10%; height:100%; }
   .wall-right { top:0; right:0; width:10%; height:100%; }
+
+  /* Player HUD Styles */
+  .player-hud {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+  }
+
+  .hud-container {
+    background: rgba(20, 20, 20, 0.9);
+    border: 2px solid #2ecc71;
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.4);
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+    min-width: 300px;
+  }
+
+  .hud-rank {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .rank-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #2ecc71;
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.6);
+  }
+
+  .hud-stats {
+    margin: 10px 0;
+  }
+
+  .hud-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 14px;
+  }
+
+  .hud-row span:first-child {
+    color: #aaa;
+  }
+
+  .hud-row span:last-child {
+    color: #2ecc71;
+    font-weight: 700;
+  }
+
+  .hud-quest {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    font-size: 13px;
+  }
+
+  .hud-quest-label {
+    color: #aaa;
+  }
+
+  .hud-quest-value {
+    color: #2ecc71;
+    font-weight: 700;
+    margin-left: 6px;
+  }
 </style>
 </head>
 <body>

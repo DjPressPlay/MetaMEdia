@@ -146,19 +146,6 @@ updateHUD(data) {
   this.hud.update(this.state);
 }
 
-// ✅ inject live HUD when controller is loaded
-injectHUD() {
-  fetch("src/playerHUD.html")
-    .then(r => r.text())
-    .then(html => {
-      const hudContainer = document.createElement("div");
-      hudContainer.innerHTML = html;
-      document.body.appendChild(hudContainer);
-      console.log("🧩 Player HUD injected.");
-    })
-    .catch(err => console.error("HUD Load Failed:", err));
-}
-
 tick() {
   // Future update loop hooks
 }
@@ -166,4 +153,3 @@ tick() {
 
 // Global init
 window.MetaMeda = new GameController();
-window.MetaMeda.injectHUD();
