@@ -154,9 +154,8 @@
 
 .shadow-img {
   position: absolute;
-  bottom: -43%;             /* lift shadow up by 12% of height */
+  bottom: -43%;
   left: 50%;
-  transform: translateX(-50%) scaleY(-0.3);
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -164,7 +163,11 @@
   opacity: 0.7;
   pointer-events: none;
   z-index: 1;
+  transform-origin: bottom center; /* ✅ rotate from the feet */
+  transform: translateX(-50%) scaleY(-0.3);
+  transition: transform 0.25s ease-out;
 }
+
 
 
 </style>
@@ -285,37 +288,6 @@
 
 
    document.getElementById('shadow-img').src = charImg.src;
-let lastX = 0;
-let currentAngle = 0;
-
-document.addEventListener('mousemove', e => {
-  const rect = room.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  character.style.left = `${x}px`;
-  character.style.top  = `${y}px`;
-
-  const shadow = document.getElementById('shadow-img');
-  const direction = x - lastX;
-
-  // Target rotation (small tilt)
-  let targetAngle = 0;
-  if (direction < -1) targetAngle = 8;   // move left → rotate slightly right
-  else if (direction > 1) targetAngle = -8; // move right → rotate slightly left
-
-  // Smooth interpolate
-  currentAngle += (targetAngle - currentAngle) * 0.15;
-
-  // ✅ pivot around feet instead of center
-  shadow.style.transform = 
-    `translateX(-50%) scaleY(-0.3) rotate(${currentAngle}deg)`;
-
-  lastX = x;
-});
-
-
-
 
 
    
