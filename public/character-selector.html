@@ -108,8 +108,16 @@
       margin: 5px;
     }
 
-    .confirm-btn { background: #4CAF50; color: #fff; }
-    .homeroom-btn { background: #2196F3; color: #fff; }
+    .confirm-btn {
+      background: #4CAF50;
+      color: #fff;
+    }
+
+    .homeroom-btn {
+      background: #2196F3;
+      color: #fff;
+    }
+
     .confirm-btn:hover { background: #45a049; }
     .homeroom-btn:hover { background: #0b7dda; }
   </style>
@@ -127,7 +135,7 @@
     </div>
 
     <div class="style-name" id="style-name">Loading...</div>
-    <div class="style-cost" id="style-cost">Cost: 0 Post Points</div>
+    <div class="style-cost" id="style-cost">Cost: 0 Coins</div>
 
     <div>
       <button class="action-btn confirm-btn" id="select-btn">Select Style</button>
@@ -135,25 +143,23 @@
     </div>
   </div>
 
-  <script type="module">
-    import { GameController } from "./src/gameController.js";
-    const Game = window.MetaMeda || new GameController();
+  <script>
+  const styles = [
+  { name: "MetaMan", img: "METAMEDIA/mm1.png", cost: 0 },
+  { name: "ZettaGirl", img: "METAMEDIA/mm2.png", cost: 0 },
+  { name: "ByteRogue", img: "METAMEDIA/mm3.png", cost: 150 },
+  { name: "DreamCaster", img: "METAMEDIA/mm4.png", cost: 250 },
+  { name: "ShadowLink", img: "METAMEDIA/mm5.png", cost: 400 },
+  { name: "DataSaint", img: "METAMEDIA/mm6.png", cost: 600 },
+  { name: "EchoNova", img: "METAMEDIA/mm7.png", cost: 800 },
+  { name: "VibeDrifter", img: "METAMEDIA/mm8.png", cost: 1000 },
+  { name: "NullWarden", img: "METAMEDIA/mm9.png", cost: 1250 },
+  { name: "CryoCore", img: "METAMEDIA/mm10.png", cost: 1500 },
+  { name: "GlitchSoul", img: "METAMEDIA/mm11.png", cost: 2000 },
+  { name: "IronReign", img: "METAMEDIA/mm12.png", cost: 2500 },
+  { name: "OverseerZ", img: "METAMEDIA/mm13.png", cost: 3500 }
+];
 
-    const styles = [
-      { name: "MetaMan", img: "METAMEDIA/mm1.png", cost: 0 },
-      { name: "ZettaGirl", img: "METAMEDIA/mm2.png", cost: 0 },
-      { name: "ByteRogue", img: "METAMEDIA/mm3.png", cost: 150 },
-      { name: "DreamCaster", img: "METAMEDIA/mm4.png", cost: 250 },
-      { name: "ShadowLink", img: "METAMEDIA/mm5.png", cost: 400 },
-      { name: "DataSaint", img: "METAMEDIA/mm6.png", cost: 600 },
-      { name: "EchoNova", img: "METAMEDIA/mm7.png", cost: 800 },
-      { name: "VibeDrifter", img: "METAMEDIA/mm8.png", cost: 1000 },
-      { name: "NullWarden", img: "METAMEDIA/mm9.png", cost: 1250 },
-      { name: "CryoCore", img: "METAMEDIA/mm10.png", cost: 1500 },
-      { name: "GlitchSoul", img: "METAMEDIA/mm11.png", cost: 2000 },
-      { name: "IronReign", img: "METAMEDIA/mm12.png", cost: 2500 },
-      { name: "OverseerZ", img: "METAMEDIA/mm13.png", cost: 3500 }
-    ];
 
     let currentIndex = 0;
     const display = document.getElementById("style-display");
@@ -166,7 +172,7 @@
       const s = styles[currentIndex];
       display.querySelector("img").src = s.img;
       nameEl.textContent = s.name;
-      costEl.textContent = s.cost === 0 ? "Free Style" : `Cost: ${s.cost} Post Points`;
+      costEl.textContent = s.cost === 0 ? "Free Style" : `Cost: ${s.cost} Coins`;
     }
 
     prevBtn.onclick = () => {
@@ -181,33 +187,16 @@
 
     document.getElementById("select-btn").onclick = () => {
       const chosen = styles[currentIndex];
-      const points = Game.state.postPoints || 0;
-
-      if (chosen.cost > points) {
-        Game.messenger.info(`❌ Not enough post points. You need ${chosen.cost - points} more.`);
-        return;
-      }
-
-      Game.state.selectedStyle = chosen.name;
-      if (chosen.cost > 0) Game.state.postPoints -= chosen.cost;
-
-      Game.messenger.info(`👕 Style set to ${chosen.name}. ${chosen.cost > 0 ? "-" + chosen.cost + " post points" : "Free style equipped."}`);
-      Game.hud.update(Game.state);
-      localStorage.setItem("selectedStyle", chosen.name);
-
+      alert(`${chosen.name} selected! ${chosen.cost > 0 ? "Cost: " + chosen.cost + " coins." : "Free style unlocked!"}`);
+      // GameController integration example:
+      // Game.state.style = chosen.name;
+      // Game.messenger.info(`👕 Style changed to ${chosen.name}`);
       window.location.href = "homeroom.html";
     };
 
     document.getElementById("homeroom-btn").onclick = () => {
       window.location.href = "homeroom.html";
     };
-
-    // Load previous selection if any
-    const saved = localStorage.getItem("selectedStyle");
-    if (saved) {
-      const idx = styles.findIndex(s => s.name === saved);
-      if (idx >= 0) currentIndex = idx;
-    }
 
     updateStyle();
   </script>
