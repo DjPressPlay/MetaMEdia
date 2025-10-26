@@ -287,11 +287,18 @@
 
    document.getElementById('shadow-img').src = charImg.src;
 
-const shadow = document.getElementById('shadow-img');
-document.addEventListener('mousemove', e => {
-  const mid = window.innerWidth / 2;
-  const tilt = ((e.clientX - mid) / mid) * 10; // smooth tilt angle
-  shadow.style.transform = `translateX(-50%) scaleY(-0.3) rotate(${tilt}deg)`;
+const shadow = document.getElementById("shadow-img");
+let angle = 0;
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowLeft") angle = -10;
+  if (e.key === "ArrowRight") angle = 10;
+  shadow.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+});
+
+document.addEventListener("keyup", () => {
+  angle = 0;
+  shadow.style.transform = `translateX(-50%) rotate(${angle}deg)`;
 });
 
 
