@@ -289,6 +289,44 @@
 
 
    document.getElementById('shadow-img').src = charImg.src;
+// ===============================
+// 🕶 Dynamic Drop Shadow System (JS version of your GML code)
+// ===============================
+const character = document.querySelector(".character");
+const shadow = document.querySelector(".shadow-img");
+
+// player movement values (replace with your game’s real variables)
+let hsp = 0; // horizontal speed
+let vsp = 0; // vertical speed
+
+// control multipliers
+const shadow_move_factor = 5; // same as in GML
+const shadow_alpha = 0.5; // same transparency
+
+function updateShadow() {
+  // compute offsets opposite to movement
+  const shadow_offset_x = -hsp * shadow_move_factor;
+  const shadow_offset_y = 250 - (vsp * shadow_move_factor);
+
+  // apply offsets (translate shadow under character)
+  shadow.style.transform = `
+    translate(${shadow_offset_x}px, ${shadow_offset_y}px)
+    scaleY(-0.3)
+  `;
+
+  // set opacity and color
+  shadow.style.filter = `brightness(0)`;
+  shadow.style.opacity = shadow_alpha;
+}
+
+// example update loop (replace with your own game loop)
+function gameLoop() {
+  // update movement values here (based on input, etc.)
+  updateShadow();
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
 
 
 
