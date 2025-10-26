@@ -290,50 +290,16 @@
 
    document.getElementById('shadow-img').src = charImg.src;
 
-   
-// 🕶 Dynamic Drop Shadow — HTML version of your GML system
+
 const shadow = document.getElementById("shadow-img");
 
-let hsp = 0; // horizontal movement speed
-let vsp = 0; // vertical movement speed
-let lastX = 0;
-let lastY = 0;
+// Shadow scale: inverse of character scale
+const shadowScale = 1 / scale;
+shadow.style.transform = `translateX(-50%) scale(${Math.min(shadowScale, 1.2)}, -0.3)`;
 
-function updateShadow() {
-  const rect = character.getBoundingClientRect();
-  const shadow_move_factor = 5;
-
-  // Calculate simulated horizontal/vertical speed (difference per frame)
-  hsp = (rect.left - lastX) * 0.2;
-  vsp = (rect.top - lastY) * 0.2;
-  lastX = rect.left;
-  lastY = rect.top;
-
-  // === Apply the same logic from GML ===
-  const shadow_offset_x = -hsp * shadow_move_factor;
-  const shadow_offset_y = 80 - (vsp * shadow_move_factor);
-  const shadow_alpha = 0.5;
-
-  // === Keep the shadow anchored at the character's feet ===
-  shadow.style.transformOrigin = "center bottom";
-
-  // === Smooth rotation and offset based on movement ===
-  const angle = hsp * 1.2; // rotate subtly depending on direction
-  shadow.style.transform = `
-    translate(${shadow_offset_x}px, ${shadow_offset_y}px)
-    scaleY(-0.3)
-    rotate(${angle}deg)
-  `;
-  shadow.style.opacity = shadow_alpha;
-  shadow.style.filter = "brightness(0)";
-}
-
-// Smooth update loop
-function loop() {
-  updateShadow();
-  requestAnimationFrame(loop);
-}
-loop();
+// Shadow opacity: fade as character lifts
+const opacity = Math.max(0.2, 1 - (scale - 1) / 5);
+shadow.style.opacity = opacity.toFixed(2);
 
 
    
