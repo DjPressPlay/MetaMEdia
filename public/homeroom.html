@@ -146,6 +146,24 @@
 <body>
 
   <div class="frame">
+
+   <!-- 🧱 HUD Overlay -->
+<div class="nameplate" id="hud">
+  <div class="header">
+    <div class="name-text" id="hud-name">Unknown</div>
+    <div class="rank-badge" id="hud-badge"></div>
+  </div>
+  <div class="stats-grid">
+    <div><div class="stat-value" id="hud-postPoints">0</div><div class="stat-label">Post</div></div>
+    <div><div class="stat-value" id="hud-clout">0</div><div class="stat-label">Clout</div></div>
+    <div><div class="stat-value" id="hud-followers">0</div><div class="stat-label">Followers</div></div>
+    <div><div class="stat-value" id="hud-likes">0</div><div class="stat-label">Likes</div></div>
+    <div><div class="stat-value" id="hud-quest">0</div><div class="stat-label">Quest</div></div>
+    <div><div class="stat-value" id="hud-messages">0</div><div class="stat-label">Msgs</div></div>
+  </div>
+</div>
+
+   
     <div class="room">
       <div class="wall-top"></div>
       <div class="wall-left"></div>
@@ -244,6 +262,26 @@
       w.addEventListener('mouseleave', hideCursor);
     });
   });
+
+
+  function updateHUD() {
+    const game = window.MetaMeda;
+    if (!game || !game.state) return;
+
+    const s = game.state;
+    document.getElementById('hud-name').textContent = s.selectedCharacter || "Unknown";
+    document.getElementById('hud-badge').style.backgroundImage = `url('${s.rankBadge}')`;
+    document.getElementById('hud-postPoints').textContent = s.postPoints;
+    document.getElementById('hud-clout').textContent = s.clout;
+    document.getElementById('hud-followers').textContent = s.followers;
+    document.getElementById('hud-likes').textContent = s.likes;
+    document.getElementById('hud-quest').textContent = s.quest;
+    document.getElementById('hud-messages').textContent = s.messages.length;
+  }
+
+  updateHUD();
+  setInterval(updateHUD, 1000);
+
   </script>
 
 </body>
