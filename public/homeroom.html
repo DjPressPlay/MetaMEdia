@@ -165,10 +165,7 @@
   opacity: 0.7;
   pointer-events: none;
   z-index: 1;
- 
-  transform: translateX(-50%) scaleY(-0.3) rotate(0deg);
-  transition: transform 0.3s ease-out;
-}
+ }
 
 
 </style>
@@ -289,17 +286,11 @@
 
 
    document.getElementById('shadow-img').src = charImg.src;
-let angle = 0;
-document.addEventListener('mousemove', e => {
-  const rect = room.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const mid = rect.width / 2;
-
-  // slight tilt depending on which side of screen
-  angle = ((x - mid) / mid) * 10;
-
-  document.getElementById('shadow-img').style.transform =
-    `translateX(-50%) scaleY(-0.3) rotate(${angle}deg)`;
+const shadow = document.getElementById("shadow-img");
+document.addEventListener("mousemove", (e) => {
+  const center = window.innerWidth / 2;
+  const offset = (e.clientX - center) / center; // left/right ratio
+  shadow.style.transform = `translateX(-50%) scaleY(-0.3) rotate(${offset * 10}deg)`; 
 });
 
 
