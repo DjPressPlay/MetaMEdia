@@ -53,22 +53,26 @@
 .character::before {
   content: "";
   position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 110%; /* ⬇️ move glow lower */
+  width: 180%;
+  height: 180%;
+  top: 62%; /* ⬇️ slightly lower under feet */
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   background: radial-gradient(
-    circle at var(--glow-side, 60%) 70%, /* ← left/right + lower */
-    rgba(0, 0, 0, 0.8) 0%,
-    rgba(0, 0, 0, 0.5) 40%,
+    circle at var(--glow-side, 60%) 75%, 
+    rgba(0, 0, 0, 1) 0%,        /* 💀 deep solid black center */
+    rgba(0, 0, 0, 0.9) 30%,     /* heavy mid layer */
+    rgba(0, 0, 0, 0.7) 60%,     /* soft edge */
+    rgba(0, 0, 0, 0.3) 90%      /* fade out */
   );
-  filter: blur(40px);
+  filter: blur(35px);
+  opacity: 1;
   z-index: -1;
   pointer-events: none;
-  transition: background 0.2s ease, top 0.2s ease;
+  transition: background 0.2s ease;
 }
+
 
 
 
