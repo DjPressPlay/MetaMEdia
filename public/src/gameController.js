@@ -150,6 +150,8 @@ updateHUD(data) {
     document.getElementById("hud-followers").textContent = this.state.followers;
     document.getElementById("hud-likes").textContent = this.state.likes;
     document.getElementById("hud-quest").textContent = this.state.quest;
+    document.getElementById("hud-name").textContent = this.state.selectedCharacter || "Unknown";
+
   }
 }
 
