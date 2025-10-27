@@ -167,7 +167,6 @@
   z-index: 1;
   transform: translateX(-50%) scaleY(-0.3); /* rotation will go here */
 }
-}
 
 
 
@@ -292,21 +291,12 @@
 
    document.getElementById('shadow-img').src = charImg.src;
 
-const shadow = document.getElementById("shadow-img");
-
-// Calculate fake angle (left/right movement)
-const dx = e.clientX - rect.left - rect.width / 2;
-const angle = dx / rect.width * 20; // max ±20deg tilt
-
-// Apply transform with rotation anchored to bottom
-const shadowScale = 1 / scale;
-const opacity = Math.max(0.2, 1 - (scale - 1) / 5);
 shadow.style.transform = `
-  translateX(-50%)
-  scale(${Math.min(shadowScale, 1.2)}, -0.3)
+  translateX(-50%) 
+  scaleY(-0.3)
   rotate(${angle}deg)
 `;
-shadow.style.opacity = opacity.toFixed(2);
+
 
    
 
