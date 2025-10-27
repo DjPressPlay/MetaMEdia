@@ -165,18 +165,6 @@
   opacity: 0.7;
   pointer-events: none;
   z-index: 1;
-  animation: shadowEnter 0.4s ease-out forwards;
- @keyframes shadowEnter {
-  from {
-    transform: translateX(-50%) translateY(-10px) scaleY(-0.3);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(-50%) translateY(0) scaleY(-0.3);
-    opacity: 0.7;
-  }
-}
-
 }
 
 
@@ -302,14 +290,46 @@
 
    document.getElementById('shadow-img').src = charImg.src;
 
-const charSrc = charImg.src;
-const shadowImg = document.getElementById('shadow-img');
 
-shadowImg.src = charSrc;
-shadowImg.style.transition = 'transform 0.1s linear';
+   // 🧍 Move character with cursor depth
+document.addEventListener('mousemove', e => {
+  const rect = room.getBoundingClientRect();
+  let x = e.clientX - rect.left;
+  let y = e.clientY - rect.top;
 
+  const wallTopHeight = rect.height * 0.55;
+  const wallLeftWidth = rect.width * 0.36;
+  const wallRightLimit = rect.width * 0.75;
+  const clampedY = Math.max(wallTopHeight, y);
+  const clampedX = Math.min(Math.max(wallLeftWidth, x), wallRightLimit);
 
-   
+  character.style.left = `${clampedX}px`;
+  character.style.top  = `${clampedY}px`;
+
+  // ✅ Shadow moves opposite direction
+  const shadow = document.getElementById('shadow-img');
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  const offsetX = (clampedX - centerX) * -0.2; // adjust multiplier for distance
+  const offsetY = (clampedY - centerY) * -0.2;
+  shadow.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px)) scaleY(-0.3)`;
+  shadow.style.left = "50%";
+  shadow.style.top = "50%";
+
+  const closeRect = closeDot.getBoundingClientRect();
+  const farRect = farDot.getBoundingClientRect();
+  const dxC = e.clientX - (closeRect.left + closeRect.width/2);
+  const dyC = e.clientY - (closeRect.top  + closeRect.height/2);
+  const dxF = e.clientX - (farRect.left   + farRect.width/2);
+  const dyF = e.clientY - (farRect.top    + farRect.height/2);
+  const distClose = Math.hypot(dxC, dyC);
+  const distFar   = Math.hypot(dxF, dyF);
+
+  const scale = 3.5 + (distFar - distClose) / 150;
+  character.style.transform =
+    `translate(-50%, -50%) scale(${Math.max(0.4, Math.min(scale, 10.5))})`;
+});
+
 
     // 👁️ Cursor visibility
     const showCursor = () => room.style.cursor = 'default';
