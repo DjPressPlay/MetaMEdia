@@ -290,8 +290,7 @@
 
    document.getElementById('shadow-img').src = charImg.src;
 
-
- // 🧍 Move character with cursor depth
+// 🧍 Move shadow opposite direction and scale by depth
 document.addEventListener('mousemove', e => {
   const rect = room.getBoundingClientRect();
   let x = e.clientX - rect.left;
@@ -306,11 +305,24 @@ document.addEventListener('mousemove', e => {
   character.style.left = `${clampedX}px`;
   character.style.top  = `${clampedY}px`;
 
-  // ✅ Move shadow opposite direction (simple inverse)
   const shadow = document.getElementById('shadow-img');
   shadow.style.left = `${100 - (clampedX / rect.width) * 100}%`;
   shadow.style.top  = `${100 - (clampedY / rect.height) * 100}%`;
+
+  // ✅ Scale shadow based on depth dots
+  const closeRect = closeDot.getBoundingClientRect();
+  const farRect   = farDot.getBoundingClientRect();
+  const dxC = e.clientX - (closeRect.left + closeRect.width / 2);
+  const dyC = e.clientY - (closeRect.top + closeRect.height / 2);
+  const dxF = e.clientX - (farRect.left + farRect.width / 2);
+  const dyF = e.clientY - (farRect.top + farRect.height / 2);
+  const distClose = Math.hypot(dxC, dyC);
+  const distFar   = Math.hypot(dxF, dyF);
+
+  const scale = 0.3 + (distFar - distClose) / 1000; // tweak sensitivity here
+  shadow.style.transform = `translateX(-50%) scaleY(-${Math.max(0.2, Math.min(scale, 1.2))})`;
 });
+
 
 
 
