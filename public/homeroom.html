@@ -55,23 +55,22 @@
   position: absolute;
   width: 180%;
   height: 180%;
-  top: 62%; /* ⬇️ slightly lower under feet */
+  top: 58%; /* ⬇️ moves the glow down */
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   background: radial-gradient(
-    circle at var(--glow-side, 60%) 75%, 
-    rgba(0, 0, 0, 1) 0%,        /* 💀 deep solid black center */
-    rgba(0, 0, 0, 0.9) 30%,     /* heavy mid layer */
-    rgba(0, 0, 0, 0.7) 60%,     /* soft edge */
-    rgba(0, 0, 0, 0.3) 90%      /* fade out */
+    circle at var(--glow-side, 60%) 60%, /* ⬇️ second % controls vertical offset */
+    rgba(0,255,200,0.5) 0%,
+    rgba(0,255,200,0.15) 40%,
+    transparent 80%
   );
-  filter: blur(35px);
-  opacity: 1;
+  filter: blur(24px);
   z-index: -1;
   pointer-events: none;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, top 0.2s ease;
 }
+
 
 
 
