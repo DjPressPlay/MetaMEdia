@@ -203,8 +203,9 @@
       <div id="close" class="depth-dot"></div>
 
      <div class="character">
-        <img id="shadow-img" class="shadow-img" src="" alt="Shadow">
         <img id="character-img" src="" alt="Character">
+        <img id="shadow-img" class="shadow-img" src="" alt="Shadow">
+      
       </div>
 
       </div>
@@ -290,47 +291,6 @@
 
    document.getElementById('shadow-img').src = charImg.src;
 
-// 🕶️ Dynamic Shadow Offset (opposite to movement)
-const shadow = document.getElementById('shadow-img');
-let lastX = 0, lastY = 0;
-
-document.addEventListener('mousemove', e => {
-  const rect = room.getBoundingClientRect();
-  let x = e.clientX - rect.left;
-  let y = e.clientY - rect.top;
-
-  const wallTopHeight = rect.height * 0.55;
-  const wallLeftWidth = rect.width * 0.36;
-  const wallRightLimit = rect.width * 0.75;
-  const clampedY = Math.max(wallTopHeight, y);
-  const clampedX = Math.min(Math.max(wallLeftWidth, x), wallRightLimit);
-
-  character.style.left = `${clampedX}px`;
-  character.style.top  = `${clampedY}px`;
-
-  const closeRect = closeDot.getBoundingClientRect();
-  const farRect = farDot.getBoundingClientRect();
-  const dxC = e.clientX - (closeRect.left + closeRect.width/2);
-  const dyC = e.clientY - (closeRect.top  + closeRect.height/2);
-  const dxF = e.clientX - (farRect.left   + farRect.width/2);
-  const dyF = e.clientY - (farRect.top    + farRect.height/2);
-  const distClose = Math.hypot(dxC, dyC);
-  const distFar   = Math.hypot(dxF, dyF);
-  const scale = 3.5 + (distFar - distClose) / 150;
-  character.style.transform =
-    `translate(-50%, -50%) scale(${Math.max(0.4, Math.min(scale, 10.5))})`;
-
-  // 🌑 Calculate shadow movement (inverse direction)
-  const moveX = clampedX - lastX;
-  const moveY = clampedY - lastY;
-  const shadowOffsetX = -moveX * 0.4;
-  const shadowOffsetY = -moveY * 0.3;
-
-  shadow.style.transform = `translate(calc(-50% + ${shadowOffsetX}px), ${shadowOffsetY}px) scaleY(-0.3)`;
-
-  lastX = clampedX;
-  lastY = clampedY;
-});
 
 
     // 👁️ Cursor visibility
