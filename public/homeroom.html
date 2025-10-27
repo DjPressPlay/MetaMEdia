@@ -53,15 +53,15 @@
 .character::before {
   content: "";
   position: absolute;
-  width: 100%;
-  height: 100%;
+  width: calc(100% * var(--shadow-scale, 1));
+  height: calc(100% * var(--shadow-scale, 1));
   top: 98%; /* ⬇️ moves the glow down */
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   background: radial-gradient(
     circle at var(--glow-side, 60%) 60%, /* ⬇️ second % controls vertical offset */
-  rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.9) 0%,
     rgba(0, 0, 0, 0.7) 40%,
     transparent 90%
   );
@@ -326,6 +326,10 @@ document.addEventListener('mousemove', e => {
   const scale = 3.5 + (distFar - distClose) / 150;
   character.style.transform =
     `translate(-50%, -50%) scale(${Math.max(0.4, Math.min(scale, 10.5))})`;
+ 
+// 🖤 Apply same scaling to the shadow glow
+character.style.setProperty('--shadow-scale', Math.max(0.4, Math.min(scale, 10.5)));
+
 });
 
 
