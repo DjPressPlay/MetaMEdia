@@ -165,7 +165,18 @@
   opacity: 0.7;
   pointer-events: none;
   z-index: 1;
-  transform: translateX(-50%) scaleY(-0.3); /* rotation will go here */
+  animation: shadowEnter 0.4s ease-out forwards;
+ @keyframes shadowEnter {
+  from {
+    transform: translateX(-50%) translateY(-10px) scaleY(-0.3);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0) scaleY(-0.3);
+    opacity: 0.7;
+  }
+}
+
 }
 
 
