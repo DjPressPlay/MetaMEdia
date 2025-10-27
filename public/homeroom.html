@@ -283,15 +283,79 @@
     });
 
 
-   document.getElementById('shadow-img').src = charImg.src;
-const shadowImg = document.getElementById('shadow-img');
+  const shadowImg = document.getElementById('shadow-img');
+const charImg = document.getElementById('character-img');
+shadowImg.src = charImg.src;
 
-// Inside document.addEventListener('mousemove', e => { ... })
-shadowImg.style.left = `${clampedX}px`;
-shadowImg.style.top = `${clampedY}px`;
-shadowImg.style.transform = `translate(-50%, -50%) scale(${Math.max(0.4, Math.min(scale, 10.5))}) scaleY(-0.3)`;
-const opacity = Math.max(0.3, Math.min(0.8, 1 - (scale - 3.5) / 10));
-shadowImg.style.opacity = opacity.toFixed(2);
+// ===============================
+// 🌀 Character + Shadow Movement & Opposite Rotation
+// ===============================
+
+const character = document.querySelector('.character');
+let lastX = 0;
+let lastY = 0;
+let lastAngle = 0;
+let initialized = false;
+
+// Function to update shadow’s position and opposite rotation
+function syncShadow() {
+  const rect = character.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+
+  // Initialize once to prevent large initial rotation jumps
+  if (!initialized) {
+    lastX = x;
+    lastY = y;
+    initialized = true;
+  }
+
+  // Calculate delta movement
+  const dx = x - lastX;
+  const dy = y - lastY;
+
+  // Calculate the current movement angle (in degrees)
+  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+  // Position the shadow directly beneath the character, with a small offset
+  shadowImg.style.position = 'absolute';
+  shadowImg.style.left = rect.left + 'px';
+  shadowImg.style.top = rect.top + rect.height * 0.35 + 'px'; // subtle offset
+  shadowImg.style.width = rect.width + 'px';
+  shadowImg.style.height = rect.height + 'px';
+  shadowImg.style.opacity = '0.7';
+  shadowImg.style.filter = 'brightness(0)';
+  shadowImg.style.pointerEvents = 'none';
+  shadowImg.style.transformOrigin = 'center';
+
+  // Only rotate if the character actually moved
+  if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+    // Character rotation follows the movement direction
+    charImg.style.transform = `rotate(${angle}deg)`;
+
+    // Shadow rotation is the inverse of the character's angle
+    shadowImg.style.transform = `rotate(${-angle}deg) scale(1)`;
+    lastAngle = angle;
+  } else {
+    // Keep last known angle when stationary
+    charImg.style.transform = `rotate(${lastAngle}deg)`;
+    shadowImg.style.transform = `rotate(${-lastAngle}deg) scale(1)`;
+  }
+
+  // Update previous coordinates for next frame
+  lastX = x;
+  lastY = y;
+
+  // Continue checking smoothly each frame
+  requestAnimationFrame(syncShadow);
+}
+
+// Start syncing loop once DOM and character exist
+requestAnimationFrame(syncShadow);
+
+
+
+
 
     // 👁️ Cursor visibility
     const showCursor = () => room.style.cursor = 'default';
