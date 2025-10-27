@@ -50,20 +50,25 @@
     width:100%; height:100%; object-fit:cover; border-radius:12px;
   }
 
- .character::before {
+.character::before {
   content: "";
   position: absolute;
-  inset: 0;
-  border-radius: 12px;
-  background: radial-gradient(circle at center,
-    rgba(0, 255, 200, 0.55) 0%,
-    rgba(0, 255, 200, 0.15) 40%,
+  width: 180%;
+  height: 180%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at var(--glow-side, 60%) 50%,
+    rgba(0,255,200,0.5) 0%,
+    rgba(0,255,200,0.15) 40%,
     transparent 80%);
   filter: blur(24px);
   z-index: -1;
-  transform: scale(1.3);
-  transition: opacity 0.3s ease;
+  pointer-events: none;
+  transition: background 0.2s ease;
 }
+
 
 
   /* Depth markers */
@@ -195,7 +200,6 @@
       <div id="close" class="depth-dot"></div>
 
      <div class="character">
-             <img id="shadow-img" class="shadow-img" src="" alt="Shadow">
         <img id="character-img" src="" alt="Character">
       
       </div>
@@ -282,6 +286,42 @@
 
 
  
+let lastX = null;
+
+document.addEventListener('mousemove', e => {
+  const rect = room.getBoundingClientRect();
+  let x = e.clientX - rect.left;
+  let y = e.clientY - rect.top;
+
+  const wallTopHeight = rect.height * 0.55;
+  const wallLeftWidth = rect.width * 0.36;
+  const wallRightLimit = rect.width * 0.75;
+  const clampedY = Math.max(wallTopHeight, y);
+  const clampedX = Math.min(Math.max(wallLeftWidth, x), wallRightLimit);
+
+  character.style.left = `${clampedX}px`;
+  character.style.top  = `${clampedY}px`;
+
+  // 🌀 Flip glow based on movement direction
+  if (lastX !== null) {
+    const movingRight = clampedX > lastX;
+    character.style.setProperty('--glow-side', movingRight ? '20%' : '80%');
+  }
+  lastX = clampedX;
+
+  const closeRect = closeDot.getBoundingClientRect();
+  const farRect = farDot.getBoundingClientRect();
+  const dxC = e.clientX - (closeRect.left + closeRect.width/2);
+  const dyC = e.clientY - (closeRect.top  + closeRect.height/2);
+  const dxF = e.clientX - (farRect.left   + farRect.width/2);
+  const dyF = e.clientY - (farRect.top    + farRect.height/2);
+  const distClose = Math.hypot(dxC, dyC);
+  const distFar   = Math.hypot(dxF, dyF);
+
+  const scale = 3.5 + (distFar - distClose) / 150;
+  character.style.transform =
+    `translate(-50%, -50%) scale(${Math.max(0.4, Math.min(scale, 10.5))})`;
+});
 
 
 
