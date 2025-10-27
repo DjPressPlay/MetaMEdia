@@ -1,6 +1,3 @@
-ok read the game controller im trying to hook up the hud and for some reason its not working .. i said read  just read 
-
-
 // ===============================
 // 🎮 GAME CONTROLLER v6 — MetaMeda (Character Select Update)
 // ===============================
