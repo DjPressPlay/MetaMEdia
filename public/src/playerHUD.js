@@ -1,53 +1,52 @@
 // ===============================
-// 🧠 PLAYER HUD MODULE — MetaMeda v3
+// 🧠 PLAYER HUD MODULE — MetaMeda v3 (Linked to HOMEROOM)
 // ===============================
 
 export class PlayerHUD {
   constructor(game) {
     this.game = game;
 
-    // 🧱 HUD ROOT
+    // 🧱 Use same structure as .nameplate in HOMEROOM
     this.element = document.createElement("div");
-    this.element.className = "player-hud";
+    this.element.className = "nameplate"; // 👈 matches your CSS
 
-    // 🎨 HUD STRUCTURE
     this.element.innerHTML = `
-      <div class="hud-container">
-        <div class="hud-rank">
-          <img class="rank-badge" src="assets/ranks/newbie.png" alt="Rank Badge">
-        </div>
-        
-        <div class="hud-stats">
-          <div class="hud-row"><span>🪙 Post Points:</span><span class="hud-postPoints">0</span></div>
-          <div class="hud-row"><span>⭐ Clout:</span><span class="hud-clout">0</span></div>
-          <div class="hud-row"><span>👥 Followers:</span><span class="hud-followers">0</span></div>
-          <div class="hud-row"><span>❤️ Likes:</span><span class="hud-likes">0</span></div>
-        </div>
+      <div class="header">
+        <div class="name-text hud-name">Unknown</div>
+        <div class="rank-badge"></div>
+      </div>
 
-        <div class="hud-quest">
-          <span class="hud-quest-label">📜 Quest:</span>
-          <span class="hud-quest-value">None</span>
-        </div>
+      <div class="stats-grid">
+        <div><div class="stat-value hud-postPoints">0</div><div class="stat-label">Post</div></div>
+        <div><div class="stat-value hud-clout">0</div><div class="stat-label">Clout</div></div>
+        <div><div class="stat-value hud-followers">0</div><div class="stat-label">Followers</div></div>
+        <div><div class="stat-value hud-likes">0</div><div class="stat-label">Likes</div></div>
+        <div><div class="stat-value hud-quest">None</div><div class="stat-label">Quest</div></div>
+        <div><div class="stat-value hud-messages">0</div><div class="stat-label">Msgs</div></div>
       </div>
     `;
 
-    document.body.appendChild(this.element);
+    // 🔹 Attach HUD inside the game frame (not body)
+    const frame = document.querySelector(".frame");
+    if (frame) frame.appendChild(this.element);
+    else document.body.appendChild(this.element);
   }
 
   // ===============================
-  // 🌀 UPDATE HUD DYNAMICALLY
+  // 🌀 Syncs HUD with game state
   // ===============================
   update(state) {
+    if (!state) return;
+
+    this.element.querySelector(".hud-name").textContent = state.selectedCharacter || "Unknown";
     this.element.querySelector(".hud-postPoints").textContent = state.postPoints ?? 0;
-    this.element.querySelector(".hud-clout").textContent = state.clout?.toLocaleString() ?? 0;
+    this.element.querySelector(".hud-clout").textContent = state.clout ?? 0;
     this.element.querySelector(".hud-followers").textContent = state.followers ?? 0;
     this.element.querySelector(".hud-likes").textContent = state.likes ?? 0;
+    this.element.querySelector(".hud-quest").textContent = state.quest ?? "None";
+    this.element.querySelector(".hud-messages").textContent = state.messages?.length ?? 0;
 
-    const questText = state.quest > 0 ? `#${state.quest}` : "None";
-    this.element.querySelector(".hud-quest-value").textContent = questText;
-
-    // 🏅 Update rank badge
-    const badgeEl = this.element.querySelector(".rank-badge");
-    if (state.rankBadge) badgeEl.src = state.rankBadge;
+    const badge = this.element.querySelector(".rank-badge");
+    if (state.rankBadge) badge.style.backgroundImage = `url('${state.rankBadge}')`;
   }
 }
