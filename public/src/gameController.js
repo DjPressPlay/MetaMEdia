@@ -1,12 +1,16 @@
+ok read the game controller im trying to hook up the hud and for some reason its not working .. i said read  just read 
+
+
 // ===============================
-// 🎮 GAME CONTROLLER v7 — MetaMeda (HUD Unified to Home Room)
+// 🎮 GAME CONTROLLER v6 — MetaMeda (Character Select Update)
 // ===============================
 
+import { PlayerHUD } from "./playerHUD.js";
 import { Messenger } from "./messenger.js";
 
 export class GameController {
   constructor() {
-    console.log("🚀 MetaMeda GameController v7 — HUD Linked to Home Room");
+    console.log("🚀 MetaMeda GameController v6 — Character Selector Enabled");
 
     // ===== 🎯 PLAYER STATE =====
     this.state = {
@@ -21,6 +25,7 @@ export class GameController {
     };
 
     // ===== 🧩 CORE SYSTEMS =====
+    this.hud = new PlayerHUD(this);
     this.messenger = new Messenger(this);
 
     // ===== 🧭 QUEST DATA =====
@@ -52,8 +57,9 @@ export class GameController {
     };
 
     // ===== 🏁 INITIAL SETUP =====
-    this.updateHUD(this.state);
+    this.hud.update(this.state);
 
+    // If character already chosen, greet user.
     if (this.state.selectedCharacter) {
       this.messenger.info(`👋 Welcome back, ${this.state.selectedCharacter}!`);
     } else {
@@ -68,7 +74,7 @@ export class GameController {
     this.state.selectedCharacter = name;
     localStorage.setItem("selectedCharacter", name);
     this.messenger.info(`👕 Character style set: ${name}`);
-    this.updateHUD(this.state);
+    this.hud.update(this.state);
   }
 
   // =====================================================
@@ -87,7 +93,7 @@ export class GameController {
   startQuest(quest) {
     this.state.quest = quest.id;
     this.messenger.info(`📜 Quest ${quest.id}: ${quest.text}`);
-    this.updateHUD(this.state);
+    this.hud.update(this.state);
   }
 
   handleAmbientEvent(eventName) {
@@ -113,58 +119,50 @@ export class GameController {
     this.state.postPoints += 100;
     this.state.likes += likes;
     this.state.clout += 500;
-    this.updateHUD(this.state);
+    this.hud.update(this.state);
     this.messenger.text(`🧠 Post uploaded — +100 post points, +${likes} likes, +500 clout.`);
     this.triggerEvent("onPostMade");
   }
 
   handleFollowerGain(count = 10) {
     this.state.followers += count;
-    this.updateHUD(this.state);
+    this.hud.update(this.state);
     this.messenger.info(`👥 +${count} followers`);
   }
 
   handleRankUp(newBadge) {
     if (newBadge) this.state.rankBadge = newBadge;
-    this.updateHUD(this.state);
+    this.hud.update(this.state);
     this.messenger.win(`🚀 Rank Up! Your badge has evolved!`);
   }
 
   handleMessage(text) {
     this.state.messages.push(text);
     this.messenger.text(text);
-    this.updateHUD(this.state);
   }
 
-  // =====================================================
-  // 🧱 HUD SYNC
-  // =====================================================
-  updateHUD(data) {
-    this.state = { ...this.state, ...data };
-    const hud = document.getElementById("hud");
-    if (!hud) return;
+ // =====================================================
+// 🧱 UTILITY
+// =====================================================
+updateHUD(data) {
+  this.state = { ...this.state, ...data };
+  const hud = document.getElementById("hud");
+  if (hud) {
+    document.getElementById("hud-postPoints").textContent = this.state.postPoints;
+    document.getElementById("hud-clout").textContent = this.state.clout;
+    document.getElementById("hud-followers").textContent = this.state.followers;
+    document.getElementById("hud-likes").textContent = this.state.likes;
+    document.getElementById("hud-quest").textContent = this.state.quest;
+    document.getElementById("hud-name").textContent = this.state.selectedCharacter || "Unknown";
 
-    const safe = (id, value) => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = value;
-    };
-
-    safe("hud-postPoints", this.state.postPoints);
-    safe("hud-clout", this.state.clout);
-    safe("hud-followers", this.state.followers);
-    safe("hud-likes", this.state.likes);
-    safe("hud-quest", this.state.quest);
-    safe("hud-name", this.state.selectedCharacter || "Unknown");
-    safe("hud-messages", this.state.messages.length);
-
-    const badge = document.getElementById("hud-badge");
-    if (badge) badge.style.backgroundImage = `url('${this.state.rankBadge}')`;
-  }
-
-  tick() {
-    // Future loop hooks
   }
 }
 
-// 🔹 Global Init
+
+tick() {
+  // Future update loop hooks
+}
+}
+
+// Global init
 window.MetaMeda = new GameController();
