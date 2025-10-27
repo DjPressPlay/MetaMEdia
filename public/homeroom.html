@@ -375,7 +375,7 @@
 </style>
 </head>
 <body>
-
+<!--Gameframe---------------------------->
   <div class="frame">
 
 <!-- 🩵 HUD Nameplate -->
@@ -437,7 +437,7 @@
   <p>This is the third in-game screen.</p>
 </div>
 
- <!-- ✅ Game Controller -->
+ <!-- ✅ Game Controller ------------------------------------------------------------------------>
 <script type="module" src="src/gameController.js"></script>
   <script>
   window.addEventListener("DOMContentLoaded", () => {
@@ -483,6 +483,7 @@
       }
     }
 
+  //==================================================================
     // 🧍 Move character with cursor depth
     document.addEventListener('mousemove', e => {
       const rect = room.getBoundingClientRect();
@@ -565,27 +566,7 @@ character.style.setProperty('--shadow-scale', Math.max(0.4, Math.min(scale, 10.5
       w.addEventListener('mouseleave', hideCursor);
     });
   });
-
-
-  function updateHUD() {
-    const game = window.MetaMeda;
-    if (!game || !game.state) return;
-
-    const s = game.state;
-    document.getElementById('hud-name').textContent = s.selectedCharacter || "Unknown";
-    document.getElementById('hud-badge').style.backgroundImage = `url('${s.rankBadge}')`;
-    document.getElementById('hud-postPoints').textContent = s.postPoints;
-    document.getElementById('hud-clout').textContent = s.clout;
-    document.getElementById('hud-followers').textContent = s.followers;
-    document.getElementById('hud-likes').textContent = s.likes;
-    document.getElementById('hud-quest').textContent = s.quest;
-    document.getElementById('hud-messages').textContent = s.messages.length;
-  }
-
-  updateHUD();
-  setInterval(updateHUD, 1000);
-
-    // ===============================
+// ================================================================================
 // 🔹 Hotspot -> Overlay Control
 // ===============================
 const hotspots = document.querySelectorAll('.hotspot');
@@ -613,7 +594,7 @@ document.addEventListener('keydown', e => {
     screens.forEach(s => s.classList.remove('active'));
   }
 });
-
+//================================================================================
   </script>
 
 </body>
