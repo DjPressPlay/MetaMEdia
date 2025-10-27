@@ -168,8 +168,13 @@
   pointer-events: none;
   z-index: 2;
 
+  z-index: 1;
+  animation: shadowFlicker 2.5s ease-in-out infinite;
 }
-
+@keyframes shadowFlicker {
+  0%, 100% { opacity: 0.7; filter: brightness(0.1); }
+  50% { opacity: 0.4; filter: brightness(0); }
+}
 
 
 
