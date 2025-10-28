@@ -15,7 +15,7 @@ export class GameController {
       clout: 0,
       followers: 0,
       likes: 0,
-      rankBadge: "assets/ranks/newbie.png",
+      rankBadge: "badges/Echo.png",
       quest: 0,
       messages: [],
       selectedCharacter: localStorage.getItem("selectedCharacter") || null
