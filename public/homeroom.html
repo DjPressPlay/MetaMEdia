@@ -371,6 +371,47 @@
   100% { transform: translate(-10%, -20%) rotate(-2deg); }
 }
 
+/* 🏷️ Floating label for proximity detection */
+.hotspot::before {
+  content: attr(data-label);
+  position: absolute;
+  bottom: 155%;
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  background: rgba(0, 255, 255, 0.25);
+  border: 2px solid rgba(0, 255, 255, 0.8);
+  color: #00ffff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+  text-shadow:
+    0 0 8px rgba(0,255,255,0.9),
+    0 0 16px rgba(0,255,255,0.6),
+    0 0 28px rgba(0,255,255,0.4);
+  box-shadow:
+    0 0 18px rgba(0,255,255,0.7),
+    inset 0 0 10px rgba(0,255,255,0.4);
+}
+
+/* Show label when hotspot is near character */
+.hotspot.near::before {
+  opacity: 1;
+  transform: translateX(-50%) scale(1.1);
+}
+
+/* Enhanced hover effect still works */
+.hotspot:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) scale(1.1);
+}
+
 
 </style>
 </head>
@@ -411,9 +452,9 @@
 
       </div>
 <!-- 🔹 Hotspots (inside room now) -->
-<div class="hotspot" id="spot1"></div>
-<div class="hotspot" id="spot2"></div>
-<div class="hotspot" id="spot3"></div>
+<div class="hotspot" id="spot1" data-label="PC"></div>
+<div class="hotspot" id="spot2" data-label="STYLE"></div>
+<div class="hotspot" id="spot3" data-label="PHONE"></div>
       </div>
     </div>
   </div>
@@ -562,7 +603,38 @@ document.addEventListener('mousemove', e => {
 // 🖤 Apply same scaling to the shadow glow
 character.style.setProperty('--shadow-scale', Math.max(0.4, Math.min(scale, 10.5)));
 
+  // 🔍 Check proximity to hotspots and show labels
+  checkHotspotProximity();
+
 });
+
+// 🔍 Proximity detection for hotspot labels
+function checkHotspotProximity() {
+  const character = document.querySelector('.character');
+  const hotspots = document.querySelectorAll('.hotspot');
+  const proximityThreshold = 120;
+
+  const charRect = character.getBoundingClientRect();
+  const charCenterX = charRect.left + charRect.width / 2;
+  const charCenterY = charRect.top + charRect.height / 2;
+
+  hotspots.forEach(hotspot => {
+    const hotspotRect = hotspot.getBoundingClientRect();
+    const hotspotCenterX = hotspotRect.left + hotspotRect.width / 2;
+    const hotspotCenterY = hotspotRect.top + hotspotRect.height / 2;
+
+    const distance = Math.hypot(
+      charCenterX - hotspotCenterX,
+      charCenterY - hotspotCenterY
+    );
+
+    if (distance < proximityThreshold) {
+      hotspot.classList.add('near');
+    } else {
+      hotspot.classList.remove('near');
+    }
+  });
+}
 
 
 
