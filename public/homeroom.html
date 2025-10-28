@@ -439,6 +439,205 @@
 }
 
 
+  
+/* ============================= */
+/* 💻 Mini PC Screen — Metallic Beveled Frame */
+/* ============================= */
+.mini-pc-screen {
+  position: absolute;
+  width: 80%;
+  aspect-ratio: 16 / 9;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(10, 10, 10, 1) 100%),
+    url("https://images.unsplash.com/photo-1527443154391-507e9dc6c5cc?auto=format&fit=crop&w=1400&q=80") center/cover no-repeat;
+  border-radius: 14px;
+  overflow: hidden;
+  z-index: 1000;
+
+  /* 🩶 Metallic gradient frame with bevel + glow */
+  border: 10px solid transparent;
+  background-clip: padding-box, border-box;
+  background-origin: border-box;
+  background-image:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(10, 10, 10, 1)),
+    linear-gradient(145deg, #d7d7d7, #ffffff, #b8b8b8, #8a8a8a);
+  box-shadow:
+    inset 0 0 15px rgba(255, 255, 255, 0.1),
+    0 0 30px rgba(0, 255, 255, 0.35),
+    0 0 60px rgba(0, 180, 255, 0.25);
+}
+
+/* ✴️ Bevel highlight effect */
+.mini-pc-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 40%, rgba(0,0,0,0.3) 100%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 🖥️ Desktop Area (inside mini screen) */
+.desktop {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  justify-content: flex-start;
+  padding: 30px;
+  background: radial-gradient(circle at bottom right, rgba(0,255,255,0.08) 0%, transparent 80%);
+  position: relative;
+  z-index: 3;
+}
+
+/* 🧭 App Icons */
+.app-icon {
+  width: 72px;
+  height: 72px;
+  margin: 15px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.app-icon img {
+  width: 65%;
+  height: 65%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgba(0,255,255,0.5));
+  pointer-events: none;
+}
+
+.app-icon:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 20px rgba(0,255,255,0.6);
+  border-color: #00ffff;
+  background: rgba(0,255,255,0.15);
+}
+
+.app-icon:active {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(0,255,255,0.4);
+}
+
+/* Label text */
+.app-icon::before {
+  content: attr(data-app);
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: #00ffff;
+  text-shadow: 0 0 6px rgba(0,255,255,0.8);
+  letter-spacing: 1px;
+}
+
+
+.app-icon:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 20px rgba(0,255,255,0.6);
+  border-color: #00ffff;
+  background: rgba(0,255,255,0.15);
+}
+
+/* ✨ Scanline Overlay */
+.mini-pc-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.03) 0px,
+    rgba(255,255,255,0.03) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: 0.25;
+  z-index: 4;
+}
+.mini-pc-screen {
+  /* existing styles … */
+  background:
+    url("https://i.redd.it/9s2t54ycbtz71.jpg") center/cover no-repeat,
+    linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(10,10,10,1) 100%);
+}
+
+
+.app-window {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 420px;
+  background: rgba(20,20,20,0.95);
+  border: 2px solid #00ffff;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(0,255,255,0.5);
+  color: #fff;
+  z-index: 5000;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  background: rgba(0,255,255,0.2);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.close-app {
+  background: none;
+  border: none;
+  color: #00ffff;
+  font-size: 20px;
+  cursor: pointer;
+}
+.close-pc {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 28px;
+  background: none;
+  border: none;
+  color: #00ffff;
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.close-pc:hover {
+  transform: scale(1.25);
+  color: #ffffff;
+}
+
+/* Optional: smooth hide animation */
+.mini-pc-screen {
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+  
 </style>
 </head>
 <body>
@@ -488,8 +687,20 @@
 <!-- 🔹 Overlay Screens -->
 <div class="overlay-screen" id="screen1">
   <button class="close-btn">×</button>
-  <h2>Screen One</h2>
-  <p>This is the first in-game screen.</p>
+ <div class="mini-pc-screen">
+  <div class="desktop">
+    <div class="app-icon" data-app="reddit">
+      <img src="https://freelogopng.com/images/all_img/1658834095reddit-logo-png.png" alt="Reddit">
+    </div>
+     <div class="app-icon" data-app="notes">
+      <img src="https://cdn-icons-png.flaticon.com/512/2965/2965358.png" alt="Notes">
+    </div>
+ <div class="app-icon" data-app="signalz">
+      <img src="https://cdn-icons-png.flaticon.com/512/5968/5968778.png" alt="Signalz">
+    </div>
+  </div>
+</div>
+
 </div>
 
 <div class="overlay-screen" id="screen2">
@@ -692,9 +903,16 @@ hotspots.forEach((spot, i) => {
 // Close buttons
 document.querySelectorAll('.close-btn').forEach(btn => {
   btn.addEventListener('click', e => {
-    e.target.closest('.overlay-screen').classList.remove('active');
+    const overlay = e.target.closest('.overlay-screen');
+    overlay.classList.remove('active');
+
+    // 🧹 also close any mini apps if this was the PC screen
+    if (overlay.id === "screen1") {
+      closeAllApps();
+    }
   });
 });
+
 
 // Optional: ESC to close
 document.addEventListener('keydown', e => {
@@ -703,8 +921,58 @@ document.addEventListener('keydown', e => {
   }
 });
 
+//======MiniApps
 
-//================================================================================
+// Handle opening mini apps
+document.querySelectorAll('.app-icon').forEach(icon => {
+  icon.addEventListener('click', () => {
+    const appName = icon.dataset.app;
+    openApp(appName);
+  });
+});
+
+function openApp(appName) {
+  // close previous app windows
+  document.querySelectorAll('.app-window').forEach(w => w.remove());
+
+  const win = document.createElement('div');
+  win.className = 'app-window';
+  win.innerHTML = `
+    <div class="app-header">
+      <span>${appName.toUpperCase()}</span>
+      <button class="close-app">×</button>
+    </div>
+    <div class="app-body">
+      <p>Loading ${appName}...</p>
+    </div>
+  `;
+  document.body.appendChild(win);
+
+  win.querySelector('.close-app').addEventListener('click', () => win.remove());
+}
+
+/* 💻 Close all apps when mini PC closes */
+function closeAllApps() {
+  document.querySelectorAll('.app-window').forEach(w => w.remove());
+}
+
+/* Example hook: when the PC screen closes */
+const miniPcScreen = document.querySelector('.mini-pc-screen');
+const closePcBtn = document.createElement('button');
+closePcBtn.className = 'close-pc';
+closePcBtn.textContent = '×';
+miniPcScreen.appendChild(closePcBtn);
+
+closePcBtn.addEventListener('click', () => {
+  miniPcScreen.classList.remove('active');
+  miniPcScreen.style.opacity = '0';
+  closeAllApps(); // 🧹 close all open mini windows automatically
+});
+
+
+//======MiniApps
+
+  //======================================================
   </script>
 
 </body>
