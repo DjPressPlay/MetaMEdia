@@ -487,12 +487,9 @@ if (savedStyle) {
   selectedCharacter = styleObj.name;
   charImg.src = styleObj.img;
   document.getElementById("hud-name").textContent = selectedCharacter;
+  document.getElementById("hud-badge").style.backgroundImage = "url('public/badges/newbie.png')";
 }
 
-  // 🏅 grab the first badge (example: "assets/ranks/newbie.png")
-  const badgePath = styleObj.badge || "assets/ranks/newbie.png";
-  document.getElementById("hud-badge").style.backgroundImage = `url('${badgePath}')`;
-}
 
   //==================================================================
     // 🧍 Move character with cursor depth
