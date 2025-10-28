@@ -277,7 +277,7 @@
 
 /* Placement */
 #spot1 { left: 10%; top: 59%; }
-#spot2 { left: 50%; top: 100%; }
+#spot2 { left: 50%; top: 90%; }
 #spot3 { left: 90%; top: 62%; }
 
 /* Breathing motion */
@@ -312,10 +312,24 @@
   pointer-events: all;
 }
 #screen1 {
-  background: url("MEDIA/PC.png") center/cover no-repeat;
+  background: url("https://www.freeiconspng.com/uploads/computer-monitor-blank-png--19.png") center/cover no-repeat; center/cover no-repeat;
+}
+#screen1 {
+  width: 70%;
+  height: 70%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 16px;
+  overflow: hidden;
+}
+#screen1::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
 }
 
- 
 .overlay-screen h2 {
   margin-bottom: 10px;
   font-size: 24px;
