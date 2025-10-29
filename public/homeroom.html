@@ -1221,31 +1221,35 @@ function openApp(appName) {
   }
 // ========== LEAGUE APP LOGIC ==========
 
-// replace with your Riot API key (server-side in production)
-const RIOT_API_KEY = "YOUR_API_KEY_HERE";
-
-// example default name
 const defaultSummoner = "Faker";
 
-// open League app with real data
 async function loadLeagueProfile(summonerName = defaultSummoner) {
   try {
-    // 1️⃣ fetch summoner basic info
+    const summonerEndpoint = `/lol/summoner/v4/summoners/by-name/${encodeURIComponent(summonerName)}`;
     const summonerRes = await fetch(
-      `https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${encodeURIComponent(summonerName)}?api_key=${RIOT_API_KEY}`
+      `/api/riot-api?endpoint=${encodeURIComponent(summonerEndpoint)}&region=na1`
     );
+    
+    if (!summonerRes.ok) {
+      throw new Error(`Failed to fetch summoner: ${summonerRes.status}`);
+    }
+    
     const summoner = await summonerRes.json();
 
-    // update base profile fields
     document.getElementById("summoner-name").textContent = summoner.name;
     document.getElementById("summoner-icon").src =
       `https://ddragon.leagueoflegends.com/cdn/13.20.1/img/profileicon/${summoner.profileIconId}.png`;
     document.getElementById("summoner-level").textContent = `LVL ${summoner.summonerLevel}`;
 
-    // 2️⃣ fetch ranked info
+    const leagueEndpoint = `/lol/league/v4/entries/by-summoner/${summoner.id}`;
     const leagueRes = await fetch(
-      `https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/${summoner.id}?api_key=${RIOT_API_KEY}`
+      `/api/riot-api?endpoint=${encodeURIComponent(leagueEndpoint)}&region=na1`
     );
+    
+    if (!leagueRes.ok) {
+      throw new Error(`Failed to fetch ranked info: ${leagueRes.status}`);
+    }
+    
     const ranks = await leagueRes.json();
 
     const solo = ranks.find(r => r.queueType === "RANKED_SOLO_5x5");
@@ -1263,6 +1267,8 @@ async function loadLeagueProfile(summonerName = defaultSummoner) {
     }
   } catch (err) {
     console.error("Error loading League profile:", err);
+    document.getElementById("summoner-name").textContent = "Error loading profile";
+    document.getElementById("rank-tier").textContent = "Check console for details";
   }
 }
 
