@@ -378,7 +378,8 @@
   opacity: 0.75;
   animation: glarePulse 6s ease-in-out infinite;
 }
-
+  
+/* ✨ Animations */
 /* ✴️ Light rays */
 .frame::after {
   content: "";
@@ -403,7 +404,6 @@
   animation: lightRaysMove 12s linear infinite;
 }
 
-/* ✨ Animations */
 @keyframes glarePulse {
   0%, 100% {
     opacity: 0.4;
@@ -438,8 +438,6 @@
   transform: translateX(-50%) scale(1.1);
 }
 
-
-  
 /* ============================= */
 /* 💻 Mini PC Screen — Metallic Beveled Frame */
 /* ============================= */
@@ -470,17 +468,6 @@
     0 0 60px rgba(0, 180, 255, 0.25);
 }
 
-/* ✴️ Bevel highlight effect */
-.mini-pc-screen::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  background: linear-gradient(145deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 40%, rgba(0,0,0,0.3) 100%);
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  z-index: 2;
-}
 
 /* 🖥️ Desktop Area (inside mini screen) */
 .desktop {
@@ -571,7 +558,6 @@
   z-index: 4;
 }
 .mini-pc-screen {
-  /* existing styles … */
   background:
     url("https://i.redd.it/9s2t54ycbtz71.jpg") center/cover no-repeat,
     linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(10,10,10,1) 100%);
@@ -580,40 +566,64 @@
 
 .app-window {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 800px;
-  height: 420px;
+  inset: 40px 40px 40px 40px; /* adds spacing within the mini-pc frame */
+  width: auto;
+  height: auto;
   background: rgba(20,20,20,0.95);
   border: 2px solid #00ffff;
-  border-radius: 12px;
-  box-shadow: 0 0 25px rgba(0,255,255,0.5);
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,255,255,0.4);
   color: #fff;
-  z-index: 5000;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  z-index: 10;
 }
 
+
+/* ============================= */
+/* 🔹 App Window pc close Button */
+/* ============================= */
 .app-header {
-  background: rgba(0,255,255,0.2);
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-  padding: 8px 12px;
+  position: relative;
+  background: rgba(0, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+  padding: 6px 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
+  color: #00ffff;
+  font-size: 13px;
+}
+
+.app-header {
+  position: relative;
+  z-index: 20; /* ⬅️ make header layer above everything else */
 }
 
 .close-app {
+  position: absolute;
+  top: 6px;
+  right: 10px;
   background: none;
   border: none;
   color: #00ffff;
-  font-size: 20px;
+  font-size: 18px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 21; /* ⬅️ ensure it floats above scanlines or gradients */
 }
+
+.close-app:hover {
+  color: #ffffff;
+  transform: scale(1.25);
+  text-shadow: 0 0 6px #00ffff;
+}
+
+
 .close-pc {
   position: absolute;
   top: 12px;
@@ -637,6 +647,25 @@
   opacity: 1;
   transition: opacity 0.4s ease;
 }
+
+.league-nav {
+  background: linear-gradient(90deg, #0a0a0a 0%, #111 100%);
+  color: #f0b90b;
+  padding: 6px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  border-bottom: 2px solid #f0b90b;
+}
+.league-body {
+  flex: 1;
+  background: #0d0d0f;
+  color: #ddd;
+  padding: 20px;
+}
+.league-title { font-size: 16px; letter-spacing: 1px; }
+
   
 </style>
 </head>
@@ -644,6 +673,8 @@
 <!--Gameframe---------------------------->
   <div class="frame">
 
+    
+    
 <!-- 🩵 HUD Nameplate -->
 <div class="nameplate" id="hud">
   <div class="header">
@@ -660,55 +691,131 @@
     <div><div class="stat-value" id="hud-messages"></div><div class="stat-label">Msgs</div></div>
   </div>
 </div>
-
-   
+    
+<!-- 🔹 Frame inside ---------->
     <div class="room">
       <div class="wall-top"></div>
       <div class="wall-left"></div>
       <div class="wall-right"></div>
-
+      
+      
+<!-- 🔹3d points on 2d plane ---------------------->
       <div id="far" class="depth-dot"></div>
       <div id="close" class="depth-dot"></div>
-
+      
+      
      <div class="character">
         <img id="character-img" src="" alt="Character">
-      
-
-
       </div>
-<!-- 🔹 Hotspots (inside room now) -->
+      
+      
+<!-- 🔹 Hotspot placement (inside room now) -->
 <div class="hotspot" id="spot1" data-label="PC"></div>
 <div class="hotspot" id="spot2" data-label="STYLE"></div>
 <div class="hotspot" id="spot3" data-label="PHONE"></div>
       </div>
     </div>
   </div>
-
-<!-- 🔹 Overlay Screens -->
+  
+  
+<!-- 🔹 Overlay Screens  ------------------------>
 <div class="overlay-screen" id="screen1">
   <button class="close-btn">×</button>
- <div class="mini-pc-screen">
-  <div class="desktop">
-    <div class="app-icon" data-app="reddit">
-      <img src="https://freelogopng.com/images/all_img/1658834095reddit-logo-png.png" alt="Reddit">
-    </div>
-     <div class="app-icon" data-app="notes">
-      <img src="https://cdn-icons-png.flaticon.com/512/2965/2965358.png" alt="Notes">
-    </div>
- <div class="app-icon" data-app="signalz">
-      <img src="https://cdn-icons-png.flaticon.com/512/5968/5968778.png" alt="Signalz">
+
+  <div class="mini-pc-screen">
+    <div class="desktop">
+
+      <!-- 🧩 League Profile -->
+      <div class="app-icon" data-app="league">
+        <img src="https://upload.wikimedia.org/wikipedia/en/7/77/League_of_Legends_logo.png" alt="League Profile">
+      </div>
+
+      <!-- 🧩 Match History -->
+      <div class="app-icon" data-app="history">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="Match History">
+      </div>
+
+      <!-- 🧩 SignalZ Connect -->
+      <div class="app-icon" data-app="signalz">
+        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968778.png" alt="SignalZ Connect">
+      </div>
+
     </div>
   </div>
 </div>
 
+
+   <!-- 🔹 App 1: League Profile ------------------>
+<div class="mini-app-window" id="app-league" style="display: none;">
+  <div class="app-header league-nav">
+    <span class="league-title">League — Profile</span>
+    <button class="close-app">×</button>
+  </div>
+  <div class="app-body league-body">
+    <h2>Summoner Profile</h2>
+    <p>View your Summoner name, rank, and favorite champions here.</p>
+    <div class="league-placeholder">
+      <img src="https://ddragon.leagueoflegends.com/cdn/13.20.1/img/profileicon/29.png"
+           alt="Summoner Icon"
+           style="width:90px;height:90px;border-radius:50%;margin-top:10px;">
+      <p style="margin-top:8px;">Player data will appear here soon.</p>
+    </div>
+  </div>
 </div>
 
-<div class="overlay-screen" id="screen2">
-  <button class="close-btn">×</button>
-  <h2>Screen Two</h2>
-  <p>This is the second in-game screen.</p>
+<!-- 🔹 App 2: Match History ------------------>
+<div class="mini-app-window" id="app-history" style="display: none;">
+  <div class="app-header league-nav">
+    <span class="league-title">League — Match History</span>
+    <button class="close-app">×</button>
+  </div>
+  <div class="app-body league-body">
+    <h2>Recent Matches</h2>
+    <p>Displays the 10 most recent matches, including KDA and outcome.</p>
+    <ul class="match-list">
+      <li>Example Match — Jinx (12/4/8) — Win</li>
+      <li>Example Match — Yasuo (8/9/6) — Loss</li>
+      <li>Example Match — Ahri (5/3/14) — Win</li>
+    </ul>
+  </div>
 </div>
 
+<!-- 🔹 App 3: SignalZ Connect ------------------>
+<div class="mini-app-window" id="app-signalz" style="display: none;">
+  <div class="app-header league-nav">
+    <span class="league-title">SignalZ — Player Connect</span>
+    <button class="close-app">×</button>
+  </div>
+  <div class="app-body league-body">
+    <h2>Swipe to Connect</h2>
+    <p>Find and match with other Summoners. Swipe right to like, left to pass.</p>
+    <div class="signalz-profile">
+      <img src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_0.jpg"
+           alt="Player Profile"
+           style="width:100%;border-radius:10px;margin-top:10px;">
+      <div class="profile-info" style="margin-top:10px;text-align:center;">
+        <strong>Summoner: ArcaneShot</strong>
+        <p>Rank: Gold II — Main: Ezreal</p>
+      </div>
+      <div class="swipe-buttons" style="display:flex;justify-content:center;gap:20px;margin-top:15px;">
+        <button style="background:#ff4444;color:#fff;border:none;border-radius:50%;width:50px;height:50px;font-size:20px;">✖</button>
+        <button style="background:#44ff88;color:#000;border:none;border-radius:50%;width:50px;height:50px;font-size:20px;">❤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+       
+  <!-- 🔹 App 3------------------>
+    <div class="mini-app-window" id="app-signalz" style="display: none;">
+      <h2>SignalZ Hub</h2>
+      <p>Future integration point for live SignalZ feed.</p>
+    </div>
+  </div>
+</div>   
+    
+    
 <div class="overlay-screen" id="screen3">
   <button class="close-btn">×</button>
   <h2>Screen Three</h2>
@@ -872,9 +979,6 @@ function checkHotspotProximity() {
     }
   });
 }
-
-
-
     // 👁️ Cursor visibility
     const showCursor = () => room.style.cursor = 'default';
     const hideCursor = () => room.style.cursor = 'none';
@@ -885,7 +989,7 @@ function checkHotspotProximity() {
   });
 
 
-// ================================================================================
+//===========================================
 // 🔹 Hotspot -> Overlay Control
 // ===============================
 const hotspots = document.querySelectorAll('.hotspot');
@@ -921,9 +1025,10 @@ document.addEventListener('keydown', e => {
   }
 });
 
-//======MiniApps
+    
+//======MiniApps==============================================================
 
-// Handle opening mini apps
+// 🧩 Handle opening mini apps
 document.querySelectorAll('.app-icon').forEach(icon => {
   icon.addEventListener('click', () => {
     const appName = icon.dataset.app;
@@ -932,45 +1037,94 @@ document.querySelectorAll('.app-icon').forEach(icon => {
 });
 
 function openApp(appName) {
-  // close previous app windows
+  // 🧹 Close any currently open app window
   document.querySelectorAll('.app-window').forEach(w => w.remove());
 
   const win = document.createElement('div');
   win.className = 'app-window';
-  win.innerHTML = `
-    <div class="app-header">
-      <span>${appName.toUpperCase()}</span>
-      <button class="close-app">×</button>
-    </div>
-    <div class="app-body">
-      <p>Loading ${appName}...</p>
-    </div>
-  `;
-  document.body.appendChild(win);
 
+  // =========================================================
+  // 🟦 1. League Profile App
+  // =========================================================
+  if (appName === "league") {
+    win.innerHTML = `
+      <div class="app-header league-nav">
+        <span class="league-title">League — Profile</span>
+        <button class="close-app">×</button>
+      </div>
+      <div class="app-body league-body">
+        <h2>Summoner Profile</h2>
+        <p>View your Summoner name, rank, and favorite champions.</p>
+        <div class="league-placeholder">
+          <img src="https://ddragon.leagueoflegends.com/cdn/13.20.1/img/profileicon/29.png"
+               alt="Summoner Icon"
+               style="width:90px;height:90px;border-radius:50%;margin-top:10px;">
+          <p style="margin-top:8px;">Player data will appear here soon.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  // =========================================================
+  // 🟨 2. Match History App
+  // =========================================================
+  else if (appName === "history") {
+    win.innerHTML = `
+      <div class="app-header league-nav">
+        <span class="league-title">League — Match History</span>
+        <button class="close-app">×</button>
+      </div>
+      <div class="app-body league-body">
+        <h2>Recent Matches</h2>
+        <p>Displays your 10 most recent matches, including KDA and outcome.</p>
+        <ul class="match-list">
+          <li>Example Match — Jinx (12/4/8) — Win</li>
+          <li>Example Match — Yasuo (8/9/6) — Loss</li>
+          <li>Example Match — Ahri (5/3/14) — Win</li>
+        </ul>
+      </div>
+    `;
+  }
+
+  // =========================================================
+  // 🟥 3. SignalZ Connect App
+  // =========================================================
+  else if (appName === "signalz") {
+    win.innerHTML = `
+      <div class="app-header league-nav">
+        <span class="league-title">SignalZ — Player Connect</span>
+        <button class="close-app">×</button>
+      </div>
+      <div class="app-body league-body">
+        <h2>Swipe to Connect</h2>
+        <p>Find and match with other Summoners. Swipe right to like, left to pass.</p>
+        <div class="signalz-profile">
+          <img src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_0.jpg"
+               alt="Player Profile"
+               style="width:100%;border-radius:10px;margin-top:10px;">
+          <div class="profile-info" style="margin-top:10px;text-align:center;">
+            <strong>Summoner: ArcaneShot</strong>
+            <p>Rank: Gold II — Main: Ezreal</p>
+          </div>
+          <div class="swipe-buttons" style="display:flex;justify-content:center;gap:20px;margin-top:15px;">
+            <button style="background:#ff4444;color:#fff;border:none;border-radius:50%;width:50px;height:50px;font-size:20px;">✖</button>
+            <button style="background:#44ff88;color:#000;border:none;border-radius:50%;width:50px;height:50px;font-size:20px;">❤</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // =========================================================
+  // 🧩 Append + Close Logic
+  // =========================================================
+  document.querySelector('.mini-pc-screen').appendChild(win);
   win.querySelector('.close-app').addEventListener('click', () => win.remove());
 }
 
-/* 💻 Close all apps when mini PC closes */
-function closeAllApps() {
-  document.querySelectorAll('.app-window').forEach(w => w.remove());
-}
-
-/* Example hook: when the PC screen closes */
-const miniPcScreen = document.querySelector('.mini-pc-screen');
-const closePcBtn = document.createElement('button');
-closePcBtn.className = 'close-pc';
-closePcBtn.textContent = '×';
-miniPcScreen.appendChild(closePcBtn);
-
-closePcBtn.addEventListener('click', () => {
-  miniPcScreen.classList.remove('active');
-  miniPcScreen.style.opacity = '0';
-  closeAllApps(); // 🧹 close all open mini windows automatically
-});
+//======MiniApps End==========================================================
 
 
-//======MiniApps
 
   //======================================================
   </script>
