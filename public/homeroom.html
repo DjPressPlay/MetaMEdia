@@ -648,24 +648,97 @@
   transition: opacity 0.4s ease;
 }
 
-.league-nav {
-  background: linear-gradient(90deg, #0a0a0a 0%, #111 100%);
-  color: #f0b90b;
-  padding: 6px 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 700;
-  border-bottom: 2px solid #f0b90b;
-}
-.league-body {
-  flex: 1;
-  background: #0d0d0f;
-  color: #ddd;
-  padding: 20px;
-}
-.league-title { font-size: 16px; letter-spacing: 1px; }
 
+  /*App 1 */
+
+  .league-profile {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 15px;
+  border-bottom: 1px solid rgba(0,255,255,0.2);
+}
+
+.summoner-icon {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #00ffff;
+  box-shadow: 0 0 15px rgba(0,255,255,0.4);
+}
+.summoner-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.level-tag {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  background: #00ffff;
+  color: #000;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0,255,255,0.7);
+}
+
+.summoner-info h2 {
+  font-size: 20px;
+  margin-bottom: 4px;
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0,255,255,0.6);
+}
+.summoner-info p { margin: 2px 0; }
+
+.favorite-champion {
+  margin-top: 15px;
+  text-align: center;
+}
+.favorite-champion h3 {
+  color: #00ffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.champion-card img {
+  width: 160px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,255,255,0.4);
+}
+.champion-card p {
+  margin-top: 5px;
+  font-weight: 600;
+}
+
+.rank-summary {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+.summary-grid {
+  display: flex;
+  gap: 30px;
+  text-align: center;
+}
+.summary-grid .value {
+  display: block;
+  font-size: 18px;
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0,255,255,0.6);
+}
+.summary-grid .label {
+  font-size: 10px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+  
+  
   
 </style>
 </head>
@@ -745,21 +818,53 @@
 </div>
 
 
-   <!-- 🔹 App 1: League Profile ------------------>
+  <!-- 🔹 App 1: League — Summoner Profile ------------------>
 <div class="mini-app-window" id="app-league" style="display: none;">
   <div class="app-header league-nav">
-    <span class="league-title">League — Profile</span>
+    <span class="league-title">League — Summoner Profile</span>
     <button class="close-app">×</button>
   </div>
+
   <div class="app-body league-body">
-    <h2>Summoner Profile</h2>
-    <p>View your Summoner name, rank, and favorite champions here.</p>
-    <div class="league-placeholder">
-      <img src="https://ddragon.leagueoflegends.com/cdn/13.20.1/img/profileicon/29.png"
-           alt="Summoner Icon"
-           style="width:90px;height:90px;border-radius:50%;margin-top:10px;">
-      <p style="margin-top:8px;">Player data will appear here soon.</p>
-    </div>
+    <!-- 🌌 Profile Overview -->
+    <section class="league-profile">
+      <div class="summoner-icon">
+        <img
+          id="summoner-icon"
+          src="https://ddragon.leagueoflegends.com/cdn/13.20.1/img/profileicon/29.png"
+          alt="Summoner Icon"
+        />
+        <div class="level-tag" id="summoner-level">LVL 99</div>
+      </div>
+
+      <div class="summoner-info">
+        <h2 id="summoner-name">Summoner Name</h2>
+        <p id="rank-tier">Rank — Gold II</p>
+        <p id="lp-info">73 LP · W: 21 / L: 14</p>
+      </div>
+    </section>
+
+    <!-- 🧩 Favorite Champion -->
+    <section class="favorite-champion">
+      <h3>Favorite Champion</h3>
+      <div class="champion-card">
+        <img
+          id="champion-icon"
+          src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_0.jpg"
+          alt="Champion Splash"
+        />
+        <p id="champion-name">Ezreal</p>
+      </div>
+    </section>
+
+    <!-- 📊 Summary Stats -->
+    <section class="rank-summary">
+      <div class="summary-grid">
+        <div><span class="value" id="winrate">60%</span><span class="label">Win Rate</span></div>
+        <div><span class="value" id="matches">35</span><span class="label">Matches</span></div>
+        <div><span class="value" id="tier">Gold II</span><span class="label">Tier</span></div>
+      </div>
+    </section>
   </div>
 </div>
 
@@ -1114,6 +1219,60 @@ function openApp(appName) {
       </div>
     `;
   }
+// ========== LEAGUE APP LOGIC ==========
+
+// replace with your Riot API key (server-side in production)
+const RIOT_API_KEY = "YOUR_API_KEY_HERE";
+
+// example default name
+const defaultSummoner = "Faker";
+
+// open League app with real data
+async function loadLeagueProfile(summonerName = defaultSummoner) {
+  try {
+    // 1️⃣ fetch summoner basic info
+    const summonerRes = await fetch(
+      `https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${encodeURIComponent(summonerName)}?api_key=${RIOT_API_KEY}`
+    );
+    const summoner = await summonerRes.json();
+
+    // update base profile fields
+    document.getElementById("summoner-name").textContent = summoner.name;
+    document.getElementById("summoner-icon").src =
+      `https://ddragon.leagueoflegends.com/cdn/13.20.1/img/profileicon/${summoner.profileIconId}.png`;
+    document.getElementById("summoner-level").textContent = `LVL ${summoner.summonerLevel}`;
+
+    // 2️⃣ fetch ranked info
+    const leagueRes = await fetch(
+      `https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/${summoner.id}?api_key=${RIOT_API_KEY}`
+    );
+    const ranks = await leagueRes.json();
+
+    const solo = ranks.find(r => r.queueType === "RANKED_SOLO_5x5");
+    if (solo) {
+      document.getElementById("rank-tier").textContent = `${solo.tier} ${solo.rank}`;
+      document.getElementById("lp-info").textContent = `${solo.leaguePoints} LP · W: ${solo.wins} / L: ${solo.losses}`;
+      const total = solo.wins + solo.losses;
+      const winrate = total ? Math.round((solo.wins / total) * 100) : 0;
+      document.getElementById("winrate").textContent = `${winrate}%`;
+      document.getElementById("tier").textContent = `${solo.tier} ${solo.rank}`;
+      document.getElementById("matches").textContent = total;
+    } else {
+      document.getElementById("rank-tier").textContent = "Unranked";
+      document.getElementById("lp-info").textContent = "";
+    }
+  } catch (err) {
+    console.error("Error loading League profile:", err);
+  }
+}
+
+// optional: auto-load when League app opens
+document.addEventListener("click", e => {
+  if (e.target.closest(".app-icon[data-app='league']")) {
+    // wait a tick for DOM creation, then load data
+    setTimeout(() => loadLeagueProfile(defaultSummoner), 600);
+  }
+});
 
   // =========================================================
   // 🧩 Append + Close Logic
