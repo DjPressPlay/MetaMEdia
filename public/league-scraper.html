@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>League Player Lookup</title>
 <style>
 :root {
@@ -46,6 +46,7 @@ button {
   transition: 0.2s;
 }
 button:hover { background: #0ff; }
+
 #player-container {
   display: none;
   flex-direction: column;
@@ -102,7 +103,7 @@ button:hover { background: #0ff; }
 </style>
 </head>
 <body>
-<h3>League Player Lookup</h3>
+<h3>League of Graphs – Player Search</h3>
 
 <div class="search-box">
   <input id="summoner" placeholder="Enter summoner name (e.g. cant type-1998)"
@@ -128,7 +129,6 @@ button:hover { background: #0ff; }
 <div id="status"></div>
 
 <script>
-// 🔹 fetch player page (LeagueOfGraphs)
 async function fetchProfile(name) {
   const url = `https://www.leagueofgraphs.com/summoner/na/${encodeURIComponent(name)}`;
   const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
@@ -137,13 +137,6 @@ async function fetchProfile(name) {
   const html = await res.text();
   if (!html.includes("<html")) throw new Error("Invalid HTML response");
   return html;
-}
-
-// 🔹 fetch PUUID from your Netlify function
-async function fetchPUUID(name) {
-  const res = await fetch(`/.netlify/functions/getPUUID?name=${encodeURIComponent(name)}`);
-  if (!res.ok) throw new Error("Failed to fetch PUUID");
-  return await res.json();
 }
 
 async function runScrape() {
@@ -163,15 +156,10 @@ async function runScrape() {
   container.style.display = "none";
 
   try {
-    // 🧠 step 1: get PUUID from Netlify scraper
-    const puuidData = await fetchPUUID(name);
-    console.log("PUUID:", puuidData.puuid);
-
-    // 🧠 step 2: scrape LeagueOfGraphs for visible stats
     const html = await fetchProfile(name);
     const doc = new DOMParser().parseFromString(html, "text/html");
 
-    // banner
+    // Parse banner background
     let banner = "";
     const bannerDiv = doc.querySelector(".bannerImage");
     if (bannerDiv) {
@@ -180,7 +168,7 @@ async function runScrape() {
       if (match) banner = match[1];
     }
 
-    // icon
+    // Parse icon image (profile icon)
     let icon = "";
     const iconEl = doc.querySelector(".bannerIcon img") || doc.querySelector("img.profileicon");
     if (iconEl) icon = iconEl.src;
@@ -195,11 +183,11 @@ async function runScrape() {
       .slice(0,3)
       .map(el => el.textContent.trim());
 
-    // update UI
+    // Update UI
     document.getElementById("player-banner").style.backgroundImage = banner ? `url(${banner})` : "none";
     document.getElementById("player-img").src = icon || banner || "https://static.bigbrain.gg/assets/lol/riot_static/15.20.1/img/profileicon/1.png";
-    document.getElementById("player-name").innerHTML = `<b>Summoner:</b> ${puuidData.name}<br><b>PUUID:</b> ${puuidData.puuid}`;
-    document.getElementById("player-level").innerHTML = `<b>Level:</b> ${puuidData.level}`;
+    document.getElementById("player-name").innerHTML = `<b>Summoner:</b> ${name}`;
+    document.getElementById("player-level").innerHTML = `<b>Level:</b> ${level}`;
     document.getElementById("player-rank").innerHTML = `<b>Rank:</b> ${rankTier}`;
     document.getElementById("player-lp").innerHTML = `<b>LP:</b> ${lp}`;
     document.getElementById("player-wins").innerHTML = `<b>Wins:</b> ${wins}`;
