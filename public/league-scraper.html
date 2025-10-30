@@ -1,126 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>League Player Lookup</title>
 <style>
 :root {
-  --neon: #0f0;
-  --bg: #0a0a0a;
-  --panel: #111;
+  --neon:#0f0;--bg:#0a0a0a;--panel:#111;
 }
-body {
-  background: var(--bg);
-  color: var(--neon);
-  font-family: 'Orbitron', monospace;
-  padding: 40px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-h3 { margin-bottom: 20px; }
-.search-box {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 25px;
-}
-input {
-  width: 280px;
-  padding: 10px;
-  background: var(--panel);
-  color: var(--neon);
-  border: 1px solid var(--neon);
-  font-size: 15px;
-  border-radius: 6px;
-}
-button {
-  padding: 10px 20px;
-  background: var(--neon);
-  color: #000;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  border-radius: 6px;
-  transition: 0.2s;
-}
-button:hover { background: #0ff; }
-
-#player-container {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  background: var(--panel);
-  border: 2px solid var(--neon);
-  border-radius: 12px;
-  padding: 25px;
-  max-width: 400px;
-  text-align: center;
-  box-shadow: 0 0 20px #0f08;
-}
-.player-img {
-  width: 120px; height: 120px;
-  border-radius: 50%;
-  border: 2px solid var(--neon);
-  object-fit: cover;
-  margin-bottom: 15px;
-}
-.stats {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  width: 100%;
-}
-.stat {
-  background: #0a0a0a;
-  border: 1px solid var(--neon);
-  border-radius: 6px;
-  padding: 8px 10px;
-  width: 100%;
-  text-align: left;
-}
-.error { color:#f33; margin-top:20px; }
-.loading { color:#ff0; margin-top:20px; }
+body{background:var(--bg);color:var(--neon);font-family:'Orbitron',monospace;
+  padding:40px 20px;display:flex;flex-direction:column;align-items:center;}
+h3{margin-bottom:20px;}
+.search-box{display:flex;justify-content:center;gap:10px;margin-bottom:25px;}
+input{width:280px;padding:10px;background:var(--panel);color:var(--neon);
+  border:1px solid var(--neon);font-size:15px;border-radius:6px;}
+button{padding:10px 20px;background:var(--neon);color:#000;border:none;
+  cursor:pointer;font-weight:bold;border-radius:6px;transition:0.2s;}
+button:hover{background:#0ff;}
+#player-container{display:none;flex-direction:column;align-items:center;
+  background:var(--panel);border:2px solid var(--neon);border-radius:12px;
+  padding:25px;max-width:400px;text-align:center;box-shadow:0 0 20px #0f08;
+  position:relative;overflow:hidden;}
+#player-banner{position:absolute;top:0;left:0;right:0;height:140px;
+  background-size:cover;background-position:center;filter:brightness(0.4);}
+.player-img{width:120px;height:120px;border-radius:50%;border:2px solid var(--neon);
+  object-fit:cover;margin-top:80px;background:#000;z-index:2;}
+.stats{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;
+  margin-top:15px;}
+.stat{background:#0a0a0a;border:1px solid var(--neon);border-radius:6px;
+  padding:8px 10px;width:100%;text-align:left;z-index:2;}
+.error{color:#f33;margin-top:20px;}
+.loading{color:#ff0;margin-top:20px;}
 </style>
 </head>
 <body>
 <h3>League of Graphs – Player Search</h3>
 
 <div class="search-box">
-  <input id="summoner" placeholder="Enter summoner name (e.g. cant type-1998)"
+  <input id="summoner" placeholder="Enter summoner name (e.g. Comeback pure)"
          onkeypress="if(event.key==='Enter')runScrape()">
   <button onclick="runScrape()">Search</button>
 </div>
 
 <div id="player-container">
-  <img id="player-img" class="player-img" src="" alt="Summoner Icon">
+  <div id="player-banner"></div>
+  <img id="player-img" class="player-img" src="" alt="Summoner Icon" />
   <div id="player-name" class="stat"></div>
   <div class="stats">
     <div id="player-level" class="stat"></div>
     <div id="player-rank" class="stat"></div>
-    <div id="player-lp" class="stat"></div>
-    <div id="player-wins" class="stat"></div>
-    <div id="player-losses" class="stat"></div>
-    <div id="player-ratio" class="stat"></div>
-    <div id="player-champs" class="stat"></div>
   </div>
 </div>
 
-<div id="status"></div>
+<div id="status" class="loading"></div>
 
 <script>
-async function fetchProfile(name) {
-  const url = `https://www.leagueofgraphs.com/summoner/na/${encodeURIComponent(name)}`;
-  const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-  const res = await fetch(proxied);
-  if (!res.ok) throw new Error("Failed to load player page");
-  const html = await res.text();
-  if (!html.includes("<html")) throw new Error("Invalid HTML response");
-  return html;
-}
-
 async function runScrape() {
   const name = document.getElementById("summoner").value.trim();
   const status = document.getElementById("status");
@@ -138,38 +72,17 @@ async function runScrape() {
   container.style.display = "none";
 
   try {
-    const html = await fetchProfile(name);
-    const doc = new DOMParser().parseFromString(html, "text/html");
+    // Call the Netlify Function
+    const res = await fetch(`/.netlify/functions/league-scrape?name=${encodeURIComponent(name)}`);
+    if (!res.ok) throw new Error("Scraper failed");
+    const data = await res.json();
 
-    // Parse background image URL
-    let img = "";
-    const bannerDiv = doc.querySelector(".bannerImage");
-    if (bannerDiv) {
-      const style = bannerDiv.getAttribute("style") || "";
-      const match = style.match(/url\(['"]?(.*?)['"]?\)/);
-      if (match) img = match[1];
-    }
-
-    const level = doc.querySelector(".bannerSubtitle")?.textContent.replace("Level","").trim() || "Unknown";
-    const rankTier = doc.querySelector(".leagueTier")?.textContent.trim() || "Unranked";
-    const lp = doc.querySelector(".leaguePoints")?.textContent.trim() || "0 LP";
-    const wins = doc.querySelector(".wins")?.textContent.replace("Wins:","").trim() || "0";
-    const losses = doc.querySelector(".losses")?.textContent.replace("Losses:","").trim() || "0";
-    const ratio = doc.querySelector(".ratio")?.textContent.trim() || "";
-    const champs = Array.from(doc.querySelectorAll(".summoner-champion-name"))
-      .slice(0,3)
-      .map(el => el.textContent.trim());
-
-    // Update UI
-    document.getElementById("player-img").src = img || "https://static.bigbrain.gg/assets/lol/riot_static/15.20.1/img/profileicon/1.png";
-    document.getElementById("player-name").innerHTML = `<b>Summoner:</b> ${name}`;
-    document.getElementById("player-level").innerHTML = `<b>Level:</b> ${level}`;
-    document.getElementById("player-rank").innerHTML = `<b>Rank:</b> ${rankTier}`;
-    document.getElementById("player-lp").innerHTML = `<b>LP:</b> ${lp}`;
-    document.getElementById("player-wins").innerHTML = `<b>Wins:</b> ${wins}`;
-    document.getElementById("player-losses").innerHTML = `<b>Losses:</b> ${losses}`;
-    document.getElementById("player-ratio").innerHTML = ratio ? `<b>Win Rate:</b> ${ratio}` : "";
-    document.getElementById("player-champs").innerHTML = champs.length ? `<b>Top Champs:</b> ${champs.join(", ")}` : "";
+    // Apply real data from the function
+    document.getElementById("player-banner").style.backgroundImage = `url(${data.banner})`;
+    document.getElementById("player-img").src = data.icon;
+    document.getElementById("player-name").innerHTML = `<b>Summoner:</b> ${data.name}`;
+    document.getElementById("player-level").innerHTML = `<b>Level:</b> ${data.level}`;
+    document.getElementById("player-rank").innerHTML = `<b>Rank:</b> ${data.rank}`;
 
     container.style.display = "flex";
     status.textContent = "";
@@ -178,7 +91,6 @@ async function runScrape() {
     console.error(err);
     status.textContent = "Error: " + err.message;
     status.className = "error";
-    container.style.display = "none";
   }
 }
 </script>
