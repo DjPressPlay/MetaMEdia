@@ -15,7 +15,6 @@ body {
   align-items: center;
   height: 100vh;
 }
-
 .selector-wrapper {
   border: 3px solid #00ffff;
   border-radius: 12px;
@@ -28,7 +27,6 @@ body {
   padding: 24px;
   width: 400px;
 }
-
 .selector-header {
   font-size: 22px;
   font-weight: bold;
@@ -38,7 +36,6 @@ body {
   margin-bottom: 18px;
   text-shadow: 0 0 10px #00ffff;
 }
-
 .search-row {
   display: flex;
   gap: 10px;
@@ -46,7 +43,6 @@ body {
   justify-content: center;
   margin-bottom: 10px;
 }
-
 .search-row input, .search-row select {
   background: #111;
   border: 1px solid #00ffff;
@@ -55,83 +51,37 @@ body {
   padding: 8px 12px;
   font-size: 14px;
 }
-
-.search-row select {
-  width: 100px;
-  cursor: pointer;
-}
-
+.search-row select { width: 100px; cursor: pointer; }
 .search-row button {
-  background: #00ffff;
-  color: #000;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 14px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
+  background: #00ffff; color: #000;
+  border: none; border-radius: 6px;
+  padding: 8px 14px; font-weight: bold;
+  cursor: pointer; transition: 0.2s;
 }
 .search-row button:hover {
   transform: scale(1.05);
   box-shadow: 0 0 10px #00ffff;
 }
-
 .profile-display {
-  width: 200px;
-  height: 200px;
+  width: 200px; height: 200px;
   border: 2px solid #00ffff;
   border-radius: 12px;
   background: #111;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  margin: 12px 0;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; margin: 12px 0;
 }
 .profile-display img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 100%; height: 100%; object-fit: cover;
 }
-
-.summoner-name {
-  font-size: 18px;
-  margin-top: 10px;
-  text-shadow: 0 0 8px #00ffff;
-}
-
-.summoner-level {
-  font-size: 13px;
-  color: #aaa;
-  margin-top: 4px;
-}
-
-.rank-display {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #00ffff;
-  text-shadow: 0 0 8px rgba(0,255,255,0.7);
-}
-
-.note {
-  font-size: 12px;
-  color: #888;
-  margin-top: 10px;
-  text-align: center;
-}
-
-.action-row {
-  margin-top: 20px;
-  display: flex;
-  gap: 12px;
-}
+.summoner-name { font-size: 18px; margin-top: 10px; text-shadow: 0 0 8px #00ffff; }
+.summoner-level { font-size: 13px; color: #aaa; margin-top: 4px; }
+.rank-display { margin-top: 10px; font-size: 14px; color: #00ffff; text-shadow: 0 0 8px rgba(0,255,255,0.7); }
+.note { font-size: 12px; color: #888; margin-top: 10px; text-align: center; }
+.action-row { margin-top: 20px; display: flex; gap: 12px; }
 .action-row button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
+  padding: 10px 20px; border: none;
+  border-radius: 8px; font-weight: bold;
+  cursor: pointer; transition: 0.2s;
 }
 .save-btn { background: #00ffff; color: #000; }
 .home-btn { background: #111; border: 1px solid #00ffff; color: #00ffff; }
@@ -145,21 +95,11 @@ body {
 
   <div class="search-row">
     <select id="region-select">
-      <option value="BR1">BR1</option>
-      <option value="EUN1">EUN1</option>
-      <option value="EUW1" selected>EUW1</option>
-      <option value="JP1">JP1</option>
-      <option value="KR">KR</option>
-      <option value="LA1">LA1</option>
-      <option value="LA2">LA2</option>
-      <option value="ME1">ME1</option>
-      <option value="NA1">NA1</option>
-      <option value="OC1">OC1</option>
-      <option value="RU">RU</option>
-      <option value="SG2">SG2</option>
-      <option value="TR1">TR1</option>
-      <option value="TW2">TW2</option>
-      <option value="VN2">VN2</option>
+      <option value="BR1">BR1</option><option value="EUN1">EUN1</option><option value="EUW1" selected>EUW1</option>
+      <option value="JP1">JP1</option><option value="KR">KR</option><option value="LA1">LA1</option>
+      <option value="LA2">LA2</option><option value="ME1">ME1</option><option value="NA1">NA1</option>
+      <option value="OC1">OC1</option><option value="RU">RU</option><option value="SG2">SG2</option>
+      <option value="TR1">TR1</option><option value="TW2">TW2</option><option value="VN2">VN2</option>
     </select>
     <input type="text" id="summoner-input" placeholder="Enter Summoner Name...">
     <button id="search-btn">Search</button>
@@ -183,62 +123,74 @@ body {
 <script>
 let currentSummoner = null;
 
-// 🔹 Fetch Summoner and Rank Info
+// 🔹 normalize and fetch name → puuid → rank
 async function fetchSummonerProfile(name, region = "NA1") {
   const note = document.getElementById("status-note");
   note.textContent = "Loading summoner data...";
-  try {
-    const res = await fetch(`/api/riot-api?endpoint=/lol/summoner/v4/summoners/by-name/${encodeURIComponent(name)}&region=${region}`);
-    const summoner = await res.json();
-    if (!summoner.id) throw new Error("Summoner not found");
+  const cleanName = name.trim().replace(/#/g, "").replace(/\s+/g, " ");
 
+  try {
+    // STEP 1: get summoner info by name
+    const res = await fetch(`/api/riot-api?endpoint=/lol/summoner/v4/summoners/by-name/${encodeURIComponent(cleanName)}&region=${region}`);
+    if (!res.ok) throw new Error(`Name not found`);
+    const summoner = await res.json();
+
+    if (!summoner.puuid) throw new Error("No PUUID returned");
+
+    // STEP 2: get ranked info
+    const rankedRes = await fetch(`/api/riot-api?endpoint=/lol/league/v4/entries/by-summoner/${summoner.id}&region=${region}`);
+    const ranked = rankedRes.ok ? await rankedRes.json() : [];
+    const solo = ranked.find(r => r.queueType === "RANKED_SOLO_5x5");
+
+    // display
     document.getElementById("profile-icon").src =
       `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/profileicon/${summoner.profileIconId}.png`;
     document.getElementById("summoner-name").textContent = summoner.name;
     document.getElementById("summoner-level").textContent = `Level ${summoner.summonerLevel}`;
-
-    // Fetch ranked info
-    const rankedRes = await fetch(`/api/riot-api?endpoint=/lol/league/v4/entries/by-summoner/${summoner.id}&region=${region}`);
-    const ranked = await rankedRes.json();
-    const solo = ranked.find(r => r.queueType === "RANKED_SOLO_5x5");
     document.getElementById("summoner-rank").textContent = solo
       ? `${solo.tier} ${solo.rank} · ${solo.leaguePoints} LP`
       : "Unranked";
 
-    currentSummoner = { ...summoner, rank: solo || null, region };
-    note.textContent = "✅ Preview loaded — save or enter home.";
+    currentSummoner = {
+      name: summoner.name,
+      id: summoner.id,
+      puuid: summoner.puuid,
+      level: summoner.summonerLevel,
+      profileIconId: summoner.profileIconId,
+      region,
+      rank: solo || null
+    };
+
+    note.textContent = "✅ Profile loaded — save or enter home.";
   } catch (err) {
-    document.getElementById("status-note").textContent = "❌ Summoner not found.";
     console.error(err);
+    note.textContent = "❌ Summoner not found or API error.";
   }
 }
 
-// 🔹 Search button
 document.getElementById("search-btn").addEventListener("click", () => {
   const name = document.getElementById("summoner-input").value.trim();
   const region = document.getElementById("region-select").value;
   if (name) fetchSummonerProfile(name, region);
 });
 
-// 🔹 Save button (commits to localStorage)
 document.getElementById("save-profile").addEventListener("click", () => {
   if (currentSummoner) {
     localStorage.setItem("selectedSummoner", JSON.stringify(currentSummoner));
     document.getElementById("status-note").textContent = "💾 Profile saved locally!";
   } else {
-    document.getElementById("status-note").textContent = "⚠️ No profile loaded yet.";
+    document.getElementById("status-note").textContent = "⚠️ No profile loaded.";
   }
 });
 
-// 🔹 Enter Home (skip save)
 document.getElementById("goto-home").addEventListener("click", () => {
-  if (!currentSummoner && !localStorage.getItem("selectedSummoner")) {
-    document.getElementById("status-note").textContent = "⚠️ You must search or load a profile first.";
+  const saved = localStorage.getItem("selectedSummoner");
+  if (!saved && !currentSummoner) {
+    document.getElementById("status-note").textContent = "⚠️ Load a profile first.";
     return;
   }
   window.location.href = "homeroom.html";
 });
 </script>
-
 </body>
 </html>
