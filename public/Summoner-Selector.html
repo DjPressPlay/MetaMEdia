@@ -124,62 +124,59 @@ body {
 let currentSummoner = null;
 let apiOnline = false;
 
-// 🔹 Step 1: Check Riot API Status before anything else
+// 🔹 Step 1: check API status before allowing lookups
 async function checkRiotStatus(region = "NA1") {
   const note = document.getElementById("status-note");
-  note.textContent = "Checking Riot API status...";
+  note.textContent = "Checking Riot API...";
   try {
     const res = await fetch(`/api/riot-api?endpoint=/lol/status/v4/platform-data&region=${region}`);
-    if (!res.ok) throw new Error("Bad status response");
     const data = await res.json();
+    if (!res.ok) throw new Error("API unavailable");
 
-    if ((data.maintenances?.length || 0) > 0 || (data.incidents?.length || 0) > 0) {
-      note.textContent = `⚠️ ${data.name} API may be under maintenance.`;
-      apiOnline = true; // still allow usage
+    if (data.maintenances?.length || data.incidents?.length) {
+      note.textContent = `⚠️ ${data.name} under maintenance.`;
     } else {
       note.textContent = `✅ ${data.name} API Online.`;
-      apiOnline = true;
     }
+    apiOnline = true;
   } catch (err) {
     console.error("API status error:", err);
-    note.textContent = "❌ Riot API unreachable — please try again later.";
-    apiOnline = false;
+    note.textContent = "❌ Riot API not responding.";
   }
 }
 
-// 🔹 Step 2: Normalize + Fetch Summoner → Rank
+// 🔹 Step 2: Summoner search (name → puuid → rank info)
 async function fetchSummonerProfile(name, region = "NA1") {
   const note = document.getElementById("status-note");
   if (!apiOnline) {
-    note.textContent = "⚠️ API offline or not verified yet.";
+    note.textContent = "⚠️ Riot API offline. Try again later.";
     return;
   }
 
-  note.textContent = "Loading summoner data...";
   const cleanName = name.trim().replace(/#/g, "").replace(/\s+/g, " ");
+  note.textContent = `🔍 Searching for ${cleanName}...`;
 
   try {
-    // 1️⃣ Summoner Info
+    // 1️⃣ Get summoner info (returns puuid)
     const res = await fetch(`/api/riot-api?endpoint=/lol/summoner/v4/summoners/by-name/${encodeURIComponent(cleanName)}&region=${region}`);
-    if (!res.ok) throw new Error("Summoner not found");
+    if (!res.ok) throw new Error("Summoner not found.");
     const summoner = await res.json();
-    if (!summoner.puuid) throw new Error("No PUUID returned");
+    if (!summoner.puuid) throw new Error("No puuid returned.");
 
-    // 2️⃣ Ranked Info
+    // 2️⃣ Get ranked info (using summoner.id)
     const rankedRes = await fetch(`/api/riot-api?endpoint=/lol/league/v4/entries/by-summoner/${summoner.id}&region=${region}`);
     const ranked = rankedRes.ok ? await rankedRes.json() : [];
     const solo = ranked.find(r => r.queueType === "RANKED_SOLO_5x5");
 
-    // 3️⃣ Display
+    // 3️⃣ Display profile
     document.getElementById("profile-icon").src =
       `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/profileicon/${summoner.profileIconId}.png`;
     document.getElementById("summoner-name").textContent = summoner.name;
     document.getElementById("summoner-level").textContent = `Level ${summoner.summonerLevel}`;
-    document.getElementById("summoner-rank").textContent = solo
-      ? `${solo.tier} ${solo.rank} · ${solo.leaguePoints} LP`
-      : "Unranked";
+    document.getElementById("summoner-rank").textContent =
+      solo ? `${solo.tier} ${solo.rank} · ${solo.leaguePoints} LP` : "Unranked";
 
-    // 4️⃣ Cache
+    // 4️⃣ Store locally for later apps (history, replays)
     currentSummoner = {
       name: summoner.name,
       id: summoner.id,
@@ -187,17 +184,19 @@ async function fetchSummonerProfile(name, region = "NA1") {
       level: summoner.summonerLevel,
       profileIconId: summoner.profileIconId,
       region,
-      rank: solo || null
+      rank: solo || null,
     };
+    localStorage.setItem("selectedSummoner", JSON.stringify(currentSummoner));
 
-    note.textContent = "✅ Profile loaded — save or enter home.";
+    // 5️⃣ Optional: show puuid visibly (for debug)
+    note.innerHTML = `✅ Profile loaded. <br>PUUID: <span style="color:#00ffff;font-size:11px;">${summoner.puuid}</span>`;
   } catch (err) {
     console.error(err);
-    note.textContent = "❌ Summoner not found or API error.";
+    note.textContent = "❌ Summoner not found or invalid name.";
   }
 }
 
-// 🔹 Step 3: Events
+// 🔹 Step 3: handle user actions
 document.getElementById("search-btn").addEventListener("click", () => {
   const name = document.getElementById("summoner-input").value.trim();
   const region = document.getElementById("region-select").value;
@@ -216,18 +215,18 @@ document.getElementById("save-profile").addEventListener("click", () => {
 document.getElementById("goto-home").addEventListener("click", () => {
   const saved = localStorage.getItem("selectedSummoner");
   if (!saved && !currentSummoner) {
-    document.getElementById("status-note").textContent = "⚠️ Load a profile first.";
+    document.getElementById("status-note").textContent = "⚠️ Load or save a profile first.";
     return;
   }
   window.location.href = "homeroom.html";
 });
 
-// 🔹 Auto-run status check when page loads
+// 🔹 Step 4: on load — check API status automatically
 window.addEventListener("load", () => {
-  const region = document.getElementById("region-select")?.value || "NA1";
-  checkRiotStatus(region);
+  checkRiotStatus("NA1");
 });
 </script>
+
 
 </body>
 </html>
