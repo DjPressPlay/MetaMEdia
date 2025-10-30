@@ -145,8 +145,8 @@ button:hover { background: #0ff; }
 
 <div id="player-container">
   <div id="player-banner"></div>
-  <!-- Updated local image path -->
-  <img id="player-img" class="player-img" src="src/METAMEDIA/lol.jpeg" alt="League of Legends Image">
+  <!-- ✅ Correct static image path -->
+  <img id="player-img" class="player-img" src="/METAMEDIA/lol.jpeg" alt="League of Legends Image">
   <div id="player-name" class="stat"></div>
   <div class="stats">
     <div id="player-level" class="stat"></div>
@@ -208,33 +208,4 @@ async function runScrape() {
     const ratio = doc.querySelector(".ratio")?.textContent.trim() || "";
     const champs = Array.from(doc.querySelectorAll(".summoner-champion-name"))
       .slice(0,3)
-      .map(el => el.textContent.trim());
-
-    document.getElementById("player-banner").style.backgroundImage =
-      banner ? `url(${banner})` : "none";
-
-    // Always use local image
-    document.getElementById("player-img").src = "src/METAMEDIA/lol.jpeg";
-
-    document.getElementById("player-name").innerHTML = `<b>Summoner:</b> ${name}`;
-    document.getElementById("player-level").innerHTML = `<b>Level:</b> ${level}`;
-    document.getElementById("player-rank").innerHTML = `<b>Rank:</b> ${rankTier}`;
-    document.getElementById("player-lp").innerHTML = `<b>LP:</b> ${lp}`;
-    document.getElementById("player-wins").innerHTML = `<b>Wins:</b> ${wins}`;
-    document.getElementById("player-losses").innerHTML = `<b>Losses:</b> ${losses}`;
-    document.getElementById("player-ratio").innerHTML = ratio ? `<b>Win Rate:</b> ${ratio}` : "";
-    document.getElementById("player-champs").innerHTML = champs.length ? `<b>Top Champs:</b> ${champs.join(", ")}` : "";
-
-    container.style.display = "flex";
-    status.textContent = "";
-    status.className = "";
-  } catch (err) {
-    console.error(err);
-    status.textContent = "Error: " + err.message;
-    status.className = "error";
-    container.style.display = "none";
-  }
-}
-</script>
-</body>
-</html>
+      .map(e
