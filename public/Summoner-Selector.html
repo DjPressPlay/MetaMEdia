@@ -44,17 +44,21 @@ body {
   gap: 10px;
   width: 100%;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
-.search-row input {
-  flex: 1;
+.search-row input, .search-row select {
   background: #111;
   border: 1px solid #00ffff;
   border-radius: 6px;
   color: #fff;
   padding: 8px 12px;
   font-size: 14px;
+}
+
+.search-row select {
+  width: 100px;
+  cursor: pointer;
 }
 
 .search-row button {
@@ -82,7 +86,7 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  margin-bottom: 12px;
+  margin: 12px 0;
 }
 .profile-display img {
   width: 100%;
@@ -140,6 +144,23 @@ body {
   <div class="selector-header">Summoner Finder</div>
 
   <div class="search-row">
+    <select id="region-select">
+      <option value="BR1">BR1</option>
+      <option value="EUN1">EUN1</option>
+      <option value="EUW1" selected>EUW1</option>
+      <option value="JP1">JP1</option>
+      <option value="KR">KR</option>
+      <option value="LA1">LA1</option>
+      <option value="LA2">LA2</option>
+      <option value="ME1">ME1</option>
+      <option value="NA1">NA1</option>
+      <option value="OC1">OC1</option>
+      <option value="RU">RU</option>
+      <option value="SG2">SG2</option>
+      <option value="TR1">TR1</option>
+      <option value="TW2">TW2</option>
+      <option value="VN2">VN2</option>
+    </select>
     <input type="text" id="summoner-input" placeholder="Enter Summoner Name...">
     <button id="search-btn">Search</button>
   </div>
@@ -163,7 +184,7 @@ body {
 let currentSummoner = null;
 
 // 🔹 Fetch Summoner and Rank Info
-async function fetchSummonerProfile(name, region = "na1") {
+async function fetchSummonerProfile(name, region = "NA1") {
   const note = document.getElementById("status-note");
   note.textContent = "Loading summoner data...";
   try {
@@ -184,8 +205,8 @@ async function fetchSummonerProfile(name, region = "na1") {
       ? `${solo.tier} ${solo.rank} · ${solo.leaguePoints} LP`
       : "Unranked";
 
-    currentSummoner = { ...summoner, rank: solo || null };
-    note.textContent = "Preview loaded — save or enter home.";
+    currentSummoner = { ...summoner, rank: solo || null, region };
+    note.textContent = "✅ Preview loaded — save or enter home.";
   } catch (err) {
     document.getElementById("status-note").textContent = "❌ Summoner not found.";
     console.error(err);
@@ -195,8 +216,29 @@ async function fetchSummonerProfile(name, region = "na1") {
 // 🔹 Search button
 document.getElementById("search-btn").addEventListener("click", () => {
   const name = document.getElementById("summoner-input").value.trim();
-  if (name) fetchSummonerProfile(name);
+  const region = document.getElementById("region-select").value;
+  if (name) fetchSummonerProfile(name, region);
 });
 
 // 🔹 Save button (commits to localStorage)
-document.getElementById("save-profile
+document.getElementById("save-profile").addEventListener("click", () => {
+  if (currentSummoner) {
+    localStorage.setItem("selectedSummoner", JSON.stringify(currentSummoner));
+    document.getElementById("status-note").textContent = "💾 Profile saved locally!";
+  } else {
+    document.getElementById("status-note").textContent = "⚠️ No profile loaded yet.";
+  }
+});
+
+// 🔹 Enter Home (skip save)
+document.getElementById("goto-home").addEventListener("click", () => {
+  if (!currentSummoner && !localStorage.getItem("selectedSummoner")) {
+    document.getElementById("status-note").textContent = "⚠️ You must search or load a profile first.";
+    return;
+  }
+  window.location.href = "homeroom.html";
+});
+</script>
+
+</body>
+</html>
