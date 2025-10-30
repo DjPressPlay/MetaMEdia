@@ -6,34 +6,47 @@
 <title>League Player Lookup</title>
 <style>
 :root {
-  --neon: #0f0;
-  --bg: #0a0a0a;
-  --panel: #111;
+  --neon: #00ffc3;
+  --neon-accent: #3fffbf;
+  --bg: #040404;
+  --panel: #0b0f10;
+  --border: #00ffc3aa;
+  --shadow: 0 0 20px #00ffc366, inset 0 0 20px #00ffc311;
+  --font: 'Orbitron', monospace;
 }
 body {
-  background: var(--bg);
+  background: radial-gradient(circle at center, #000 60%, #020202);
   color: var(--neon);
-  font-family: 'Orbitron', monospace;
-  padding: 40px 20px;
+  font-family: var(--font);
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: 40px 20px;
+  overflow-x: hidden;
 }
-h3 { margin-bottom: 20px; }
+h3 {
+  font-size: 22px;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px var(--neon);
+  margin-bottom: 25px;
+}
 .search-box {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 25px;
+  margin-bottom: 35px;
 }
 input {
   width: 280px;
   padding: 10px;
   background: var(--panel);
   color: var(--neon);
-  border: 1px solid var(--neon);
+  border: 1px solid var(--border);
   font-size: 15px;
   border-radius: 6px;
+  box-shadow: var(--shadow);
 }
 button {
   padding: 10px 20px;
@@ -43,67 +56,96 @@ button {
   cursor: pointer;
   font-weight: bold;
   border-radius: 6px;
-  transition: 0.2s;
+  transition: 0.25s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
-button:hover { background: #0ff; }
+button:hover {
+  background: var(--neon-accent);
+  box-shadow: 0 0 15px var(--neon-accent);
+  transform: translateY(-2px);
+}
 
 #player-container {
   display: none;
   flex-direction: column;
   align-items: center;
-  background: var(--panel);
-  border: 2px solid var(--neon);
-  border-radius: 12px;
-  padding: 25px;
-  max-width: 400px;
-  text-align: center;
-  box-shadow: 0 0 20px #0f08;
   position: relative;
+  width: clamp(320px, 90vw, 420px);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #050909 0%, #0b0f10 100%);
+  box-shadow: var(--shadow);
   overflow: hidden;
+  text-align: center;
+  padding: 0 0 25px;
 }
 #player-banner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  width: 100%;
   height: 140px;
   background-size: cover;
   background-position: center;
-  filter: brightness(0.4);
+  filter: brightness(0.5);
+  position: relative;
+}
+#player-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, #0000, #000c);
 }
 .player-img {
-  width: 120px;
-  height: 120px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
   border: 2px solid var(--neon);
   object-fit: cover;
-  margin-top: 80px;
   background: #000;
+  box-shadow: 0 0 20px var(--neon);
+  margin-top: -55px;
   z-index: 2;
 }
+.card-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 0%, #00ffc33a, transparent 80%);
+  animation: pulse 3s infinite ease-in-out;
+}
+@keyframes pulse {
+  0%,100% { opacity: 0.2; }
+  50% { opacity: 0.6; }
+}
+
 .stats {
+  width: 85%;
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  width: 100%;
-  margin-top: 15px;
+  gap: 6px;
+  z-index: 3;
 }
 .stat {
-  background: #0a0a0a;
-  border: 1px solid var(--neon);
+  padding: 8px 12px;
+  border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 8px 10px;
-  width: 100%;
+  background: #070707;
   text-align: left;
-  z-index: 2;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  box-shadow: inset 0 0 6px #00ffc311;
 }
-.error { color:#f33; margin-top:20px; }
+#player-name {
+  font-weight: bold;
+  text-shadow: 0 0 8px var(--neon);
+  margin-top: 8px;
+}
+.error { color:#f55; margin-top:20px; }
 .loading { color:#ff0; margin-top:20px; }
 </style>
 </head>
 <body>
-<h3>League of Graphs – Player Search</h3>
+<h3>League of Graphs — Player Lookup</h3>
 
 <div class="search-box">
   <input id="summoner" placeholder="Enter summoner name (e.g. cant type-1998)"
@@ -112,9 +154,10 @@ button:hover { background: #0ff; }
 </div>
 
 <div id="player-container">
+  <div class="card-glow"></div>
   <div id="player-banner"></div>
   <img id="player-img" class="player-img" src="" alt="Summoner Icon">
-  <div id="player-name" class="stat"></div>
+  <div id="player-name"></div>
   <div class="stats">
     <div id="player-level" class="stat"></div>
     <div id="player-rank" class="stat"></div>
@@ -159,7 +202,6 @@ async function runScrape() {
     const html = await fetchProfile(name);
     const doc = new DOMParser().parseFromString(html, "text/html");
 
-    // Parse banner background
     let banner = "";
     const bannerDiv = doc.querySelector(".bannerImage");
     if (bannerDiv) {
@@ -168,7 +210,6 @@ async function runScrape() {
       if (match) banner = match[1];
     }
 
-    // Parse icon image (profile icon)
     let icon = "";
     const iconEl = doc.querySelector(".bannerIcon img") || doc.querySelector("img.profileicon");
     if (iconEl) icon = iconEl.src;
@@ -183,10 +224,9 @@ async function runScrape() {
       .slice(0,3)
       .map(el => el.textContent.trim());
 
-    // Update UI
     document.getElementById("player-banner").style.backgroundImage = banner ? `url(${banner})` : "none";
     document.getElementById("player-img").src = icon || banner || "https://static.bigbrain.gg/assets/lol/riot_static/15.20.1/img/profileicon/1.png";
-    document.getElementById("player-name").innerHTML = `<b>Summoner:</b> ${name}`;
+    document.getElementById("player-name").innerHTML = `<b>${name}</b>`;
     document.getElementById("player-level").innerHTML = `<b>Level:</b> ${level}`;
     document.getElementById("player-rank").innerHTML = `<b>Rank:</b> ${rankTier}`;
     document.getElementById("player-lp").innerHTML = `<b>LP:</b> ${lp}`;
