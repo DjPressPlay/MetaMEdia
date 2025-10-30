@@ -1,21 +1,25 @@
 // netlify/functions/scrape.js
-import fetch from "node-fetch";
-import * as cheerio from "cheerio";
+const fetch = require("node-fetch");
+const cheerio = require("cheerio");
 
-export async function handler(event) {
+exports.handler = async (event) => {
   const { region = "na", name = "" } = event.queryStringParameters;
-  if (!name) return { statusCode: 400, body: JSON.stringify({ error: "missing name" }) };
+  if (!name)
+    return { statusCode: 400, body: JSON.stringify({ error: "Missing summoner name" }) };
 
   try {
     const url = `https://www.leagueofgraphs.com/rankings/summoners/${region}`;
-    const page = await fetch(url);
-    const html = await page.text();
+    const response = await fetch(url);
+    if (!response.ok)
+      return { statusCode: response.status, body: JSON.stringify({ error: "Failed to load leaderboard" }) };
+
+    const html = await response.text();
     const $ = cheerio.load(html);
 
     let result = null;
     $("table tr").each((i, el) => {
-      const text = $(el).text().toLowerCase();
-      if (text.includes(name.toLowerCase())) {
+      const row = $(el).text().toLowerCase();
+      if (row.includes(name.toLowerCase())) {
         const cells = $(el).find("td");
         const rank = cells.eq(0).text().trim();
         const summoner = cells.eq(1).find("a").text().trim();
@@ -23,13 +27,13 @@ export async function handler(event) {
         const tier = cells.eq(2).text().trim();
         const lp = cells.eq(3).text().trim();
         const winrate = cells.eq(4).text().trim();
+
         result = { summoner, rank, tier, lp, winrate, profile_icon: img };
       }
     });
 
-    if (!result) {
-      return { statusCode: 404, body: JSON.stringify({ error: "not found" }) };
-    }
+    if (!result)
+      return { statusCode: 404, body: JSON.stringify({ error: "Summoner not found in leaderboard" }) };
 
     return {
       statusCode: 200,
@@ -37,9 +41,7 @@ export async function handler(event) {
       body: JSON.stringify(result)
     };
   } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: err.message })
-    };
+    console.error(err);
+    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
-}
+};
