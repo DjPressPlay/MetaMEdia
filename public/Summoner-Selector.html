@@ -51,7 +51,8 @@ body {
   padding: 8px 12px;
   font-size: 14px;
 }
-.search-row select { width: 100px; cursor: pointer; }
+.search-row input { flex: 1; min-width: 0; }
+.search-row select { width: 100px; cursor: pointer; flex-shrink: 0; }
 .search-row button {
   background: #00ffff; color: #000;
   border: none; border-radius: 6px;
@@ -83,9 +84,14 @@ body {
   border-radius: 8px; font-weight: bold;
   cursor: pointer; transition: 0.2s;
 }
+.action-row button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
 .save-btn { background: #00ffff; color: #000; }
 .home-btn { background: #111; border: 1px solid #00ffff; color: #00ffff; }
-.save-btn:hover, .home-btn:hover { transform: scale(1.05); }
+.save-btn:hover:not(:disabled), .home-btn:hover:not(:disabled) { transform: scale(1.05); }
 </style>
 </head>
 <body>
@@ -113,9 +119,10 @@ body {
   <div class="summoner-level" id="summoner-level"></div>
   <div class="rank-display" id="summoner-rank"></div>
   <div class="note" id="status-note">Search a summoner to view profile.</div>
+  <div class="note" id="server-status" style="margin-top: 5px; font-size: 11px; color: #0f0;"></div>
 
   <div class="action-row">
-    <button class="save-btn" id="save-profile">Save</button>
+    <button class="save-btn" id="save-profile" disabled>Save</button>
     <button class="home-btn" id="goto-home">Enter Home</button>
   </div>
 </div>
@@ -123,9 +130,38 @@ body {
 <script>
 let currentSummoner = null;
 
-// 🔹 normalize and fetch name → puuid → rank
+async function checkServerStatus(region = "NA1") {
+  const statusElement = document.getElementById("server-status");
+  try {
+    const res = await fetch(`/api/riot-api?endpoint=/lol/status/v4/platform-data&region=${region}`);
+    if (!res.ok) {
+      statusElement.textContent = "⚠️ Unable to check server status";
+      statusElement.style.color = "#ffa500";
+      return;
+    }
+    const data = await res.json();
+    
+    if (data.incidents && data.incidents.length > 0) {
+      statusElement.textContent = `⚠️ Server Issues: ${data.incidents.length} incident(s)`;
+      statusElement.style.color = "#ff0000";
+    } else if (data.maintenances && data.maintenances.length > 0) {
+      statusElement.textContent = `🔧 Maintenance: ${data.maintenances.length} scheduled`;
+      statusElement.style.color = "#ffa500";
+    } else {
+      statusElement.textContent = `✅ ${data.name} - All systems operational`;
+      statusElement.style.color = "#0f0";
+    }
+  } catch (err) {
+    console.error("Failed to check server status:", err);
+    statusElement.textContent = "Status check unavailable";
+    statusElement.style.color = "#888";
+  }
+}
+
 async function fetchSummonerProfile(name, region = "NA1") {
   const note = document.getElementById("status-note");
+  const saveBtn = document.getElementById("save-profile");
+  saveBtn.disabled = true;
   note.textContent = "Loading summoner data...";
   const cleanName = name.trim().replace(/#/g, "").replace(/\s+/g, " ");
 
@@ -162,9 +198,12 @@ async function fetchSummonerProfile(name, region = "NA1") {
     };
 
     note.textContent = "✅ Profile loaded — save or enter home.";
+    saveBtn.disabled = false;
   } catch (err) {
     console.error(err);
     note.textContent = "❌ Summoner not found or API error.";
+    currentSummoner = null;
+    saveBtn.disabled = true;
   }
 }
 
@@ -172,6 +211,14 @@ document.getElementById("search-btn").addEventListener("click", () => {
   const name = document.getElementById("summoner-input").value.trim();
   const region = document.getElementById("region-select").value;
   if (name) fetchSummonerProfile(name, region);
+});
+
+document.getElementById("summoner-input").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    const name = document.getElementById("summoner-input").value.trim();
+    const region = document.getElementById("region-select").value;
+    if (name) fetchSummonerProfile(name, region);
+  }
 });
 
 document.getElementById("save-profile").addEventListener("click", () => {
@@ -186,10 +233,43 @@ document.getElementById("save-profile").addEventListener("click", () => {
 document.getElementById("goto-home").addEventListener("click", () => {
   const saved = localStorage.getItem("selectedSummoner");
   if (!saved && !currentSummoner) {
-    document.getElementById("status-note").textContent = "⚠️ Load a profile first.";
+    const note = document.getElementById("status-note");
+    note.textContent = "⚠️ Load a profile first.";
     return;
   }
+  if (currentSummoner && !saved) {
+    localStorage.setItem("selectedSummoner", JSON.stringify(currentSummoner));
+  }
   window.location.href = "homeroom.html";
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+  const regionSelect = document.getElementById("region-select");
+  checkServerStatus(regionSelect.value);
+  
+  const saved = localStorage.getItem("selectedSummoner");
+  if (saved) {
+    try {
+      const summoner = JSON.parse(saved);
+      currentSummoner = summoner;
+      document.getElementById("profile-icon").src =
+        `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/profileicon/${summoner.profileIconId}.png`;
+      document.getElementById("summoner-name").textContent = summoner.name;
+      document.getElementById("summoner-level").textContent = `Level ${summoner.level}`;
+      document.getElementById("summoner-rank").textContent = summoner.rank
+        ? `${summoner.rank.tier} ${summoner.rank.rank} · ${summoner.rank.leaguePoints} LP`
+        : "Unranked";
+      document.getElementById("status-note").textContent = "💾 Previously saved profile loaded.";
+      document.getElementById("save-profile").disabled = false;
+      document.getElementById("region-select").value = summoner.region || "EUW1";
+    } catch (err) {
+      console.error("Failed to load saved summoner:", err);
+    }
+  }
+});
+
+document.getElementById("region-select").addEventListener("change", (e) => {
+  checkServerStatus(e.target.value);
 });
 </script>
 </body>
