@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>League Search</title>
+<title>League Player Scraper</title>
 <style>
 body { background:#0a0a0a; color:#0f0; font-family:monospace; padding:20px; }
-input { width:300px; padding:8px; background:#111; color:#0f0; border:1px solid #0f0; font-size:14px; }
+input { width:320px; padding:8px; background:#111; color:#0f0; border:1px solid #0f0; font-size:14px; }
 button { padding:8px 16px; background:#0f0; color:#000; border:none; cursor:pointer; font-weight:bold; margin-left:8px; }
 button:hover { background:#0ff; }
 pre { margin-top:15px; white-space:pre-wrap; font-size:13px; }
@@ -15,56 +15,77 @@ pre { margin-top:15px; white-space:pre-wrap; font-size:13px; }
 </style>
 </head>
 <body>
-<h3>Search League of Graphs NA Rankings</h3>
-<input id="search" placeholder="Enter summoner name" onkeypress="if(event.key==='Enter')runSearch()">
-<button onclick="runSearch()">Search</button>
+<h3>League Player Info Lookup (NA)</h3>
+<input id="summoner" placeholder="Enter summoner name (e.g. cant type-1998)" onkeypress="if(event.key==='Enter')runScrape()">
+<button onclick="runScrape()">Fetch Info</button>
 <pre id="output"></pre>
 
 <script>
-async function fetchPage() {
-  const url = "https://www.leagueofgraphs.com/rankings/summoners/na";
+async function fetchProfile(name) {
+  const url = `https://www.leagueofgraphs.com/summoner/na/${encodeURIComponent(name)}`;
   const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
   const res = await fetch(proxied);
-  if (!res.ok) throw new Error("Failed to load page");
-  return await res.text();
+  if (!res.ok) throw new Error("Failed to load player page");
+  const html = await res.text();
+  if (!html.includes("<html")) throw new Error("Invalid HTML response");
+  return html;
 }
 
-async function runSearch() {
-  const term = document.getElementById("search").value.trim();
-  const output = document.getElementById("output");
-  
-  if (!term) {
-    output.textContent = "Please enter a summoner name.";
-    output.className = "";
+function extractBetween(text, start, end) {
+  const s = text.indexOf(start);
+  if (s === -1) return null;
+  const e = text.indexOf(end, s + start.length);
+  if (e === -1) return null;
+  return text.slice(s + start.length, e).trim();
+}
+
+async function runScrape() {
+  const name = document.getElementById("summoner").value.trim();
+  const out = document.getElementById("output");
+
+  if (!name) {
+    out.textContent = "Enter a summoner name first.";
+    out.className = "";
     return;
   }
-  
-  output.textContent = "Searching...";
-  output.className = "loading";
+
+  out.textContent = "Fetching data...";
+  out.className = "loading";
 
   try {
-    const html = await fetchPage();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-    
-    const links = Array.from(doc.querySelectorAll('a[href^="/summoner/na/"]'));
-    const summoners = links
-      .map(link => link.textContent.trim())
-      .filter(name => name && name.length > 0);
-    
-    const filtered = summoners.filter(n => 
-      n.toLowerCase().includes(term.toLowerCase())
-    );
-    
-    output.className = "";
-    if (filtered.length === 0) {
-      output.textContent = `No results found for "${term}".`;
-    } else {
-      output.textContent = `Found ${filtered.length} match${filtered.length > 1 ? 'es' : ''}:\n\n` + filtered.join("\n");
-    }
+    const html = await fetchProfile(name);
+    const doc = new DOMParser().parseFromString(html, "text/html");
+
+    // Basic profile data
+    const level = doc.querySelector(".bannerSubtitle")?.textContent.trim() || "Unknown";
+    const rankBox = doc.querySelector(".leagueTier")?.textContent.trim() || "Unranked";
+    const lp = doc.querySelector(".leaguePoints")?.textContent.trim() || "0 LP";
+    const wins = doc.querySelector(".wins")?.textContent.trim() || "0 Wins";
+    const losses = doc.querySelector(".losses")?.textContent.trim() || "0 Losses";
+    const ratio = doc.querySelector(".ratio")?.textContent.trim() || "";
+
+    // Top 3 played champions (names only)
+    const champs = Array.from(doc.querySelectorAll(".summoner-champion-name"))
+      .slice(0, 3)
+      .map(el => el.textContent.trim());
+
+    const info = {
+      Summoner: name,
+      Level: level,
+      Rank: rankBox,
+      LP: lp,
+      Wins: wins,
+      Losses: losses,
+      Ratio: ratio,
+      TopChampions: champs
+    };
+
+    out.className = "";
+    out.textContent = JSON.stringify(info, null, 2);
+
   } catch (err) {
-    output.className = "error";
-    output.textContent = "Error: " + err.message + "\n\nPlease try again later.";
+    out.className = "error";
+    out.textContent = "Error: " + err.message;
     console.error(err);
   }
 }
