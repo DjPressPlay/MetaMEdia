@@ -122,27 +122,55 @@ body {
 
 <script>
 let currentSummoner = null;
+let apiOnline = false;
 
-// 🔹 normalize and fetch name → puuid → rank
+// 🔹 Step 1: Check Riot API Status before anything else
+async function checkRiotStatus(region = "NA1") {
+  const note = document.getElementById("status-note");
+  note.textContent = "Checking Riot API status...";
+  try {
+    const res = await fetch(`/api/riot-api?endpoint=/lol/status/v4/platform-data&region=${region}`);
+    if (!res.ok) throw new Error("Bad status response");
+    const data = await res.json();
+
+    if ((data.maintenances?.length || 0) > 0 || (data.incidents?.length || 0) > 0) {
+      note.textContent = `⚠️ ${data.name} API may be under maintenance.`;
+      apiOnline = true; // still allow usage
+    } else {
+      note.textContent = `✅ ${data.name} API Online.`;
+      apiOnline = true;
+    }
+  } catch (err) {
+    console.error("API status error:", err);
+    note.textContent = "❌ Riot API unreachable — please try again later.";
+    apiOnline = false;
+  }
+}
+
+// 🔹 Step 2: Normalize + Fetch Summoner → Rank
 async function fetchSummonerProfile(name, region = "NA1") {
   const note = document.getElementById("status-note");
+  if (!apiOnline) {
+    note.textContent = "⚠️ API offline or not verified yet.";
+    return;
+  }
+
   note.textContent = "Loading summoner data...";
   const cleanName = name.trim().replace(/#/g, "").replace(/\s+/g, " ");
 
   try {
-    // STEP 1: get summoner info by name
+    // 1️⃣ Summoner Info
     const res = await fetch(`/api/riot-api?endpoint=/lol/summoner/v4/summoners/by-name/${encodeURIComponent(cleanName)}&region=${region}`);
-    if (!res.ok) throw new Error(`Name not found`);
+    if (!res.ok) throw new Error("Summoner not found");
     const summoner = await res.json();
-
     if (!summoner.puuid) throw new Error("No PUUID returned");
 
-    // STEP 2: get ranked info
+    // 2️⃣ Ranked Info
     const rankedRes = await fetch(`/api/riot-api?endpoint=/lol/league/v4/entries/by-summoner/${summoner.id}&region=${region}`);
     const ranked = rankedRes.ok ? await rankedRes.json() : [];
     const solo = ranked.find(r => r.queueType === "RANKED_SOLO_5x5");
 
-    // display
+    // 3️⃣ Display
     document.getElementById("profile-icon").src =
       `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/profileicon/${summoner.profileIconId}.png`;
     document.getElementById("summoner-name").textContent = summoner.name;
@@ -151,6 +179,7 @@ async function fetchSummonerProfile(name, region = "NA1") {
       ? `${solo.tier} ${solo.rank} · ${solo.leaguePoints} LP`
       : "Unranked";
 
+    // 4️⃣ Cache
     currentSummoner = {
       name: summoner.name,
       id: summoner.id,
@@ -168,6 +197,7 @@ async function fetchSummonerProfile(name, region = "NA1") {
   }
 }
 
+// 🔹 Step 3: Events
 document.getElementById("search-btn").addEventListener("click", () => {
   const name = document.getElementById("summoner-input").value.trim();
   const region = document.getElementById("region-select").value;
@@ -191,6 +221,13 @@ document.getElementById("goto-home").addEventListener("click", () => {
   }
   window.location.href = "homeroom.html";
 });
+
+// 🔹 Auto-run status check when page loads
+window.addEventListener("load", () => {
+  const region = document.getElementById("region-select")?.value || "NA1";
+  checkRiotStatus(region);
+});
 </script>
+
 </body>
 </html>
