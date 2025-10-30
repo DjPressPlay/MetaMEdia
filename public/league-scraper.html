@@ -47,8 +47,9 @@ button {
 }
 button:hover { background: #0ff; }
 
+
 #player-container {
-  display: none;
+  display: none;                /* keep behavior identical */
   flex-direction: column;
   align-items: center;
   background: linear-gradient(180deg,#0b0b0b 0%, #080808 100%);
@@ -66,7 +67,7 @@ button:hover { background: #0ff; }
 
 #player-banner {
   width: 100%;
-  height: 120px;
+  height: 120px;                /* same visual proportion */
   background-size: cover;
   background-position: center;
   filter: brightness(0.45);
@@ -79,7 +80,7 @@ button:hover { background: #0ff; }
   border-radius: 50%;
   border: 2px solid rgba(0,255,204,0.95);
   object-fit: cover;
-  margin-top: -52px;
+  margin-top: -52px;            /* keeps overlap with banner */
   background: #000;
   z-index: 2;
   box-shadow: 0 6px 22px rgba(0,255,204,0.06);
@@ -132,6 +133,8 @@ button:hover { background: #0ff; }
   #player-banner { height:100px; }
   .stat { font-size:13px; padding:7px 10px; }
 }
+
+
 </style>
 </head>
 <body>
@@ -145,8 +148,7 @@ button:hover { background: #0ff; }
 
 <div id="player-container">
   <div id="player-banner"></div>
-  <!-- ✅ Correct static image path -->
-  <img id="player-img" class="player-img" src="/METAMEDIA/lol.jpeg" alt="League of Legends Image">
+  <img id="player-img" class="player-img" src="" alt="Summoner Icon">
   <div id="player-name" class="stat"></div>
   <div class="stats">
     <div id="player-level" class="stat"></div>
@@ -192,6 +194,7 @@ async function runScrape() {
     const html = await fetchProfile(name);
     const doc = new DOMParser().parseFromString(html, "text/html");
 
+    // Parse banner background
     let banner = "";
     const bannerDiv = doc.querySelector(".bannerImage");
     if (bannerDiv) {
@@ -199,6 +202,11 @@ async function runScrape() {
       const match = style.match(/url\(['"]?(.*?)['"]?\)/);
       if (match) banner = match[1];
     }
+
+    // Parse icon image (profile icon)
+    let icon = "";
+    const iconEl = doc.querySelector(".bannerIcon img") || doc.querySelector("img.profileicon");
+    if (iconEl) icon = iconEl.src;
 
     const level = doc.querySelector(".bannerSubtitle")?.textContent.replace("Level","").trim() || "Unknown";
     const rankTier = doc.querySelector(".leagueTier")?.textContent.trim() || "Unranked";
@@ -208,4 +216,30 @@ async function runScrape() {
     const ratio = doc.querySelector(".ratio")?.textContent.trim() || "";
     const champs = Array.from(doc.querySelectorAll(".summoner-champion-name"))
       .slice(0,3)
-      .map(e
+      .map(el => el.textContent.trim());
+
+    // Update UI
+    document.getElementById("player-banner").style.backgroundImage = banner ? `url(${banner})` : "none";
+    document.getElementById("player-img").src = icon || banner || "https://static.bigbrain.gg/assets/lol/riot_static/15.20.1/img/profileicon/1.png";
+    document.getElementById("player-name").innerHTML = `<b>Summoner:</b> ${name}`;
+    document.getElementById("player-level").innerHTML = `<b>Level:</b> ${level}`;
+    document.getElementById("player-rank").innerHTML = `<b>Rank:</b> ${rankTier}`;
+    document.getElementById("player-lp").innerHTML = `<b>LP:</b> ${lp}`;
+    document.getElementById("player-wins").innerHTML = `<b>Wins:</b> ${wins}`;
+    document.getElementById("player-losses").innerHTML = `<b>Losses:</b> ${losses}`;
+    document.getElementById("player-ratio").innerHTML = ratio ? `<b>Win Rate:</b> ${ratio}` : "";
+    document.getElementById("player-champs").innerHTML = champs.length ? `<b>Top Champs:</b> ${champs.join(", ")}` : "";
+
+    container.style.display = "flex";
+    status.textContent = "";
+    status.className = "";
+  } catch (err) {
+    console.error(err);
+    status.textContent = "Error: " + err.message;
+    status.className = "error";
+    container.style.display = "none";
+  }
+}
+</script>
+</body>
+</html>
