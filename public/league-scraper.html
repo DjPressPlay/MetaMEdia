@@ -3,22 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>League Player Scraper</title>
+<title>League Player Lookup</title>
 <style>
-body { background:#0a0a0a; color:#0f0; font-family:monospace; padding:20px; }
-input { width:320px; padding:8px; background:#111; color:#0f0; border:1px solid #0f0; font-size:14px; }
-button { padding:8px 16px; background:#0f0; color:#000; border:none; cursor:pointer; font-weight:bold; margin-left:8px; }
+body {
+  background:#0a0a0a; color:#0f0; font-family:'Orbitron', monospace;
+  padding:30px; text-align:center;
+}
+h3 { margin-bottom:20px; }
+.search-box {
+  display:flex; justify-content:center; gap:10px; margin-bottom:25px;
+}
+input {
+  width:280px; padding:10px; background:#111; color:#0f0;
+  border:1px solid #0f0; font-size:15px; border-radius:4px;
+}
+button {
+  padding:10px 20px; background:#0f0; color:#000;
+  border:none; cursor:pointer; font-weight:bold;
+  border-radius:4px; transition:0.2s;
+}
 button:hover { background:#0ff; }
-pre { margin-top:15px; white-space:pre-wrap; font-size:13px; }
-.error { color:#f33; }
-.loading { color:#ff0; }
+#card {
+  display:inline-block; background:#111; border:1px solid #0f0;
+  padding:20px; border-radius:10px; text-align:left;
+  color:#0f0; max-width:380px; margin:auto;
+}
+.player-img {
+  display:block; width:120px; height:120px;
+  border-radius:50%; margin:0 auto 15px auto;
+  border:2px solid #0f0; object-fit:cover;
+}
+.stat { margin:4px 0; }
+.error { color:#f33; margin-top:20px; }
+.loading { color:#ff0; margin-top:20px; }
 </style>
 </head>
 <body>
-<h3>League Player Info Lookup (NA)</h3>
-<input id="summoner" placeholder="Enter summoner name (e.g. cant type-1998)" onkeypress="if(event.key==='Enter')runScrape()">
-<button onclick="runScrape()">Fetch Info</button>
-<pre id="output"></pre>
+<h3>League of Graphs – NA Player Search</h3>
+
+<div class="search-box">
+  <input id="summoner" placeholder="Enter summoner name (e.g. cant type-1998)"
+         onkeypress="if(event.key==='Enter')runScrape()">
+  <button onclick="runScrape()">Search</button>
+</div>
+
+<div id="card"></div>
+<div id="status"></div>
 
 <script>
 async function fetchProfile(name) {
@@ -31,62 +61,58 @@ async function fetchProfile(name) {
   return html;
 }
 
-function extractBetween(text, start, end) {
-  const s = text.indexOf(start);
-  if (s === -1) return null;
-  const e = text.indexOf(end, s + start.length);
-  if (e === -1) return null;
-  return text.slice(s + start.length, e).trim();
-}
-
 async function runScrape() {
   const name = document.getElementById("summoner").value.trim();
-  const out = document.getElementById("output");
+  const card = document.getElementById("card");
+  const status = document.getElementById("status");
 
   if (!name) {
-    out.textContent = "Enter a summoner name first.";
-    out.className = "";
+    status.textContent = "Enter a summoner name first.";
+    status.className = "error";
     return;
   }
-
-  out.textContent = "Fetching data...";
-  out.className = "loading";
+  card.innerHTML = "";
+  status.textContent = "Fetching data...";
+  status.className = "loading";
 
   try {
     const html = await fetchProfile(name);
     const doc = new DOMParser().parseFromString(html, "text/html");
 
-    // Basic profile data
-    const level = doc.querySelector(".bannerSubtitle")?.textContent.trim() || "Unknown";
-    const rankBox = doc.querySelector(".leagueTier")?.textContent.trim() || "Unranked";
-    const lp = doc.querySelector(".leaguePoints")?.textContent.trim() || "0 LP";
-    const wins = doc.querySelector(".wins")?.textContent.trim() || "0 Wins";
-    const losses = doc.querySelector(".losses")?.textContent.trim() || "0 Losses";
+    // --- Extract main profile fields ---
+    const level = doc.querySelector(".bannerSubtitle")?.textContent.replace("Level","").trim() || "Unknown";
+    const rankTier = doc.querySelector(".leagueTier")?.textContent.trim() || "Unranked";
+    const lp = doc.querySelector(".leaguePoints")?.textContent.trim() || "";
+    const wins = doc.querySelector(".wins")?.textContent.replace("Wins:","").trim() || "0";
+    const losses = doc.querySelector(".losses")?.textContent.replace("Losses:","").trim() || "0";
     const ratio = doc.querySelector(".ratio")?.textContent.trim() || "";
+    const img = doc.querySelector(".bannerImage img")?.src || "";
 
-    // Top 3 played champions (names only)
     const champs = Array.from(doc.querySelectorAll(".summoner-champion-name"))
-      .slice(0, 3)
+      .slice(0,3)
       .map(el => el.textContent.trim());
 
-    const info = {
-      Summoner: name,
-      Level: level,
-      Rank: rankBox,
-      LP: lp,
-      Wins: wins,
-      Losses: losses,
-      Ratio: ratio,
-      TopChampions: champs
-    };
+    // --- Build pretty card ---
+    let htmlOut = "";
+    if (img) htmlOut += `<img class="player-img" src="${img}" alt="${name}">`;
+    htmlOut += `<div class="stat"><b>Summoner:</b> ${name}</div>`;
+    htmlOut += `<div class="stat"><b>Level:</b> ${level}</div>`;
+    htmlOut += `<div class="stat"><b>Rank:</b> ${rankTier}</div>`;
+    if (lp) htmlOut += `<div class="stat"><b>LP:</b> ${lp}</div>`;
+    htmlOut += `<div class="stat"><b>Wins:</b> ${wins}</div>`;
+    htmlOut += `<div class="stat"><b>Losses:</b> ${losses}</div>`;
+    if (ratio) htmlOut += `<div class="stat"><b>Win Rate:</b> ${ratio}</div>`;
+    if (champs.length > 0) htmlOut += `<div class="stat"><b>Top Champs:</b> ${champs.join(", ")}</div>`;
 
-    out.className = "";
-    out.textContent = JSON.stringify(info, null, 2);
+    card.innerHTML = htmlOut;
+    status.textContent = "";
+    status.className = "";
 
-  } catch (err) {
-    out.className = "error";
-    out.textContent = "Error: " + err.message;
+  } catch(err) {
     console.error(err);
+    card.innerHTML = "";
+    status.textContent = "Error: " + err.message;
+    status.className = "error";
   }
 }
 </script>
