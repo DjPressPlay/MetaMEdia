@@ -145,7 +145,7 @@ button:hover { background: #0ff; }
 
 <div id="player-container">
   <div id="player-banner"></div>
-  <!-- ⬇ This now loads your local metamedia image -->
+  <!-- 🖼️ Loads image from local METAMEDIA folder -->
   <img id="player-img" class="player-img" src="./src/METAMEDIA/lol.jpeg" alt="League of Legends Image">
   <div id="player-name" class="stat"></div>
   <div class="stats">
@@ -213,7 +213,7 @@ async function runScrape() {
     document.getElementById("player-banner").style.backgroundImage =
       banner ? `url(${banner})` : "none";
 
-    // ⬇ Player image stays constant from metamedia folder
+    // 🖼️ Always use your local METAMEDIA image
     document.getElementById("player-img").src = "./src/METAMEDIA/lol.jpeg";
 
     document.getElementById("player-name").innerHTML = `<b>Summoner:</b> ${name}`;
