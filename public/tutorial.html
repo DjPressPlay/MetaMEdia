@@ -5,25 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tutorial</title>
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at center, #0c0c0c, #000);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #tutorial-screen {
+      text-align: center;
+      padding: 40px;
+      border: 3px solid #00ffff;
+      border-radius: 12px;
+      background: rgba(10,10,10,0.9);
+      box-shadow: 0 0 30px rgba(0,255,255,0.4);
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #00ffff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px #00ffff;
+    }
+  </style>
 </head>
 <body>
   <div id="info-box-container"></div>
 
-  <div id="tutorial-screen" style="text-align: center; padding: 40px;">
+  <div id="tutorial-screen">
     <h1>📘 Tutorial</h1>
-    <p>This is where you explain how the game works.</p>
-    
-    <button
-      id="continue-btn"
-      style="margin-top: 20px; padding: 10px 20px; font-size: 16px;"
-    >
-      Continue to Character Creator
-    </button>
+    <p>Welcome to the Zetsu Game Hub!<br>
+       In this short guide, you'll learn how to set up your first Summoner profile before entering the Home Room.</p>
+    <p>Once ready, click below to continue.</p>
+    <button id="continue-btn">Continue to Summoner Selector</button>
   </div>
 
-  <!-- Load compiled TypeScript for this page -->
-  <script type="module" src="/tutorial.js"></script>
-  <script type="module" src="src/gameController.js"></script>
+  <script type="module">
+    document.getElementById("continue-btn").addEventListener("click", () => {
+      window.location.href = "summoner-selector.html";
+    });
+  </script>
 
+  <script type="module" src="src/gameController.js"></script>
 </body>
 </html>
