@@ -5,13 +5,60 @@
 <title>League Stats Tracker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
-body{margin:0;font-family:'Segoe UI',sans-serif;background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh}
-.card{border:2px solid #00ffff;border-radius:12px;background:rgba(12,12,12,.9);padding:24px;box-shadow:0 0 25px rgba(0,255,255,.3);width:420px;text-align:center}
-input,select,button{padding:8px 10px;margin:6px;border-radius:6px;border:1px solid #00ffff;background:#111;color:#fff;font-size:14px}
-button{background:#00ffff;color:#000;font-weight:bold;cursor:pointer}
-.profile{width:160px;height:160px;border:2px solid #00ffff;border-radius:10px;overflow:hidden;margin:12px auto}
-.profile img{width:100%;height:100%;object-fit:cover}
-pre{white-space:pre-wrap;font-size:12px;color:#0ff;text-align:left}
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #000;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+.card {
+  border: 2px solid #00ffff;
+  border-radius: 12px;
+  background: rgba(12, 12, 12, 0.9);
+  padding: 24px;
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
+  width: 420px;
+  text-align: center;
+}
+input, select, button {
+  padding: 8px 10px;
+  margin: 6px;
+  border-radius: 6px;
+  border: 1px solid #00ffff;
+  background: #111;
+  color: #fff;
+  font-size: 14px;
+}
+button {
+  background: #00ffff;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+}
+.profile {
+  width: 160px;
+  height: 160px;
+  border: 2px solid #00ffff;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 12px auto;
+}
+.profile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+pre {
+  white-space: pre-wrap;
+  font-size: 12px;
+  color: #0ff;
+  text-align: left;
+}
 </style>
 </head>
 <body>
@@ -38,27 +85,31 @@ pre{white-space:pre-wrap;font-size:12px;color:#0ff;text-align:left}
 </div>
 
 <script>
-async function fetchPlayer(){
-  const name=document.getElementById("name").value.trim();
-  const region=document.getElementById("region").value;
-  if(!name)return;
-  document.getElementById("status").textContent="Loading...";
-  try{
-    const res=await fetch(`/.netlify/functions/scrape?region=${region}&name=${encodeURIComponent(name)}`);
-    const data=await res.json();
-    if(!res.ok)throw new Error(data.error||"Failed");
-    document.getElementById("icon").src=data.profile_icon||"";
-    document.getElementById("summoner").textContent=data.summoner||"Unknown";
-    document.getElementById("rank").textContent=data.rank||"";
-    document.getElementById("lp").textContent=`LP: ${data.lp||"?"} • Winrate ${data.winrate||"?"}`;
-    document.getElementById("extra").textContent=JSON.stringify(data.top_champions||[],null,2);
-    document.getElementById("status").textContent="✅ Loaded";
-  }catch(e){
+async function fetchPlayer() {
+  const name = document.getElementById("name").value.trim();
+  const region = document.getElementById("region").value;
+  if (!name) return;
+  document.getElementById("status").textContent = "Loading...";
+  try {
+    const res = await fetch(`/.netlify/functions/scrape?region=${region}&name=${encodeURIComponent(name)}`);
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Bad response (${res.status}): ${text}`);
+    }
+    const data = await res.json();
+
+    document.getElementById("icon").src = data.profile_icon || "";
+    document.getElementById("summoner").textContent = data.summoner || "Unknown";
+    document.getElementById("rank").textContent = data.rank || "";
+    document.getElementById("lp").textContent = `LP: ${data.lp || "?"} • Winrate ${data.winrate || "?"}`;
+    document.getElementById("extra").textContent = JSON.stringify(data.top_champions || [], null, 2);
+    document.getElementById("status").textContent = "✅ Loaded";
+  } catch (e) {
     console.error(e);
-    document.getElementById("status").textContent="❌ "+e.message;
+    document.getElementById("status").textContent = "❌ " + e.message;
   }
 }
-document.getElementById("search").addEventListener("click",fetchPlayer);
+document.getElementById("search").addEventListener("click", fetchPlayer);
 </script>
 </body>
 </html>
