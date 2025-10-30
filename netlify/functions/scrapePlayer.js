@@ -1,39 +1,51 @@
-// netlify/functions/scrape.js
-const fetch = require("node-fetch");
-const cheerio = require("cheerio");
-
-exports.handler = async (event) => {
-  const { region = "na", name = "" } = event.queryStringParameters;
+export async function handler(event) {
+  const { region = "na", name = "" } = event.queryStringParameters || {};
   if (!name)
     return { statusCode: 400, body: JSON.stringify({ error: "Missing summoner name" }) };
 
   try {
     const url = `https://www.leagueofgraphs.com/rankings/summoners/${region}`;
-    const response = await fetch(url);
-    if (!response.ok)
-      return { statusCode: response.status, body: JSON.stringify({ error: "Failed to load leaderboard" }) };
+    const res = await fetch(url);
+    const html = await res.text();
 
-    const html = await response.text();
-    const $ = cheerio.load(html);
+    // Find the row with the summoner name
+    const lowerName = name.toLowerCase();
+    const rowRegex = new RegExp(
+      `<tr[^>]*>[^<]*<td[^>]*>(.*?)</td>[^]*?<a[^>]*>([^<]*${lowerName}[^<]*)</a>[^]*?</tr>`,
+      "i"
+    );
+    const match = html.match(rowRegex);
 
-    let result = null;
-    $("table tr").each((i, el) => {
-      const row = $(el).text().toLowerCase();
-      if (row.includes(name.toLowerCase())) {
-        const cells = $(el).find("td");
-        const rank = cells.eq(0).text().trim();
-        const summoner = cells.eq(1).find("a").text().trim();
-        const img = cells.eq(1).find("img").attr("src");
-        const tier = cells.eq(2).text().trim();
-        const lp = cells.eq(3).text().trim();
-        const winrate = cells.eq(4).text().trim();
+    if (!match)
+      return { statusCode: 404, body: JSON.stringify({ error: "Not found in leaderboard" }) };
 
-        result = { summoner, rank, tier, lp, winrate, profile_icon: img };
-      }
-    });
+    const rowHtml = match[0];
 
-    if (!result)
-      return { statusCode: 404, body: JSON.stringify({ error: "Summoner not found in leaderboard" }) };
+    // Extract fields with simple regexes
+    const get = (pattern) => {
+      const m = rowHtml.match(pattern);
+      return m ? m[1].trim() : "";
+    };
+
+    const rank = get(/<td[^>]*>(\d+)<\/td>/);
+    const summoner = get(/<a[^>]*>([^<]+)<\/a>/);
+    const img = get(/<img[^>]+src="([^"]+)"/);
+    const tier = get(/<\/a><\/td><td[^>]*>([^<]*)<\/td>/);
+    const lp = get(/<td[^>]*>(\d+)\s*LP<\/td>/i);
+    const winrate = get(/(\d+\.?\d*)%/);
+
+    const result = {
+      summoner,
+      rank,
+      tier,
+      lp: lp || "",
+      winrate: winrate || "",
+      profile_icon: img
+        ? img.startsWith("http")
+          ? img
+          : `https://www.leagueofgraphs.com${img}`
+        : ""
+    };
 
     return {
       statusCode: 200,
@@ -41,7 +53,9 @@ exports.handler = async (event) => {
       body: JSON.stringify(result)
     };
   } catch (err) {
-    console.error(err);
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message })
+    };
   }
-};
+}
