@@ -2,48 +2,70 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>League Search</title>
 <style>
-body { background:#0a0a0a; color:#0f0; font-family:monospace; }
-input { width:300px; padding:6px; background:#111; color:#0f0; border:1px solid #0f0; }
-button { padding:6px 12px; background:#0f0; color:#000; border:none; cursor:pointer; }
-pre { margin-top:15px; white-space:pre-wrap; }
+body { background:#0a0a0a; color:#0f0; font-family:monospace; padding:20px; }
+input { width:300px; padding:8px; background:#111; color:#0f0; border:1px solid #0f0; font-size:14px; }
+button { padding:8px 16px; background:#0f0; color:#000; border:none; cursor:pointer; font-weight:bold; margin-left:8px; }
+button:hover { background:#0ff; }
+pre { margin-top:15px; white-space:pre-wrap; font-size:13px; }
+.error { color:#f33; }
+.loading { color:#ff0; }
 </style>
 </head>
 <body>
 <h3>Search League of Graphs NA Rankings</h3>
-<input id="search" placeholder="Enter summoner name">
+<input id="search" placeholder="Enter summoner name" onkeypress="if(event.key==='Enter')runSearch()">
 <button onclick="runSearch()">Search</button>
 <pre id="output"></pre>
 
 <script>
 async function fetchPage() {
   const url = "https://www.leagueofgraphs.com/rankings/summoners/na";
-  const proxied = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+  const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
   const res = await fetch(proxied);
   if (!res.ok) throw new Error("Failed to load page");
   return await res.text();
 }
 
 async function runSearch() {
-  const term = document.getElementById("search").value.trim().toLowerCase();
+  const term = document.getElementById("search").value.trim();
   const output = document.getElementById("output");
+  
+  if (!term) {
+    output.textContent = "Please enter a summoner name.";
+    output.className = "";
+    return;
+  }
+  
   output.textContent = "Searching...";
+  output.className = "loading";
 
   try {
     const html = await fetchPage();
-    // quick parse by regex since we can’t use cheerio
-    const matches = [...html.matchAll(/<a[^>]*href="\/summoner\/na\/([^"]+)"[^>]*>(.*?)<\/a>/gi)]
-      .map(m => m[2].replace(/<[^>]+>/g, '').trim());
-
-    const filtered = matches.filter(n => n.toLowerCase().includes(term));
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    
+    const links = Array.from(doc.querySelectorAll('a[href^="/summoner/na/"]'));
+    const summoners = links
+      .map(link => link.textContent.trim())
+      .filter(name => name && name.length > 0);
+    
+    const filtered = summoners.filter(n => 
+      n.toLowerCase().includes(term.toLowerCase())
+    );
+    
+    output.className = "";
     if (filtered.length === 0) {
-      output.textContent = "No results found.";
+      output.textContent = `No results found for "${term}".`;
     } else {
-      output.textContent = filtered.join("\n");
+      output.textContent = `Found ${filtered.length} match${filtered.length > 1 ? 'es' : ''}:\n\n` + filtered.join("\n");
     }
   } catch (err) {
-    output.textContent = "Error: " + err.message;
+    output.className = "error";
+    output.textContent = "Error: " + err.message + "\n\nPlease try again later.";
+    console.error(err);
   }
 }
 </script>
