@@ -67,7 +67,7 @@ button:hover { background: #0ff; }
 #player-banner {
   width: 100%;
   height: 120px;
-  background: url("MetaMEdia/public/METAMEDIA/lol.jpeg") center/cover no-repeat;
+  background: url("./METAMEDIA/lol.jpeg") center/cover no-repeat;
   filter: brightness(0.45);
   border-bottom: 1px solid rgba(255,255,255,0.03);
 }
@@ -79,11 +79,10 @@ button:hover { background: #0ff; }
   border: 2px solid rgba(0,255,204,0.95);
   object-fit: cover;
   margin-top: -52px;
-  background: #000;
+  background: #000 url("./METAMEDIA/lol.jpeg") center/cover no-repeat;
   z-index: 2;
   box-shadow: 0 6px 22px rgba(0,255,204,0.06);
   transition: transform .14s ease;
-  background: url("MetaMEdia/public/METAMEDIA/lol.jpeg")
 }
 .player-img:hover { transform: scale(1.03); }
 
@@ -145,7 +144,7 @@ button:hover { background: #0ff; }
 
 <div id="player-container">
   <div id="player-banner"></div>
-  <img id="player-img" class="player-img" src="MetaMEdia/public/METAMEDIA/lol.jpeg" alt="Summoner Icon">
+  <img id="player-img" class="player-img" src="./METAMEDIA/lol.jpeg" alt="Summoner Icon">
   <div id="player-name" class="stat"></div>
   <div class="stats">
     <div id="player-level" class="stat"></div>
@@ -201,9 +200,11 @@ async function runScrape() {
       .slice(0,3)
       .map(el => el.textContent.trim());
 
-    // Update UI using the static lol.jpeg for visuals
-    document.getElementById("player-banner").style.backgroundImage = "url('MetaMEdia/public/METAMEDIA/lol.jpeg')";
-    document.getElementById("player-img").src = "MetaMEdia/public/METAMEDIA/lol.jpeg";
+    // always use the local image
+    const imgPath = "./METAMEDIA/lol.jpeg";
+    document.getElementById("player-banner").style.backgroundImage = `url('${imgPath}')`;
+    document.getElementById("player-img").src = imgPath;
+
     document.getElementById("player-name").innerHTML = `<b>Summoner:</b> ${name}`;
     document.getElementById("player-level").innerHTML = `<b>Level:</b> ${level}`;
     document.getElementById("player-rank").innerHTML = `<b>Rank:</b> ${rankTier}`;
