@@ -934,33 +934,43 @@ window.addEventListener("DOMContentLoaded", () => {
   const character = document.querySelector(".character");
   const charImg = document.getElementById("character-img");
 
-  // 🔹 Get saved Summoner data
-  const savedSummoner = localStorage.getItem("savedSummoner");
+  // ✅ load from the same key used by the League scrapper
+  const savedSummoner = localStorage.getItem("summonerData");
 
-  // ✅ HUD population (Level, Rank, LP, Wins, Losses, WR)
   if (savedSummoner) {
     try {
       const data = JSON.parse(savedSummoner);
 
+      // ✅ populate HUD with the saved summoner info
       document.getElementById("hud-name").textContent = data.name || "Unknown";
       document.getElementById("hud-level").textContent = data.level || "—";
-      document.getElementById("hud-rank").textContent = data.rank || "Unranked";
+      document.getElementById("hud-rank").textContent = data.rank || data.rankTier || "Unranked";
       document.getElementById("hud-lp").textContent = data.lp || "0 LP";
       document.getElementById("hud-wins").textContent = data.wins || "0";
       document.getElementById("hud-losses").textContent = data.losses || "0";
-      document.getElementById("hud-winrate").textContent = data.winrate || "—";
 
-      // temp placeholder until we call Riot for champion splash
-      charImg.src = "./METAMEDIA/lol.jpeg";
+      // compute winrate if not already saved
+      const wins = parseInt(data.wins || 0);
+      const losses = parseInt(data.losses || 0);
+      const total = wins + losses;
+      const winrate = total > 0 ? Math.round((wins / total) * 100) + "%" : "—";
+      document.getElementById("hud-winrate").textContent = winrate;
+
+      // ✅ temp placeholder until Riot API splash call
+      charImg.src = "/METAMEDIA/lol.jpeg";
       document.getElementById("hud-badge").style.backgroundImage =
         "url('badges/Echo.png')";
+
+      console.log("🏠 Loaded Summoner:", data.name);
     } catch (err) {
-      console.error("⚠️ Failed to parse savedSummoner:", err);
+      console.error("⚠️ Failed to parse summonerData:", err);
+      document.getElementById("hud-name").textContent = "Corrupted Data";
     }
   } else {
-    // fallback: blank HUD
     document.getElementById("hud-name").textContent = "No Summoner Loaded";
   }
+});
+
 
   // ==========================================================
   // 🧍 Character Movement System (kept intact)
