@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>League Player Lookup</title>
+<title>League of Legends MetaDock – Load Player</title>
 <style>
 :root {
   --neon: #0f0;
@@ -20,6 +20,7 @@ body {
   align-items: center;
 }
 h3 { margin-bottom: 20px; }
+
 .search-box {
   display: flex;
   justify-content: center;
@@ -46,6 +47,11 @@ button {
   transition: 0.2s;
 }
 button:hover { background: #0ff; }
+button:disabled {
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+}
 
 #player-container {
   display: none;
@@ -124,6 +130,7 @@ button:hover { background: #0ff; }
 
 .error { color:#ff6b6b; margin-top:14px; font-weight:600; }
 .loading { color:#ffd24d; margin-top:14px; font-weight:600; }
+.success { color:#00ff99; margin-top:14px; font-weight:600; }
 
 @media (max-width:420px){
   #player-container { padding:14px; border-radius:10px; }
@@ -134,12 +141,12 @@ button:hover { background: #0ff; }
 </style>
 </head>
 <body>
-<h3>League of Legends MetaDock – Load Player </h3>
+<h3>League of Legends MetaDock – Load Player</h3>
 
 <div class="search-box">
   <input id="summoner" placeholder="Enter summoner name (e.g. cant type-1998)"
-         onkeypress="if(event.key==='Enter')runScrape()">
-  <button onclick="runScrape()">Search</button>
+         onkeypress="if(event.key==='Enter')runScrape()" disabled>
+  <button id="searchBtn" onclick="runScrape()" disabled>Search</button>
 </div>
 
 <div id="player-container">
@@ -160,6 +167,39 @@ button:hover { background: #0ff; }
 <div id="status"></div>
 
 <script>
+window.addEventListener("DOMContentLoaded", checkRegionStatus);
+
+// 🔹 REGION STATUS CHECK (via Netlify function)
+async function checkRegionStatus() {
+  const statusDiv = document.getElementById("status");
+  const input = document.getElementById("summoner");
+  const btn = document.getElementById("searchBtn");
+
+  statusDiv.textContent = "Checking online status...";
+  statusDiv.className = "loading";
+
+  try {
+    const res = await fetch("/.netlify/functions/checkStatus");
+    if (!res.ok) throw new Error("Unable to reach status endpoint");
+    const data = await res.json();
+
+    if (data.allOnline) {
+      statusDiv.textContent = "✅ All regions online.";
+      statusDiv.className = "success";
+      input.disabled = false;
+      btn.disabled = false;
+    } else {
+      statusDiv.textContent = `⚠️ Offline / Maintenance: ${data.offlineRegions.join(", ")}`;
+      statusDiv.className = "error";
+    }
+  } catch (err) {
+    console.error("Status Check Error:", err);
+    statusDiv.textContent = "⚠️ Could not reach Riot servers.";
+    statusDiv.className = "error";
+  }
+}
+
+// 🔹 FETCH PROFILE FROM LEAGUE OF GRAPHS
 async function fetchProfile(name) {
   const url = `https://www.leagueofgraphs.com/summoner/na/${encodeURIComponent(name)}`;
   const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
@@ -170,6 +210,7 @@ async function fetchProfile(name) {
   return html;
 }
 
+// 🔹 PARSE SCRAPED DATA
 async function runScrape() {
   const name = document.getElementById("summoner").value.trim();
   const status = document.getElementById("status");
@@ -200,7 +241,6 @@ async function runScrape() {
       .slice(0,3)
       .map(el => el.textContent.trim());
 
-    // always use the local image
     const imgPath = "./METAMEDIA/lol.jpeg";
     document.getElementById("player-banner").style.backgroundImage = `url('${imgPath}')`;
     document.getElementById("player-img").src = imgPath;
