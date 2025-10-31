@@ -127,6 +127,34 @@ body {
 .home-btn { background: #111; border: 1px solid #00ffff; color: #00ffff; }
 .save-btn:hover, .home-btn:hover { transform: scale(1.05); }
 
+.mini-card {
+  margin-top: 18px;
+  width: 100%;
+  border: 2px solid #00ffff;
+  border-radius: 10px;
+  padding: 12px;
+  background: rgba(15,15,15,0.9);
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  box-shadow: 0 0 15px rgba(0,255,255,0.2);
+}
+.mini-card h4 {
+  text-align: center;
+  margin: 0 0 8px 0;
+  font-size: 15px;
+  color: #00ffff;
+  text-shadow: 0 0 8px #00ffff;
+}
+.mini-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #bfffe8;
+}
+.mini-stat b { color: #00ffff; }
+
 .status {
   margin-top: 16px;
   font-size: 14px;
@@ -160,13 +188,22 @@ body {
     <button class="home-btn" id="goto-home">Enter Home Room</button>
   </div>
 
+  <!-- 🔹 Mini Stat Card -->
+  <div class="mini-card" id="mini-card">
+    <h4>Summoner Stats</h4>
+    <div class="mini-stat"><b>Rank:</b> <span id="mini-rank">—</span></div>
+    <div class="mini-stat"><b>Level:</b> <span id="mini-level">—</span></div>
+    <div class="mini-stat"><b>Win Rate:</b> <span id="mini-ratio">—</span></div>
+    <div class="mini-stat"><b>Top Champs:</b> <span id="mini-champs">—</span></div>
+  </div>
+
   <div class="status" id="status"></div>
 </div>
 
 <script>
 window.addEventListener("DOMContentLoaded", checkRegionStatus);
 
-// 🔹 Check region status via Netlify Function
+// 🔹 Region status via Netlify
 async function checkRegionStatus() {
   const statusDiv = document.getElementById("status");
   const input = document.getElementById("summoner");
@@ -196,7 +233,7 @@ async function checkRegionStatus() {
   }
 }
 
-// 🔹 Fetch Summoner Info
+// 🔹 Scrape + Render
 async function fetchProfile(name) {
   const url = `https://www.leagueofgraphs.com/summoner/na/${encodeURIComponent(name)}`;
   const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
@@ -207,11 +244,11 @@ async function fetchProfile(name) {
   return html;
 }
 
-// 🔹 Scrape + Render
 async function runScrape() {
   const name = document.getElementById("summoner").value.trim();
   const status = document.getElementById("status");
   const profileIcon = document.getElementById("profile-icon");
+  const miniCard = document.getElementById("mini-card");
 
   if (!name) {
     status.textContent = "Enter a summoner name first.";
@@ -226,7 +263,6 @@ async function runScrape() {
     const statusRes = await fetch("/.netlify/functions/checkStatus");
     if (!statusRes.ok) throw new Error("Unable to verify Riot API status");
     const statusData = await statusRes.json();
-
     if (!statusData.allOnline) {
       status.textContent = `⚠️ Riot servers offline: ${statusData.offlineRegions.join(", ")}`;
       status.className = "status error";
@@ -239,12 +275,24 @@ async function runScrape() {
 
     const level = doc.querySelector(".bannerSubtitle")?.textContent.replace("Level","").trim() || "Unknown";
     const rankTier = doc.querySelector(".leagueTier")?.textContent.trim() || "Unranked";
+    const ratio = doc.querySelector(".ratio")?.textContent.trim() || "N/A";
+    const champs = Array.from(doc.querySelectorAll(".summoner-champion-name"))
+      .slice(0,3)
+      .map(el => el.textContent.trim())
+      .join(", ") || "—";
 
+    // Update main fields
     document.getElementById("player-name").textContent = name;
     document.getElementById("player-level").textContent = `Level ${level}`;
     document.getElementById("player-rank").textContent = rankTier;
+    profileIcon.src = "./METAMEDIA/lol.jpeg";
 
-    profileIcon.src = "./METAMEDIA/lol.jpeg"; // Always local image
+    // Update mini-card
+    document.getElementById("mini-rank").textContent = rankTier;
+    document.getElementById("mini-level").textContent = level;
+    document.getElementById("mini-ratio").textContent = ratio;
+    document.getElementById("mini-champs").textContent = champs;
+    miniCard.style.display = "flex";
 
     status.textContent = "✅ Profile loaded.";
     status.className = "status success";
