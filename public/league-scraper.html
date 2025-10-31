@@ -15,20 +15,17 @@ body {
   align-items: center;
   height: 100vh;
 }
-
 .selector-wrapper {
   border: 3px solid #00ffff;
   border-radius: 12px;
   background: rgba(10,10,10,0.9);
   box-shadow: 0 0 30px rgba(0,255,255,0.4);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 24px;
   width: 380px;
 }
-
 .selector-header {
   font-size: 22px;
   font-weight: bold;
@@ -38,7 +35,6 @@ body {
   margin-bottom: 20px;
   text-shadow: 0 0 10px #00ffff;
 }
-
 .search-row {
   display: flex;
   gap: 10px;
@@ -74,7 +70,6 @@ body {
   color: #777;
   cursor: not-allowed;
 }
-
 .profile-display {
   width: 200px;
   height: 200px;
@@ -92,7 +87,6 @@ body {
   height: 100%;
   object-fit: cover;
 }
-
 .summoner-name {
   font-size: 18px;
   margin-top: 10px;
@@ -109,7 +103,6 @@ body {
   color: #00ffff;
   text-shadow: 0 0 8px rgba(0,255,255,0.7);
 }
-
 .action-row {
   margin-top: 20px;
   display: flex;
@@ -127,6 +120,7 @@ body {
 .home-btn { background: #111; border: 1px solid #00ffff; color: #00ffff; }
 .save-btn:hover, .home-btn:hover { transform: scale(1.05); }
 
+/* ✅ Mini-card for real scrappable data only */
 .mini-card {
   margin-top: 18px;
   width: 100%;
@@ -188,13 +182,14 @@ body {
     <button class="home-btn" id="goto-home">Enter Home Room</button>
   </div>
 
-  <!-- 🔹 Mini Stat Card -->
+  <!-- ✅ Only the real scrappable stats -->
   <div class="mini-card" id="mini-card">
     <h4>Summoner Stats</h4>
-    <div class="mini-stat"><b>Rank:</b> <span id="mini-rank">—</span></div>
     <div class="mini-stat"><b>Level:</b> <span id="mini-level">—</span></div>
-    <div class="mini-stat"><b>Win Rate:</b> <span id="mini-ratio">—</span></div>
-    <div class="mini-stat"><b>Top Champs:</b> <span id="mini-champs">—</span></div>
+    <div class="mini-stat"><b>Rank:</b> <span id="mini-rank">—</span></div>
+    <div class="mini-stat"><b>LP:</b> <span id="mini-lp">—</span></div>
+    <div class="mini-stat"><b>Wins:</b> <span id="mini-wins">—</span></div>
+    <div class="mini-stat"><b>Losses:</b> <span id="mini-losses">—</span></div>
   </div>
 
   <div class="status" id="status"></div>
@@ -203,20 +198,16 @@ body {
 <script>
 window.addEventListener("DOMContentLoaded", checkRegionStatus);
 
-// 🔹 Region status via Netlify
 async function checkRegionStatus() {
   const statusDiv = document.getElementById("status");
   const input = document.getElementById("summoner");
   const btn = document.getElementById("searchBtn");
-
   statusDiv.textContent = "Checking online status...";
   statusDiv.className = "status loading";
-
   try {
     const res = await fetch("/.netlify/functions/checkStatus");
     if (!res.ok) throw new Error("Unable to reach status endpoint");
     const data = await res.json();
-
     if (data.allOnline) {
       statusDiv.textContent = "✅ All regions online.";
       statusDiv.className = "status success";
@@ -227,13 +218,11 @@ async function checkRegionStatus() {
       statusDiv.className = "status error";
     }
   } catch (err) {
-    console.error("Status Check Error:", err);
     statusDiv.textContent = "⚠️ Could not reach Riot servers.";
     statusDiv.className = "status error";
   }
 }
 
-// 🔹 Scrape + Render
 async function fetchProfile(name) {
   const url = `https://www.leagueofgraphs.com/summoner/na/${encodeURIComponent(name)}`;
   const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
@@ -247,57 +236,38 @@ async function fetchProfile(name) {
 async function runScrape() {
   const name = document.getElementById("summoner").value.trim();
   const status = document.getElementById("status");
-  const profileIcon = document.getElementById("profile-icon");
   const miniCard = document.getElementById("mini-card");
-
   if (!name) {
     status.textContent = "Enter a summoner name first.";
     status.className = "status error";
     return;
   }
-
-  status.textContent = "Verifying Riot API status...";
+  status.textContent = "Fetching data...";
   status.className = "status loading";
-
   try {
-    const statusRes = await fetch("/.netlify/functions/checkStatus");
-    if (!statusRes.ok) throw new Error("Unable to verify Riot API status");
-    const statusData = await statusRes.json();
-    if (!statusData.allOnline) {
-      status.textContent = `⚠️ Riot servers offline: ${statusData.offlineRegions.join(", ")}`;
-      status.className = "status error";
-      return;
-    }
-
-    status.textContent = "Fetching data...";
     const html = await fetchProfile(name);
     const doc = new DOMParser().parseFromString(html, "text/html");
 
     const level = doc.querySelector(".bannerSubtitle")?.textContent.replace("Level","").trim() || "Unknown";
     const rankTier = doc.querySelector(".leagueTier")?.textContent.trim() || "Unranked";
-    const ratio = doc.querySelector(".ratio")?.textContent.trim() || "N/A";
-    const champs = Array.from(doc.querySelectorAll(".summoner-champion-name"))
-      .slice(0,3)
-      .map(el => el.textContent.trim())
-      .join(", ") || "—";
+    const lp = doc.querySelector(".leaguePoints")?.textContent.trim() || "0 LP";
+    const wins = doc.querySelector(".wins")?.textContent.replace("Wins:","").trim() || "0";
+    const losses = doc.querySelector(".losses")?.textContent.replace("Losses:","").trim() || "0";
 
-    // Update main fields
     document.getElementById("player-name").textContent = name;
     document.getElementById("player-level").textContent = `Level ${level}`;
     document.getElementById("player-rank").textContent = rankTier;
-    profileIcon.src = "./METAMEDIA/lol.jpeg";
 
-    // Update mini-card
-    document.getElementById("mini-rank").textContent = rankTier;
     document.getElementById("mini-level").textContent = level;
-    document.getElementById("mini-ratio").textContent = ratio;
-    document.getElementById("mini-champs").textContent = champs;
+    document.getElementById("mini-rank").textContent = rankTier;
+    document.getElementById("mini-lp").textContent = lp;
+    document.getElementById("mini-wins").textContent = wins;
+    document.getElementById("mini-losses").textContent = losses;
     miniCard.style.display = "flex";
 
     status.textContent = "✅ Profile loaded.";
     status.className = "status success";
   } catch (err) {
-    console.error(err);
     status.textContent = "Error: " + err.message;
     status.className = "status error";
   }
