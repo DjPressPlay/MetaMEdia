@@ -3,180 +3,177 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>League of Legends MetaDock – Load Player</title>
+<title>League of Legends MetaDock – Summoner Setup</title>
 <style>
-:root {
-  --neon: #0f0;
-  --bg: #0a0a0a;
-  --panel: #111;
-}
 body {
-  background: var(--bg);
-  color: var(--neon);
-  font-family: 'Orbitron', monospace;
-  padding: 40px 20px;
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at center, #0a0a0a, #000);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.selector-wrapper {
+  border: 3px solid #00ffff;
+  border-radius: 12px;
+  background: rgba(10,10,10,0.9);
+  box-shadow: 0 0 30px rgba(0,255,255,0.4);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 24px;
+  width: 380px;
 }
-h3 { margin-bottom: 20px; }
 
-.search-box {
+.selector-header {
+  font-size: 22px;
+  font-weight: bold;
+  color: #00ffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px #00ffff;
+}
+
+.search-row {
   display: flex;
-  justify-content: center;
   gap: 10px;
-  margin-bottom: 25px;
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 20px;
 }
-input {
-  width: 280px;
-  padding: 10px;
-  background: var(--panel);
-  color: var(--neon);
-  border: 1px solid var(--neon);
-  font-size: 15px;
+.search-row input {
+  flex: 1;
+  background: #111;
+  border: 1px solid #00ffff;
   border-radius: 6px;
+  color: #fff;
+  padding: 8px 12px;
+  font-size: 14px;
 }
-button {
-  padding: 10px 20px;
-  background: var(--neon);
+.search-row button {
+  background: #00ffff;
   color: #000;
   border: none;
-  cursor: pointer;
-  font-weight: bold;
   border-radius: 6px;
+  padding: 8px 14px;
+  font-weight: bold;
+  cursor: pointer;
   transition: 0.2s;
 }
-button:hover { background: #0ff; }
-button:disabled {
+.search-row button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px #00ffff;
+}
+.search-row button:disabled {
   background: #333;
-  color: #666;
+  color: #777;
   cursor: not-allowed;
 }
 
-#player-container {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  background: linear-gradient(180deg,#0b0b0b 0%, #080808 100%);
-  border: 1px solid rgba(0,255,204,0.14);
+.profile-display {
+  width: 200px;
+  height: 200px;
+  border: 2px solid #00ffff;
   border-radius: 12px;
-  padding: 20px;
-  max-width: 420px;
-  width: 100%;
-  text-align: center;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-  position: relative;
-  overflow: hidden;
-  transition: transform .12s ease, box-shadow .12s ease;
-}
-
-#player-banner {
-  width: 100%;
-  height: 120px;
-  background: url("./METAMEDIA/lol.jpeg") center/cover no-repeat;
-  filter: brightness(0.45);
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-
-.player-img {
-  width: 104px;
-  height: 104px;
-  border-radius: 50%;
-  border: 2px solid rgba(0,255,204,0.95);
-  object-fit: cover;
-  margin-top: -52px;
-  background: #000 url("./METAMEDIA/lol.jpeg") center/cover no-repeat;
-  z-index: 2;
-  box-shadow: 0 6px 22px rgba(0,255,204,0.06);
-  transition: transform .14s ease;
-}
-.player-img:hover { transform: scale(1.03); }
-
-#player-name {
-  margin-top: 10px;
-  font-weight: 700;
-  font-size: 16px;
-  color: #eafff6;
-  letter-spacing: .4px;
-  text-shadow: 0 0 8px rgba(0,255,204,0.06);
-}
-
-.stats {
+  background: #111 url("./METAMEDIA/lol.jpeg") center/cover no-repeat;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: calc(100% - 36px);
-  margin-top: 14px;
-  align-items: stretch;
-  z-index: 2;
-}
-
-.stat {
-  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
-  border: 1px solid rgba(0,255,204,0.06);
-  border-radius: 8px;
-  padding: 8px 12px;
-  width: 100%;
-  text-align: left;
-  font-size: 13px;
-  color: #bfffe8;
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.01);
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 12px;
 }
-.stat b { font-weight:700; color:#eafff6; }
-
-.error { color:#ff6b6b; margin-top:14px; font-weight:600; }
-.loading { color:#ffd24d; margin-top:14px; font-weight:600; }
-.success { color:#00ff99; margin-top:14px; font-weight:600; }
-
-@media (max-width:420px){
-  #player-container { padding:14px; border-radius:10px; }
-  .player-img { width:88px; height:88px; margin-top:-44px; }
-  #player-banner { height:100px; }
-  .stat { font-size:13px; padding:7px 10px; }
+.profile-display img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
+
+.summoner-name {
+  font-size: 18px;
+  margin-top: 10px;
+  text-shadow: 0 0 8px #00ffff;
+}
+.summoner-level {
+  font-size: 13px;
+  color: #aaa;
+  margin-top: 4px;
+}
+.rank-display {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #00ffff;
+  text-shadow: 0 0 8px rgba(0,255,255,0.7);
+}
+
+.action-row {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+}
+.action-row button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.save-btn { background: #00ffff; color: #000; }
+.home-btn { background: #111; border: 1px solid #00ffff; color: #00ffff; }
+.save-btn:hover, .home-btn:hover { transform: scale(1.05); }
+
+.status {
+  margin-top: 16px;
+  font-size: 14px;
+  text-align: center;
+}
+.loading { color: #ffd24d; }
+.error { color: #ff6b6b; }
+.success { color: #00ff99; }
 </style>
 </head>
 <body>
-<h3>League of Legends MetaDock – Load Player</h3>
 
-<div class="search-box">
-  <input id="summoner" placeholder="Enter summoner name (e.g. cant type-1998)"
-         onkeypress="if(event.key==='Enter')runScrape()" disabled>
-  <button id="searchBtn" onclick="runScrape()" disabled>Search</button>
-</div>
+<div class="selector-wrapper">
+  <div class="selector-header">Summoner Setup</div>
 
-<div id="player-container">
-  <div id="player-banner"></div>
-  <img id="player-img" class="player-img" src="./METAMEDIA/lol.jpeg" alt="Summoner Icon">
-  <div id="player-name" class="stat"></div>
-  <div class="stats">
-    <div id="player-level" class="stat"></div>
-    <div id="player-rank" class="stat"></div>
-    <div id="player-lp" class="stat"></div>
-    <div id="player-wins" class="stat"></div>
-    <div id="player-losses" class="stat"></div>
-    <div id="player-ratio" class="stat"></div>
-    <div id="player-champs" class="stat"></div>
+  <div class="search-row">
+    <input id="summoner" placeholder="Enter Summoner Name..." onkeypress="if(event.key==='Enter')runScrape()" disabled>
+    <button id="searchBtn" onclick="runScrape()" disabled>Search</button>
   </div>
-</div>
 
-<div id="status"></div>
+  <div class="profile-display">
+    <img id="profile-icon" src="./METAMEDIA/lol.jpeg" alt="Profile Icon">
+  </div>
+
+  <div class="summoner-name" id="player-name">No Profile Loaded</div>
+  <div class="summoner-level" id="player-level"></div>
+  <div class="rank-display" id="player-rank"></div>
+
+  <div class="action-row">
+    <button class="save-btn" id="save-profile">Save Profile</button>
+    <button class="home-btn" id="goto-home">Enter Home Room</button>
+  </div>
+
+  <div class="status" id="status"></div>
+</div>
 
 <script>
 window.addEventListener("DOMContentLoaded", checkRegionStatus);
 
-// 🔹 REGION STATUS CHECK (via Netlify function)
+// 🔹 Check region status via Netlify Function
 async function checkRegionStatus() {
   const statusDiv = document.getElementById("status");
   const input = document.getElementById("summoner");
   const btn = document.getElementById("searchBtn");
 
   statusDiv.textContent = "Checking online status...";
-  statusDiv.className = "loading";
+  statusDiv.className = "status loading";
 
   try {
     const res = await fetch("/.netlify/functions/checkStatus");
@@ -185,21 +182,21 @@ async function checkRegionStatus() {
 
     if (data.allOnline) {
       statusDiv.textContent = "✅ All regions online.";
-      statusDiv.className = "success";
+      statusDiv.className = "status success";
       input.disabled = false;
       btn.disabled = false;
     } else {
-      statusDiv.textContent = `⚠️ Offline / Maintenance: ${data.offlineRegions.join(", ")}`;
-      statusDiv.className = "error";
+      statusDiv.textContent = `⚠️ Offline: ${data.offlineRegions.join(", ")}`;
+      statusDiv.className = "status error";
     }
   } catch (err) {
     console.error("Status Check Error:", err);
     statusDiv.textContent = "⚠️ Could not reach Riot servers.";
-    statusDiv.className = "error";
+    statusDiv.className = "status error";
   }
 }
 
-// 🔹 FETCH PROFILE FROM LEAGUE OF GRAPHS
+// 🔹 Fetch Summoner Info
 async function fetchProfile(name) {
   const url = `https://www.leagueofgraphs.com/summoner/na/${encodeURIComponent(name)}`;
   const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
@@ -210,22 +207,20 @@ async function fetchProfile(name) {
   return html;
 }
 
-// 🔹 PARSE SCRAPED DATA
+// 🔹 Scrape + Render
 async function runScrape() {
   const name = document.getElementById("summoner").value.trim();
   const status = document.getElementById("status");
-  const container = document.getElementById("player-container");
+  const profileIcon = document.getElementById("profile-icon");
 
   if (!name) {
     status.textContent = "Enter a summoner name first.";
-    status.className = "error";
-    container.style.display = "none";
+    status.className = "status error";
     return;
   }
 
   status.textContent = "Verifying Riot API status...";
-  status.className = "loading";
-  container.style.display = "none";
+  status.className = "status loading";
 
   try {
     const statusRes = await fetch("/.netlify/functions/checkStatus");
@@ -233,47 +228,30 @@ async function runScrape() {
     const statusData = await statusRes.json();
 
     if (!statusData.allOnline) {
-      status.textContent = `⚠️ Cannot search - Riot servers offline: ${statusData.offlineRegions.join(", ")}`;
-      status.className = "error";
+      status.textContent = `⚠️ Riot servers offline: ${statusData.offlineRegions.join(", ")}`;
+      status.className = "status error";
       return;
     }
 
     status.textContent = "Fetching data...";
-    status.className = "loading";
     const html = await fetchProfile(name);
     const doc = new DOMParser().parseFromString(html, "text/html");
 
     const level = doc.querySelector(".bannerSubtitle")?.textContent.replace("Level","").trim() || "Unknown";
     const rankTier = doc.querySelector(".leagueTier")?.textContent.trim() || "Unranked";
-    const lp = doc.querySelector(".leaguePoints")?.textContent.trim() || "0 LP";
-    const wins = doc.querySelector(".wins")?.textContent.replace("Wins:","").trim() || "0";
-    const losses = doc.querySelector(".losses")?.textContent.replace("Losses:","").trim() || "0";
-    const ratio = doc.querySelector(".ratio")?.textContent.trim() || "";
-    const champs = Array.from(doc.querySelectorAll(".summoner-champion-name"))
-      .slice(0,3)
-      .map(el => el.textContent.trim());
 
-    const imgPath = "./METAMEDIA/lol.jpeg";
-    document.getElementById("player-banner").style.backgroundImage = `url('${imgPath}')`;
-    document.getElementById("player-img").src = imgPath;
+    document.getElementById("player-name").textContent = name;
+    document.getElementById("player-level").textContent = `Level ${level}`;
+    document.getElementById("player-rank").textContent = rankTier;
 
-    document.getElementById("player-name").innerHTML = `<b>Summoner:</b> ${name}`;
-    document.getElementById("player-level").innerHTML = `<b>Level:</b> ${level}`;
-    document.getElementById("player-rank").innerHTML = `<b>Rank:</b> ${rankTier}`;
-    document.getElementById("player-lp").innerHTML = `<b>LP:</b> ${lp}`;
-    document.getElementById("player-wins").innerHTML = `<b>Wins:</b> ${wins}`;
-    document.getElementById("player-losses").innerHTML = `<b>Losses:</b> ${losses}`;
-    document.getElementById("player-ratio").innerHTML = ratio ? `<b>Win Rate:</b> ${ratio}` : "";
-    document.getElementById("player-champs").innerHTML = champs.length ? `<b>Top Champs:</b> ${champs.join(", ")}` : "";
+    profileIcon.src = "./METAMEDIA/lol.jpeg"; // Always local image
 
-    container.style.display = "flex";
-    status.textContent = "";
-    status.className = "";
+    status.textContent = "✅ Profile loaded.";
+    status.className = "status success";
   } catch (err) {
     console.error(err);
     status.textContent = "Error: " + err.message;
-    status.className = "error";
-    container.style.display = "none";
+    status.className = "status error";
   }
 }
 </script>
