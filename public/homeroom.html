@@ -649,96 +649,6 @@
 }
 
 
-  /*App 1 */
-
-  .league-profile {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 15px;
-  border-bottom: 1px solid rgba(0,255,255,0.2);
-}
-
-.summoner-icon {
-  position: relative;
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 3px solid #00ffff;
-  box-shadow: 0 0 15px rgba(0,255,255,0.4);
-}
-.summoner-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.level-tag {
-  position: absolute;
-  bottom: -6px;
-  right: -6px;
-  background: #00ffff;
-  color: #000;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 6px;
-  box-shadow: 0 0 10px rgba(0,255,255,0.7);
-}
-
-.summoner-info h2 {
-  font-size: 20px;
-  margin-bottom: 4px;
-  color: #00ffff;
-  text-shadow: 0 0 10px rgba(0,255,255,0.6);
-}
-.summoner-info p { margin: 2px 0; }
-
-.favorite-champion {
-  margin-top: 15px;
-  text-align: center;
-}
-.favorite-champion h3 {
-  color: #00ffff;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 6px;
-}
-.champion-card img {
-  width: 160px;
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0,255,255,0.4);
-}
-.champion-card p {
-  margin-top: 5px;
-  font-weight: 600;
-}
-
-.rank-summary {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-}
-.summary-grid {
-  display: flex;
-  gap: 30px;
-  text-align: center;
-}
-.summary-grid .value {
-  display: block;
-  font-size: 18px;
-  color: #00ffff;
-  text-shadow: 0 0 10px rgba(0,255,255,0.6);
-}
-.summary-grid .label {
-  font-size: 10px;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-  
-  
   
 </style>
 </head>
@@ -747,24 +657,24 @@
   <div class="frame">
 
     
-    
-<!-- 🩵 HUD Nameplate (League Stats Mode) -->
+<!-- 🩵 HUD Nameplate -->
 <div class="nameplate" id="hud">
   <div class="header">
-    <div class="name-text" id="hud-name">Summoner Name</div>
-    <div class="rank-badge" id="hud-badge"></div>
+    <div class="name-text" id="summoner-name"></div>
+    <div class="rank-badge" id="summoner-badge"></div>
   </div>
 
   <div class="stats-grid">
-    <div><div class="stat-value" id="hud-level">—</div><div class="stat-label">Level</div></div>
-    <div><div class="stat-value" id="hud-rank">—</div><div class="stat-label">Rank</div></div>
-    <div><div class="stat-value" id="hud-lp">—</div><div class="stat-label">LP</div></div>
-    <div><div class="stat-value" id="hud-wins">—</div><div class="stat-label">Wins</div></div>
-    <div><div class="stat-value" id="hud-losses">—</div><div class="stat-label">Losses</div></div>
-    <div><div class="stat-value" id="hud-winrate">—</div><div class="stat-label">WR%</div></div>
+    <div><div class="stat-value" id="summoner-level"></div><div class="stat-label">Level</div></div>
+    <div><div class="stat-value" id="summoner-rank"></div><div class="stat-label">Rank</div></div>
+    <div><div class="stat-value" id="summoner-lp"></div><div class="stat-label">LP</div></div>
+    <div><div class="stat-value" id="summoner-wins"></div><div class="stat-label">Wins</div></div>
+    <div><div class="stat-value" id="summoner-losses"></div><div class="stat-label">Losses</div></div>
   </div>
 </div>
 
+
+    
 <!-- 🔹 Frame inside ---------->
     <div class="room">
       <div class="wall-top"></div>
@@ -797,117 +707,35 @@
 
   <div class="mini-pc-screen">
     <div class="desktop">
-
-      <!-- 🧩 League Profile -->
-      <div class="app-icon" data-app="league">
-        <img src="https://upload.wikimedia.org/wikipedia/en/7/77/League_of_Legends_logo.png" alt="League Profile">
+      <div class="app-icon" data-app="reddit">
+        <img src="https://freelogopng.com/images/all_img/1658834095reddit-logo-png.png" alt="Reddit">
       </div>
 
-      <!-- 🧩 Match History -->
-      <div class="app-icon" data-app="history">
-        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="Match History">
+      <div class="app-icon" data-app="notes">
+        <img src="https://cdn-icons-png.flaticon.com/512/2965/2965358.png" alt="Notes">
       </div>
 
-      <!-- 🧩 SignalZ Connect -->
       <div class="app-icon" data-app="signalz">
-        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968778.png" alt="SignalZ Connect">
-      </div>
-
-    </div>
-  </div>
-</div>
-
-
-  <!-- 🔹 App 1: League — Summoner Profile ------------------>
-<div class="mini-app-window" id="app-league" style="display: none;">
-  <div class="app-header league-nav">
-    <span class="league-title">League — Summoner Profile</span>
-    <button class="close-app">×</button>
-  </div>
-
-  <div class="app-body league-body">
-    <!-- 🌌 Profile Overview -->
-    <section class="league-profile">
-      <div class="summoner-icon">
-        <img
-          id="summoner-icon"
-          src="https://ddragon.leagueoflegends.com/cdn/13.20.1/img/profileicon/29.png"
-          alt="Summoner Icon"
-        />
-        <div class="level-tag" id="summoner-level">LVL 99</div>
-      </div>
-
-      <div class="summoner-info">
-        <h2 id="summoner-name">Summoner Name</h2>
-        <p id="rank-tier">Rank — Gold II</p>
-        <p id="lp-info">73 LP · W: 21 / L: 14</p>
-      </div>
-    </section>
-
-    <!-- 🧩 Favorite Champion -->
-    <section class="favorite-champion">
-      <h3>Favorite Champion</h3>
-      <div class="champion-card">
-        <img
-          id="champion-icon"
-          src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_0.jpg"
-          alt="Champion Splash"
-        />
-        <p id="champion-name">Ezreal</p>
-      </div>
-    </section>
-
-    <!-- 📊 Summary Stats -->
-    <section class="rank-summary">
-      <div class="summary-grid">
-        <div><span class="value" id="winrate">60%</span><span class="label">Win Rate</span></div>
-        <div><span class="value" id="matches">35</span><span class="label">Matches</span></div>
-        <div><span class="value" id="tier">Gold II</span><span class="label">Tier</span></div>
-      </div>
-    </section>
-  </div>
-</div>
-
-<!-- 🔹 App 2: Match History ------------------>
-<div class="mini-app-window" id="app-history" style="display: none;">
-  <div class="app-header league-nav">
-    <span class="league-title">League — Match History</span>
-    <button class="close-app">×</button>
-  </div>
-  <div class="app-body league-body">
-    <h2>Recent Matches</h2>
-    <p>Displays the 10 most recent matches, including KDA and outcome.</p>
-    <ul class="match-list">
-      <li>Example Match — Jinx (12/4/8) — Win</li>
-      <li>Example Match — Yasuo (8/9/6) — Loss</li>
-      <li>Example Match — Ahri (5/3/14) — Win</li>
-    </ul>
-  </div>
-</div>
-
-<!-- 🔹 App 3: SignalZ Connect ------------------>
-<div class="mini-app-window" id="app-signalz" style="display: none;">
-  <div class="app-header league-nav">
-    <span class="league-title">SignalZ — Player Connect</span>
-    <button class="close-app">×</button>
-  </div>
-  <div class="app-body league-body">
-    <h2>Swipe to Connect</h2>
-    <p>Find and match with other Summoners. Swipe right to like, left to pass.</p>
-    <div class="signalz-profile">
-      <img src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_0.jpg"
-           alt="Player Profile"
-           style="width:100%;border-radius:10px;margin-top:10px;">
-      <div class="profile-info" style="margin-top:10px;text-align:center;">
-        <strong>Summoner: ArcaneShot</strong>
-        <p>Rank: Gold II — Main: Ezreal</p>
-      </div>
-      <div class="swipe-buttons" style="display:flex;justify-content:center;gap:20px;margin-top:15px;">
-        <button style="background:#ff4444;color:#fff;border:none;border-radius:50%;width:50px;height:50px;font-size:20px;">✖</button>
-        <button style="background:#44ff88;color:#000;border:none;border-radius:50%;width:50px;height:50px;font-size:20px;">❤</button>
+        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968778.png" alt="Signalz">
       </div>
     </div>
-  </div>
+
+    <!-- 🧩 Mini Apps ------------------------>
+  <div class="app-icon" data-app="league">
+  <img src="https://upload.wikimedia.org/wikipedia/en/7/77/League_of_Legends_logo.png" alt="League">
+</div>
+
+  <!-- 🔹 App 2 ------------------>
+    <div class="mini-app-window" id="app-notes" style="display: none;">
+      <h2>Notes App</h2>
+      <textarea placeholder="Type your notes here..."></textarea>
+    </div>
+ 
+  
+<div class="overlay-screen" id="screen2">
+  <button class="close-btn">×</button>
+  <h2>Screen Two</h2>
+  <p>This is the second in-game screen.</p>
 </div>
 
     
@@ -928,106 +756,57 @@
 </div>
 
  <!-- ✅ Game Controller ------------------------------------------------------------------------>
-<script>
-// ✅ New Game Controller — pull League Scraper data
-window.addEventListener("DOMContentLoaded", () => {
-  const saved = localStorage.getItem("summonerData");
-  if (!saved) return;
+<script type="module" src="src/gameController.js"></script>
+  <script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const room = document.querySelector('.room');
+    const character = document.querySelector('.character');
+    const charImg = document.getElementById('character-img');
+    const closeDot = document.getElementById('close');
+    const farDot = document.getElementById('far');
+    const wallTop = document.querySelector('.wall-top');
+    const wallLeft = document.querySelector('.wall-left');
+    const wallRight = document.querySelector('.wall-right');
 
-  const data = JSON.parse(saved);
-  const { name, level, rank, lp, wins, losses } = data;
-
-  document.getElementById("summoner-name").textContent = name || "";
-  document.getElementById("summoner-badge").style.backgroundImage = `url('badges/${rank || "Echo"}.png')`;
-  document.getElementById("summoner-level").textContent = level ?? "";
-  document.getElementById("summoner-rank").textContent = rank ?? "";
-  document.getElementById("summoner-lp").textContent = lp ?? "";
-  document.getElementById("summoner-wins").textContent = wins ?? "";
-  document.getElementById("summoner-losses").textContent = losses ?? "";
-});
-
-
-
-  // ==========================================================
-  // 🧍 Character Movement System (kept intact)
-  // ==========================================================
-  const closeDot = document.getElementById("close");
-  const farDot = document.getElementById("far");
-  const wallTop = document.querySelector(".wall-top");
-  const wallLeft = document.querySelector(".wall-left");
-  const wallRight = document.querySelector(".wall-right");
-
-  let lastX = null;
-
-  document.addEventListener("mousemove", (e) => {
-    const rect = room.getBoundingClientRect();
-    let x = e.clientX - rect.left;
-    let y = e.clientY - rect.top;
-
-    const wallTopHeight = rect.height * 0.55;
-    const wallLeftWidth = rect.width * 0.36;
-    const wallRightLimit = rect.width * 0.75;
-    const clampedY = Math.max(wallTopHeight, y);
-    const clampedX = Math.min(Math.max(wallLeftWidth, x), wallRightLimit);
-
-    character.style.left = `${clampedX}px`;
-    character.style.top = `${clampedY}px`;
-
-    if (lastX !== null) {
-      const movingRight = clampedX > lastX;
-      character.style.setProperty("--glow-side", movingRight ? "20%" : "80%");
+    const controller = window.MetaMeda;
+    const savedStyle = localStorage.getItem("selectedStyle");
+    let selectedCharacter = null;
+    
+    if (savedStyle) {
+      const styleObj = JSON.parse(savedStyle);
+      selectedCharacter = styleObj.name;
+      charImg.src = styleObj.img;
+      controller?.messenger?.info?.(`🏠 Loaded ${selectedCharacter} into Home Room.`);
+    } else {
+      selectedCharacter = controller?.state?.selectedCharacter;
+      if (selectedCharacter) {
+        const styles = {
+          MetaMan: "METAMEDIA/mm1.png",
+          ZettaGirl: "METAMEDIA/mm2.png",
+          ByteRogue: "METAMEDIA/mm3.png",
+          DreamCaster: "METAMEDIA/mm4.png",
+          ShadowLink: "METAMEDIA/mm5.png",
+          DataSaint: "METAMEDIA/mm6.png",
+          EchoNova: "METAMEDIA/mm7.png",
+          VibeDrifter: "METAMEDIA/mm8.png",
+          NullWarden: "METAMEDIA/mm9.png",
+          CryoCore: "METAMEDIA/mm10.png",
+          GlitchSoul: "METAMEDIA/mm11.png",
+          IronReign: "METAMEDIA/mm12.png",
+          OverseerZ: "METAMEDIA/mm13.png"
+        };
+        charImg.src = styles[selectedCharacter] || "METAMEDIA/mm1.png";
+      } else {
+        charImg.src = "METAMEDIA/mm1.png";
+      }
     }
-    lastX = clampedX;
-
-    const closeRect = closeDot.getBoundingClientRect();
-    const farRect = farDot.getBoundingClientRect();
-    const dxC = e.clientX - (closeRect.left + closeRect.width / 2);
-    const dyC = e.clientY - (closeRect.top + closeRect.height / 2);
-    const dxF = e.clientX - (farRect.left + farRect.width / 2);
-    const dyF = e.clientY - (farRect.top + farRect.height / 2);
-    const distClose = Math.hypot(dxC, dyC);
-    const distFar = Math.hypot(dxF, dyF);
-
-    const scale = 3.5 + (distFar - distClose) / 150;
-    character.style.transform = `translate(-50%, -50%) scale(${Math.max(
-      0.4,
-      Math.min(scale, 10.5)
-    )})`;
-
-    character.style.setProperty(
-      "--shadow-scale",
-      Math.max(0.4, Math.min(scale, 10.5))
-    );
-
-    checkHotspotProximity();
-  });
-
-  // 🔍 Hotspot proximity (unchanged)
-  function checkHotspotProximity() {
-    const hotspots = document.querySelectorAll(".hotspot");
-    const proximityThreshold = 120;
-    const charRect = character.getBoundingClientRect();
-    const charCenterX = charRect.left + charRect.width / 2;
-    const charCenterY = charRect.top + charRect.height / 2;
-
-    hotspots.forEach((hotspot) => {
-      const rect = hotspot.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const distance = Math.hypot(charCenterX - centerX, charCenterY - centerY);
-      hotspot.classList.toggle("near", distance < proximityThreshold);
-    });
-  }
-
-  // 👁️ Cursor visibility zones
-  const showCursor = () => (room.style.cursor = "default");
-  const hideCursor = () => (room.style.cursor = "none");
-  [wallTop, wallLeft, wallRight].forEach((w) => {
-    w.addEventListener("mouseenter", showCursor);
-    w.addEventListener("mouseleave", hideCursor);
-  });
-});
-
+if (savedStyle) {
+  const styleObj = JSON.parse(savedStyle);
+  selectedCharacter = styleObj.name;
+  charImg.src = styleObj.img;
+  document.getElementById("hud-name").textContent = selectedCharacter;
+  document.getElementById("hud-badge").style.backgroundImage = "url('badges/Echo.png')";
+}
 
 
   //==================================================================
@@ -1182,7 +961,7 @@ document.addEventListener('keydown', e => {
     
 //======MiniApps==============================================================
 
-// 🧩 Handle opening mini apps
+// Handle opening mini apps
 document.querySelectorAll('.app-icon').forEach(icon => {
   icon.addEventListener('click', () => {
     const appName = icon.dataset.app;
@@ -1191,153 +970,45 @@ document.querySelectorAll('.app-icon').forEach(icon => {
 });
 
 function openApp(appName) {
-  // 🧹 Close any currently open app window
+  // close previous app windows inside the mini-pc
   document.querySelectorAll('.app-window').forEach(w => w.remove());
 
   const win = document.createElement('div');
   win.className = 'app-window';
 
-  // =========================================================
-  // 🟦 1. League Profile App
-  // =========================================================
-  if (appName === "league") {
-    win.innerHTML = `
-      <div class="app-header league-nav">
-        <span class="league-title">League — Profile</span>
-        <button class="close-app">×</button>
+  // 🧩 Reddit mini-app
+ if (appName === "reddit") {
+  win.innerHTML = `
+    <div class="app-header reddit-nav">
+      <div class="reddit-left">
+        <img class="reddit-logo" src="https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-57x57.png" alt="reddit">
+        <span class="reddit-title">Reddit</span>
       </div>
-      <div class="app-body league-body">
-        <h2>Summoner Profile</h2>
-        <p>View your Summoner name, rank, and favorite champions.</p>
-        <div class="league-placeholder">
-          <img src="https://ddragon.leagueoflegends.com/cdn/13.20.1/img/profileicon/29.png"
-               alt="Summoner Icon"
-               style="width:90px;height:90px;border-radius:50%;margin-top:10px;">
-          <p style="margin-top:8px;">Player data will appear here soon.</p>
-        </div>
+      <div class="reddit-tabs">
+        <button class="tab active">Home</button>
+        <button class="tab">Popular</button>
+        <button class="tab">Explore</button>
       </div>
-    `;
-  }
+      <button class="close-app">×</button>
+    </div>
 
-  // =========================================================
-  // 🟨 2. Match History App
-  // =========================================================
-  else if (appName === "history") {
-    win.innerHTML = `
-      <div class="app-header league-nav">
-        <span class="league-title">League — Match History</span>
-        <button class="close-app">×</button>
+    <div class="app-body reddit-body">
+      <div class="reddit-feed" id="reddit-feed">
+        ${generateRandomPosts()}
       </div>
-      <div class="app-body league-body">
-        <h2>Recent Matches</h2>
-        <p>Displays your 10 most recent matches, including KDA and outcome.</p>
-        <ul class="match-list">
-          <li>Example Match — Jinx (12/4/8) — Win</li>
-          <li>Example Match — Yasuo (8/9/6) — Loss</li>
-          <li>Example Match — Ahri (5/3/14) — Win</li>
-        </ul>
-      </div>
-    `;
-  }
-
-  // =========================================================
-  // 🟥 3. SignalZ Connect App
-  // =========================================================
-  else if (appName === "signalz") {
-    win.innerHTML = `
-      <div class="app-header league-nav">
-        <span class="league-title">SignalZ — Player Connect</span>
-        <button class="close-app">×</button>
-      </div>
-      <div class="app-body league-body">
-        <h2>Swipe to Connect</h2>
-        <p>Find and match with other Summoners. Swipe right to like, left to pass.</p>
-        <div class="signalz-profile">
-          <img src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_0.jpg"
-               alt="Player Profile"
-               style="width:100%;border-radius:10px;margin-top:10px;">
-          <div class="profile-info" style="margin-top:10px;text-align:center;">
-            <strong>Summoner: ArcaneShot</strong>
-            <p>Rank: Gold II — Main: Ezreal</p>
-          </div>
-          <div class="swipe-buttons" style="display:flex;justify-content:center;gap:20px;margin-top:15px;">
-            <button style="background:#ff4444;color:#fff;border:none;border-radius:50%;width:50px;height:50px;font-size:20px;">✖</button>
-            <button style="background:#44ff88;color:#000;border:none;border-radius:50%;width:50px;height:50px;font-size:20px;">❤</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-// ========== LEAGUE APP LOGIC ==========
-
-const defaultSummoner = "Faker";
-
-async function loadLeagueProfile(summonerName = defaultSummoner) {
-  try {
-    const summonerEndpoint = `/lol/summoner/v4/summoners/by-name/${encodeURIComponent(summonerName)}`;
-    const summonerRes = await fetch(
-      `/api/riot-api?endpoint=${encodeURIComponent(summonerEndpoint)}&region=na1`
-    );
-    
-    if (!summonerRes.ok) {
-      throw new Error(`Failed to fetch summoner: ${summonerRes.status}`);
-    }
-    
-    const summoner = await summonerRes.json();
-
-    document.getElementById("summoner-name").textContent = summoner.name;
-    document.getElementById("summoner-icon").src =
-      `https://ddragon.leagueoflegends.com/cdn/13.20.1/img/profileicon/${summoner.profileIconId}.png`;
-    document.getElementById("summoner-level").textContent = `LVL ${summoner.summonerLevel}`;
-
-    const leagueEndpoint = `/lol/league/v4/entries/by-summoner/${summoner.id}`;
-    const leagueRes = await fetch(
-      `/api/riot-api?endpoint=${encodeURIComponent(leagueEndpoint)}&region=na1`
-    );
-    
-    if (!leagueRes.ok) {
-      throw new Error(`Failed to fetch ranked info: ${leagueRes.status}`);
-    }
-    
-    const ranks = await leagueRes.json();
-
-    const solo = ranks.find(r => r.queueType === "RANKED_SOLO_5x5");
-    if (solo) {
-      document.getElementById("rank-tier").textContent = `${solo.tier} ${solo.rank}`;
-      document.getElementById("lp-info").textContent = `${solo.leaguePoints} LP · W: ${solo.wins} / L: ${solo.losses}`;
-      const total = solo.wins + solo.losses;
-      const winrate = total ? Math.round((solo.wins / total) * 100) : 0;
-      document.getElementById("winrate").textContent = `${winrate}%`;
-      document.getElementById("tier").textContent = `${solo.tier} ${solo.rank}`;
-      document.getElementById("matches").textContent = total;
-    } else {
-      document.getElementById("rank-tier").textContent = "Unranked";
-      document.getElementById("lp-info").textContent = "";
-    }
-  } catch (err) {
-    console.error("Error loading League profile:", err);
-    document.getElementById("summoner-name").textContent = "Error loading profile";
-    document.getElementById("rank-tier").textContent = "Check console for details";
-  }
+    </div>
+  `;
 }
 
-// optional: auto-load when League app opens
-document.addEventListener("click", e => {
-  if (e.target.closest(".app-icon[data-app='league']")) {
-    // wait a tick for DOM creation, then load data
-    setTimeout(() => loadLeagueProfile(defaultSummoner), 600);
-  }
-});
 
-  // =========================================================
-  // 🧩 Append + Close Logic
-  // =========================================================
+  // ✅ append window inside the mini-pc-screen, not global body
   document.querySelector('.mini-pc-screen').appendChild(win);
+
+  // 🔻 close-button logic
   win.querySelector('.close-app').addEventListener('click', () => win.remove());
 }
 
 //======MiniApps End==========================================================
-
 
 
   //======================================================
