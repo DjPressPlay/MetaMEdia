@@ -928,57 +928,120 @@
 </div>
 
  <!-- ✅ Game Controller ------------------------------------------------------------------------>
-<script type="module" src="src/gameController.js"></script>
-  <script>
-  window.addEventListener("DOMContentLoaded", () => {
-    const room = document.querySelector('.room');
-    const character = document.querySelector('.character');
-    const charImg = document.getElementById('character-img');
-    const closeDot = document.getElementById('close');
-    const farDot = document.getElementById('far');
-    const wallTop = document.querySelector('.wall-top');
-    const wallLeft = document.querySelector('.wall-left');
-    const wallRight = document.querySelector('.wall-right');
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+  const room = document.querySelector(".room");
+  const character = document.querySelector(".character");
+  const charImg = document.getElementById("character-img");
 
-    const controller = window.MetaMeda;
-    const savedStyle = localStorage.getItem("selectedStyle");
-    let selectedCharacter = null;
-    
-    if (savedStyle) {
-      const styleObj = JSON.parse(savedStyle);
-      selectedCharacter = styleObj.name;
-      charImg.src = styleObj.img;
-      controller?.messenger?.info?.(`🏠 Loaded ${selectedCharacter} into Home Room.`);
-    } else {
-      selectedCharacter = controller?.state?.selectedCharacter;
-      if (selectedCharacter) {
-        const styles = {
-          MetaMan: "METAMEDIA/mm1.png",
-          ZettaGirl: "METAMEDIA/mm2.png",
-          ByteRogue: "METAMEDIA/mm3.png",
-          DreamCaster: "METAMEDIA/mm4.png",
-          ShadowLink: "METAMEDIA/mm5.png",
-          DataSaint: "METAMEDIA/mm6.png",
-          EchoNova: "METAMEDIA/mm7.png",
-          VibeDrifter: "METAMEDIA/mm8.png",
-          NullWarden: "METAMEDIA/mm9.png",
-          CryoCore: "METAMEDIA/mm10.png",
-          GlitchSoul: "METAMEDIA/mm11.png",
-          IronReign: "METAMEDIA/mm12.png",
-          OverseerZ: "METAMEDIA/mm13.png"
-        };
-        charImg.src = styles[selectedCharacter] || "METAMEDIA/mm1.png";
-      } else {
-        charImg.src = "METAMEDIA/mm1.png";
-      }
+  // 🔹 Get saved Summoner data
+  const savedSummoner = localStorage.getItem("savedSummoner");
+
+  // ✅ HUD population (Level, Rank, LP, Wins, Losses, WR)
+  if (savedSummoner) {
+    try {
+      const data = JSON.parse(savedSummoner);
+
+      document.getElementById("hud-name").textContent = data.name || "Unknown";
+      document.getElementById("hud-level").textContent = data.level || "—";
+      document.getElementById("hud-rank").textContent = data.rank || "Unranked";
+      document.getElementById("hud-lp").textContent = data.lp || "0 LP";
+      document.getElementById("hud-wins").textContent = data.wins || "0";
+      document.getElementById("hud-losses").textContent = data.losses || "0";
+      document.getElementById("hud-winrate").textContent = data.winrate || "—";
+
+      // temp placeholder until we call Riot for champion splash
+      charImg.src = "./METAMEDIA/lol.jpeg";
+      document.getElementById("hud-badge").style.backgroundImage =
+        "url('badges/Echo.png')";
+    } catch (err) {
+      console.error("⚠️ Failed to parse savedSummoner:", err);
     }
-if (savedStyle) {
-  const styleObj = JSON.parse(savedStyle);
-  selectedCharacter = styleObj.name;
-  charImg.src = styleObj.img;
-  document.getElementById("hud-name").textContent = selectedCharacter;
-  document.getElementById("hud-badge").style.backgroundImage = "url('badges/Echo.png')";
-}
+  } else {
+    // fallback: blank HUD
+    document.getElementById("hud-name").textContent = "No Summoner Loaded";
+  }
+
+  // ==========================================================
+  // 🧍 Character Movement System (kept intact)
+  // ==========================================================
+  const closeDot = document.getElementById("close");
+  const farDot = document.getElementById("far");
+  const wallTop = document.querySelector(".wall-top");
+  const wallLeft = document.querySelector(".wall-left");
+  const wallRight = document.querySelector(".wall-right");
+
+  let lastX = null;
+
+  document.addEventListener("mousemove", (e) => {
+    const rect = room.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+
+    const wallTopHeight = rect.height * 0.55;
+    const wallLeftWidth = rect.width * 0.36;
+    const wallRightLimit = rect.width * 0.75;
+    const clampedY = Math.max(wallTopHeight, y);
+    const clampedX = Math.min(Math.max(wallLeftWidth, x), wallRightLimit);
+
+    character.style.left = `${clampedX}px`;
+    character.style.top = `${clampedY}px`;
+
+    if (lastX !== null) {
+      const movingRight = clampedX > lastX;
+      character.style.setProperty("--glow-side", movingRight ? "20%" : "80%");
+    }
+    lastX = clampedX;
+
+    const closeRect = closeDot.getBoundingClientRect();
+    const farRect = farDot.getBoundingClientRect();
+    const dxC = e.clientX - (closeRect.left + closeRect.width / 2);
+    const dyC = e.clientY - (closeRect.top + closeRect.height / 2);
+    const dxF = e.clientX - (farRect.left + farRect.width / 2);
+    const dyF = e.clientY - (farRect.top + farRect.height / 2);
+    const distClose = Math.hypot(dxC, dyC);
+    const distFar = Math.hypot(dxF, dyF);
+
+    const scale = 3.5 + (distFar - distClose) / 150;
+    character.style.transform = `translate(-50%, -50%) scale(${Math.max(
+      0.4,
+      Math.min(scale, 10.5)
+    )})`;
+
+    character.style.setProperty(
+      "--shadow-scale",
+      Math.max(0.4, Math.min(scale, 10.5))
+    );
+
+    checkHotspotProximity();
+  });
+
+  // 🔍 Hotspot proximity (unchanged)
+  function checkHotspotProximity() {
+    const hotspots = document.querySelectorAll(".hotspot");
+    const proximityThreshold = 120;
+    const charRect = character.getBoundingClientRect();
+    const charCenterX = charRect.left + charRect.width / 2;
+    const charCenterY = charRect.top + charRect.height / 2;
+
+    hotspots.forEach((hotspot) => {
+      const rect = hotspot.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const distance = Math.hypot(charCenterX - centerX, charCenterY - centerY);
+      hotspot.classList.toggle("near", distance < proximityThreshold);
+    });
+  }
+
+  // 👁️ Cursor visibility zones
+  const showCursor = () => (room.style.cursor = "default");
+  const hideCursor = () => (room.style.cursor = "none");
+  [wallTop, wallLeft, wallRight].forEach((w) => {
+    w.addEventListener("mouseenter", showCursor);
+    w.addEventListener("mouseleave", hideCursor);
+  });
+});
+
 
 
   //==================================================================
