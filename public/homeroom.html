@@ -938,19 +938,21 @@ window.addEventListener("DOMContentLoaded", () => {
     try {
       const data = JSON.parse(savedSummoner);
 
-      // ✅ Push exactly what was saved — 
       document.getElementById("hud-name").textContent   = data.name     || "—";
       document.getElementById("hud-level").textContent  = data.level    || "—";
-      document.getElementById("hud-rank").textContent   = data.rankTier || "—";
+      document.getElementById("hud-rank").textContent   = data.rank || data.rankTier || "—";
       document.getElementById("hud-lp").textContent     = data.lp       || "—";
       document.getElementById("hud-wins").textContent   = data.wins     || "—";
       document.getElementById("hud-losses").textContent = data.losses   || "—";
-      document.getElementById("hud-winrate").textContent = "—"; // scrapper doesn’t save WR
+      
+      const wins = parseInt(data.wins) || 0;
+      const losses = parseInt(data.losses) || 0;
+      const total = wins + losses;
+      const winrate = total > 0 ? Math.round((wins / total) * 100) : 0;
+      document.getElementById("hud-winrate").textContent = total > 0 ? `${winrate}%` : "—";
 
-      // ✅ Match image location exactly as in scrapper
       charImg.src = "/METAMEDIA/lol.jpeg";
 
-      // ✅ Keep same badge for now
       document.getElementById("hud-badge").style.backgroundImage =
         "url('badges/Echo.png')";
 
