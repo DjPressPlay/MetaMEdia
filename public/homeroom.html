@@ -930,46 +930,40 @@
  <!-- ✅ Game Controller ------------------------------------------------------------------------>
 <script>
 window.addEventListener("DOMContentLoaded", () => {
-  const room = document.querySelector(".room");
-  const character = document.querySelector(".character");
   const charImg = document.getElementById("character-img");
 
-  // ✅ load from the same key used by the League scrapper
   const savedSummoner = localStorage.getItem("summonerData");
 
   if (savedSummoner) {
     try {
       const data = JSON.parse(savedSummoner);
 
-      // ✅ populate HUD with the saved summoner info
-      document.getElementById("hud-name").textContent = data.name || "Unknown";
-      document.getElementById("hud-level").textContent = data.level || "—";
-      document.getElementById("hud-rank").textContent = data.rank || data.rankTier || "Unranked";
-      document.getElementById("hud-lp").textContent = data.lp || "0 LP";
-      document.getElementById("hud-wins").textContent = data.wins || "0";
-      document.getElementById("hud-losses").textContent = data.losses || "0";
+      // ✅ Push exactly what was saved — 
+      document.getElementById("hud-name").textContent   = data.name     || "—";
+      document.getElementById("hud-level").textContent  = data.level    || "—";
+      document.getElementById("hud-rank").textContent   = data.rankTier || "—";
+      document.getElementById("hud-lp").textContent     = data.lp       || "—";
+      document.getElementById("hud-wins").textContent   = data.wins     || "—";
+      document.getElementById("hud-losses").textContent = data.losses   || "—";
+      document.getElementById("hud-winrate").textContent = "—"; // scrapper doesn’t save WR
 
-      // compute winrate if not already saved
-      const wins = parseInt(data.wins || 0);
-      const losses = parseInt(data.losses || 0);
-      const total = wins + losses;
-      const winrate = total > 0 ? Math.round((wins / total) * 100) + "%" : "—";
-      document.getElementById("hud-winrate").textContent = winrate;
-
-      // ✅ temp placeholder until Riot API splash call
+      // ✅ Match image location exactly as in scrapper
       charImg.src = "/METAMEDIA/lol.jpeg";
+
+      // ✅ Keep same badge for now
       document.getElementById("hud-badge").style.backgroundImage =
         "url('badges/Echo.png')";
 
-      console.log("🏠 Loaded Summoner:", data.name);
+      console.log("🏠 Loaded Summoner from local save:", data);
     } catch (err) {
       console.error("⚠️ Failed to parse summonerData:", err);
-      document.getElementById("hud-name").textContent = "Corrupted Data";
+      document.getElementById("hud-name").textContent = "Error loading save";
     }
   } else {
     document.getElementById("hud-name").textContent = "No Summoner Loaded";
   }
 });
+
 
 
   // ==========================================================
