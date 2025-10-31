@@ -223,11 +223,23 @@ async function runScrape() {
     return;
   }
 
-  status.textContent = "Fetching data...";
+  status.textContent = "Verifying Riot API status...";
   status.className = "loading";
   container.style.display = "none";
 
   try {
+    const statusRes = await fetch("/.netlify/functions/checkStatus");
+    if (!statusRes.ok) throw new Error("Unable to verify Riot API status");
+    const statusData = await statusRes.json();
+
+    if (!statusData.allOnline) {
+      status.textContent = `⚠️ Cannot search - Riot servers offline: ${statusData.offlineRegions.join(", ")}`;
+      status.className = "error";
+      return;
+    }
+
+    status.textContent = "Fetching data...";
+    status.className = "loading";
     const html = await fetchProfile(name);
     const doc = new DOMParser().parseFromString(html, "text/html");
 
