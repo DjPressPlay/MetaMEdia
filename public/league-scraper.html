@@ -196,6 +196,7 @@ body {
 </div>
 
 <script>
+<script>
 window.addEventListener("DOMContentLoaded", checkRegionStatus);
 
 async function checkRegionStatus() {
@@ -237,11 +238,16 @@ async function runScrape() {
   const name = document.getElementById("summoner").value.trim();
   const status = document.getElementById("status");
   const miniCard = document.getElementById("mini-card");
+  const confirmBtn = document.getElementById("save-profile");
+  const homeBtn = document.getElementById("goto-home");
+
+  homeBtn.disabled = true;
   if (!name) {
     status.textContent = "Enter a summoner name first.";
     status.className = "status error";
     return;
   }
+
   status.textContent = "Fetching data...";
   status.className = "status loading";
   try {
@@ -265,7 +271,20 @@ async function runScrape() {
     document.getElementById("mini-losses").textContent = losses;
     miniCard.style.display = "flex";
 
-    status.textContent = "✅ Profile loaded.";
+    // ✅ Auto-save right here
+    localStorage.setItem("summonerData", JSON.stringify({ name, level, rank: rankTier, lp, wins, losses }));
+
+    // 🔹 Change button to "Confirm" mode
+    confirmBtn.textContent = "Confirm Profile";
+    confirmBtn.disabled = false;
+    confirmBtn.style.background = "#ffd24d";
+    confirmBtn.style.color = "#000";
+
+    // lock home until confirmed
+    homeBtn.disabled = true;
+    homeBtn.style.opacity = "0.5";
+
+    status.textContent = "✅ Profile loaded. Please confirm to continue.";
     status.className = "status success";
   } catch (err) {
     status.textContent = "Error: " + err.message;
@@ -273,28 +292,27 @@ async function runScrape() {
   }
 }
 
- // 🔹 Save Profile Locally
+// 🔹 Confirm button
 document.getElementById("save-profile").addEventListener("click", () => {
-  const data = {
-    name: document.getElementById("player-name").textContent,
-    level: document.getElementById("mini-level").textContent,
-    rankTier: document.getElementById("mini-rank").textContent,
-    lp: document.getElementById("mini-lp").textContent,
-    wins: document.getElementById("mini-wins").textContent,
-    losses: document.getElementById("mini-losses").textContent
-  };
-  localStorage.setItem("summonerData", JSON.stringify(data));
-
   const status = document.getElementById("status");
-  status.textContent = "✅ Profile saved locally.";
+  const homeBtn = document.getElementById("goto-home");
+
+  status.textContent = "✅ Profile confirmed. You may enter the Home Room.";
   status.className = "status success";
+  homeBtn.disabled = false;
+  homeBtn.style.opacity = "1";
+  homeBtn.style.cursor = "pointer";
+  const confirmBtn = document.getElementById("save-profile");
+  confirmBtn.textContent = "Confirmed";
+  confirmBtn.style.background = "#00ff99";
+  confirmBtn.disabled = true;
 });
 
 // 🔹 Go to Home Room
 document.getElementById("goto-home").addEventListener("click", () => {
+  if (document.getElementById("goto-home").disabled) return;
   window.location.href = "homeroom.html";
 });
- 
 </script>
 </body>
 </html>
