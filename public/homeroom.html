@@ -449,11 +449,11 @@
 
 .closet-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
   justify-items: center;
   align-items: center;
-  max-height: 60vh;
+  max-height: 65vh;
   overflow-y: auto;
   padding: 20px;
   background: rgba(0, 0, 0, 0.5);
@@ -463,8 +463,8 @@
 
 .champion-card {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 140px;
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
@@ -832,7 +832,7 @@
   <div class="closet-container">
     <h2 style="color: #00ffff; margin-bottom: 20px;">Champion Closet</h2>
     <div id="closet-champions" class="closet-grid">
-      <p style="color: #aaa;">Loading champions from your recent match...</p>
+      <p style="color: #aaa;">Loading all champions...</p>
     </div>
   </div>
 </div>   
@@ -933,110 +933,64 @@
     
 
 async function loadClosetChampions() {
-  const summonerData = localStorage.getItem("summonerData");
-  if (!summonerData) {
-    document.getElementById("closet-champions").innerHTML = '<p style="color: #ff6b6b;">No summoner data found. Please login first.</p>';
-    return;
-  }
-
-  const data = JSON.parse(summonerData);
-  const puuid = data.puuid;
-
-  if (!puuid) {
-    document.getElementById("closet-champions").innerHTML = '<p style="color: #ff6b6b;">PUUID not found. Please refresh your profile.</p>';
-    return;
-  }
-
   try {
-    const matchIdsRes = await fetch(`/.netlify/functions/riot-api?endpoint=/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=1&region=americas`);
-    if (!matchIdsRes.ok) throw new Error("Failed to fetch match IDs");
-    
-    const matchIds = await matchIdsRes.json();
-    
-    if (!matchIds || matchIds.length === 0) {
-      document.getElementById("closet-champions").innerHTML = '<p style="color: #aaa;">No recent matches found.</p>';
-      return;
-    }
-
-    const recentMatchId = matchIds[0];
-    
-    const matchRes = await fetch(`/.netlify/functions/riot-api?endpoint=/lol/match/v5/matches/${recentMatchId}&region=americas`);
-    if (!matchRes.ok) throw new Error("Failed to fetch match details");
-    
-    const matchData = await matchRes.json();
-    
-    const participants = matchData.info.participants;
-    const summoner = participants.find(p => p.puuid === puuid);
-    
-    if (!summoner) {
-      document.getElementById("closet-champions").innerHTML = '<p style="color: #ff6b6b;">Could not find summoner in match.</p>';
-      return;
-    }
-
-    const teamId = summoner.teamId;
-    const teamChampions = participants.filter(p => p.teamId === teamId);
-
     const championsRes = await fetch('https://ddragon.leagueoflegends.com/cdn/14.1.1/data/en_US/champion.json');
     if (!championsRes.ok) throw new Error("Failed to fetch champion data");
     
     const championsData = await championsRes.json();
-    const championMap = {};
-    
-    for (const champKey in championsData.data) {
-      const champ = championsData.data[champKey];
-      championMap[champ.key] = champ.id;
-    }
-
     const closetContainer = document.getElementById("closet-champions");
     closetContainer.innerHTML = '';
 
-    teamChampions.forEach(participant => {
-      const championId = participant.championId.toString();
-      const championName = championMap[championId];
+    const championsList = Object.values(championsData.data).sort((a, b) => a.name.localeCompare(b.name));
+
+    championsList.forEach(champ => {
+      const championName = champ.id;
+      const championCard = document.createElement('div');
+      championCard.className = 'champion-card';
+      championCard.setAttribute('data-name', championName);
       
-      if (championName) {
-        const championCard = document.createElement('div');
-        championCard.className = 'champion-card';
-        championCard.setAttribute('data-name', championName);
-        championCard.setAttribute('data-champion-id', championId);
-        
-        if (selectedCharacter === championName) {
-          championCard.classList.add('selected');
-        }
-        
-        const championImg = document.createElement('img');
+      if (selectedCharacter === championName) {
+        championCard.classList.add('selected');
+      }
+      
+      const championImg = document.createElement('img');
+      const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championName}_0.jpg`;
+      championImg.src = splashUrl;
+      championImg.alt = championName;
+      
+      championImg.onerror = () => {
+        console.warn(`Splash art failed to load for ${championName}, trying thumbnail`);
         championImg.src = `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${championName}.png`;
-        championImg.alt = championName;
-        
-        championCard.addEventListener('click', () => {
-          document.querySelectorAll('.champion-card').forEach(card => {
-            card.classList.remove('selected');
-          });
-          
-          championCard.classList.add('selected');
-          
-          const charImg = document.getElementById('character-img');
-          const renderUrl = `https://wiki.leagueoflegends.com/en-us/images/${championName}_Render.png`;
-          
-          charImg.onerror = () => {
-            console.warn(`Render image failed to load for ${championName}, using thumbnail`);
-            charImg.src = `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${championName}.png`;
-          };
-          
-          charImg.src = renderUrl;
-          
-          selectedCharacter = championName;
-          localStorage.setItem('selectedChampion', championName);
-          
-          console.log(`Selected champion: ${championName}, using render image`);
+      };
+      
+      championCard.addEventListener('click', () => {
+        document.querySelectorAll('.champion-card').forEach(card => {
+          card.classList.remove('selected');
         });
         
-        championCard.appendChild(championImg);
-        closetContainer.appendChild(championCard);
-      }
+        championCard.classList.add('selected');
+        
+        const charImg = document.getElementById('character-img');
+        const renderUrl = `https://wiki.leagueoflegends.com/en-us/images/${championName}_Render.png`;
+        
+        charImg.onerror = () => {
+          console.warn(`Render image failed to load for ${championName}, using thumbnail`);
+          charImg.src = `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${championName}.png`;
+        };
+        
+        charImg.src = renderUrl;
+        
+        selectedCharacter = championName;
+        localStorage.setItem('selectedChampion', championName);
+        
+        console.log(`Selected champion: ${championName}, using render image`);
+      });
+      
+      championCard.appendChild(championImg);
+      closetContainer.appendChild(championCard);
     });
 
-    console.log(`Loaded ${teamChampions.length} champions from recent match`);
+    console.log(`Loaded ${championsList.length} champions`);
     
   } catch (err) {
     console.error('Error loading closet champions:', err);
