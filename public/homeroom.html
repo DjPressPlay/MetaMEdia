@@ -49,10 +49,15 @@
     transform:translate(-50%,-50%);
     pointer-events:none;
     transition:transform 0.05s linear;
+    overflow:hidden;
   }
 
   .character img {
-    width:100%; height:100%; object-fit:cover; border-radius:12px;
+    width:100%; 
+    height:100%; 
+    object-fit:cover; 
+    object-position:center top;
+    border-radius:12px;
   }
 
 .character::before {
@@ -462,6 +467,12 @@
   border-color: #00ffff;
 }
 
+.champion-card.selected {
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.9), 0 0 50px rgba(0, 255, 255, 1);
+  transform: scale(1.1);
+}
+
 .champion-card img {
   width: 100%;
   height: 100%;
@@ -836,7 +847,7 @@
 
     const controller = window.MetaMeda;
     const savedStyle = localStorage.getItem("selectedStyle");
-    let selectedCharacter = null;
+    let selectedCharacter = localStorage.getItem('selectedChampion') || null;
     
     async function loadRiotProfile() {
       const summonerData = localStorage.getItem("summonerData");
@@ -856,12 +867,20 @@
       
       const badgeEl = document.getElementById('summoner-badge');
       
-      if (data.profileIconUrl) {
+      if (selectedCharacter) {
+        const championSplashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selectedCharacter}_0.jpg`;
+        charImg.src = championSplashUrl;
+        console.log(`Restored selected champion: ${selectedCharacter}`);
+      } else if (data.profileIconUrl) {
         charImg.src = data.profileIconUrl;
         badgeEl.style.backgroundImage = `url(${data.profileIconUrl})`;
       } else {
         charImg.src = "./METAMEDIA/lol.jpeg";
         badgeEl.style.backgroundImage = `url(./METAMEDIA/lol.jpeg)`;
+      }
+      
+      if (data.profileIconUrl && !selectedCharacter) {
+        badgeEl.style.backgroundImage = `url(${data.profileIconUrl})`;
       }
       
       try {
@@ -878,7 +897,11 @@
         const profileIconId = summonerApiData.profileIconId;
         
         const riotIconUrl = `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/profileicon/${profileIconId}.png`;
-        charImg.src = riotIconUrl;
+        
+        if (!selectedCharacter) {
+          charImg.src = riotIconUrl;
+        }
+        
         badgeEl.style.backgroundImage = `url(${riotIconUrl})`;
         
         const updatedData = { ...data, profileIconUrl: riotIconUrl, puuid };
@@ -959,10 +982,32 @@ async function loadClosetChampions() {
         const championCard = document.createElement('div');
         championCard.className = 'champion-card';
         championCard.setAttribute('data-name', championName);
+        championCard.setAttribute('data-champion-id', championId);
+        
+        if (selectedCharacter === championName) {
+          championCard.classList.add('selected');
+        }
         
         const championImg = document.createElement('img');
         championImg.src = `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${championName}.png`;
         championImg.alt = championName;
+        
+        championCard.addEventListener('click', () => {
+          document.querySelectorAll('.champion-card').forEach(card => {
+            card.classList.remove('selected');
+          });
+          
+          championCard.classList.add('selected');
+          
+          const charImg = document.getElementById('character-img');
+          const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championName}_0.jpg`;
+          charImg.src = splashUrl;
+          
+          selectedCharacter = championName;
+          localStorage.setItem('selectedChampion', championName);
+          
+          console.log(`Selected champion: ${championName}`);
+        });
         
         championCard.appendChild(championImg);
         closetContainer.appendChild(championCard);
