@@ -423,6 +423,67 @@
   100% { transform: translate(-10%, -20%) rotate(-2deg); }
 }
 
+.closet-container {
+  width: 90%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px;
+}
+
+.closet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 20px;
+  justify-items: center;
+  align-items: center;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.champion-card {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 2px solid rgba(0, 255, 255, 0.4);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.champion-card:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+  border-color: #00ffff;
+}
+
+.champion-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.champion-card::after {
+  content: attr(data-name);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.85);
+  color: #00ffff;
+  padding: 4px;
+  font-size: 11px;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
 /* 🏷️ Floating label for proximity detection */
 .hotspot::before {
  
@@ -733,19 +794,22 @@
       <textarea placeholder="Type your notes here..."></textarea>
     </div>
  
-  
-<div class="overlay-screen" id="screen2">
-  <button class="close-btn">×</button>
-  <h2>Screen Two</h2>
-  <p>This is the second in-game screen.</p>
-</div>
-
-    
        
   <!-- 🔹 App 3------------------>
     <div class="mini-app-window" id="app-signalz" style="display: none;">
       <h2>SignalZ Hub</h2>
       <p>Future integration point for live SignalZ feed.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 🔹 SEPARATE Champion Closet Overlay (screen2) -->
+<div class="overlay-screen" id="screen2">
+  <button class="close-btn">×</button>
+  <div class="closet-container">
+    <h2 style="color: #00ffff; margin-bottom: 20px;">Champion Closet</h2>
+    <div id="closet-champions" class="closet-grid">
+      <p style="color: #aaa;">Loading champions from your recent match...</p>
     </div>
   </div>
 </div>   
@@ -828,6 +892,97 @@
     
     loadRiotProfile();
     
+
+async function loadClosetChampions() {
+  const summonerData = localStorage.getItem("summonerData");
+  if (!summonerData) {
+    document.getElementById("closet-champions").innerHTML = '<p style="color: #ff6b6b;">No summoner data found. Please login first.</p>';
+    return;
+  }
+
+  const data = JSON.parse(summonerData);
+  const puuid = data.puuid;
+
+  if (!puuid) {
+    document.getElementById("closet-champions").innerHTML = '<p style="color: #ff6b6b;">PUUID not found. Please refresh your profile.</p>';
+    return;
+  }
+
+  try {
+    const matchIdsRes = await fetch(`/.netlify/functions/riot-api?endpoint=/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=1&region=americas`);
+    if (!matchIdsRes.ok) throw new Error("Failed to fetch match IDs");
+    
+    const matchIds = await matchIdsRes.json();
+    
+    if (!matchIds || matchIds.length === 0) {
+      document.getElementById("closet-champions").innerHTML = '<p style="color: #aaa;">No recent matches found.</p>';
+      return;
+    }
+
+    const recentMatchId = matchIds[0];
+    
+    const matchRes = await fetch(`/.netlify/functions/riot-api?endpoint=/lol/match/v5/matches/${recentMatchId}&region=americas`);
+    if (!matchRes.ok) throw new Error("Failed to fetch match details");
+    
+    const matchData = await matchRes.json();
+    
+    const participants = matchData.info.participants;
+    const summoner = participants.find(p => p.puuid === puuid);
+    
+    if (!summoner) {
+      document.getElementById("closet-champions").innerHTML = '<p style="color: #ff6b6b;">Could not find summoner in match.</p>';
+      return;
+    }
+
+    const teamId = summoner.teamId;
+    const teamChampions = participants.filter(p => p.teamId === teamId);
+
+    const championsRes = await fetch('https://ddragon.leagueoflegends.com/cdn/14.1.1/data/en_US/champion.json');
+    if (!championsRes.ok) throw new Error("Failed to fetch champion data");
+    
+    const championsData = await championsRes.json();
+    const championMap = {};
+    
+    for (const champKey in championsData.data) {
+      const champ = championsData.data[champKey];
+      championMap[champ.key] = champ.id;
+    }
+
+    const closetContainer = document.getElementById("closet-champions");
+    closetContainer.innerHTML = '';
+
+    teamChampions.forEach(participant => {
+      const championId = participant.championId.toString();
+      const championName = championMap[championId];
+      
+      if (championName) {
+        const championCard = document.createElement('div');
+        championCard.className = 'champion-card';
+        championCard.setAttribute('data-name', championName);
+        
+        const championImg = document.createElement('img');
+        championImg.src = `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${championName}.png`;
+        championImg.alt = championName;
+        
+        championCard.appendChild(championImg);
+        closetContainer.appendChild(championCard);
+      }
+    });
+
+    console.log(`Loaded ${teamChampions.length} champions from recent match`);
+    
+  } catch (err) {
+    console.error('Error loading closet champions:', err);
+    document.getElementById("closet-champions").innerHTML = `<p style="color: #ff6b6b;">Error: ${err.message}</p>`;
+  }
+}
+
+const spot2 = document.getElementById('spot2');
+if (spot2) {
+  spot2.addEventListener('click', () => {
+    loadClosetChampions();
+  });
+}
 
 
   //==================================================================
