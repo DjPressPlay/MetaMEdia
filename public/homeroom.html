@@ -56,7 +56,7 @@
     width:100%; 
     height:100%; 
     object-fit:cover; 
-    object-position:center top;
+    object-position:center center;
     border-radius:12px;
   }
 
@@ -868,9 +868,13 @@
       const badgeEl = document.getElementById('summoner-badge');
       
       if (selectedCharacter) {
-        const championSplashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selectedCharacter}_0.jpg`;
-        charImg.src = championSplashUrl;
-        console.log(`Restored selected champion: ${selectedCharacter}`);
+        const championRenderUrl = `https://wiki.leagueoflegends.com/en-us/images/${selectedCharacter}_Render.png`;
+        charImg.onerror = () => {
+          console.warn(`Render image failed to load for ${selectedCharacter}, using thumbnail`);
+          charImg.src = `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${selectedCharacter}.png`;
+        };
+        charImg.src = championRenderUrl;
+        console.log(`Restored selected champion: ${selectedCharacter} with render image`);
       } else if (data.profileIconUrl) {
         charImg.src = data.profileIconUrl;
         badgeEl.style.backgroundImage = `url(${data.profileIconUrl})`;
@@ -1000,13 +1004,19 @@ async function loadClosetChampions() {
           championCard.classList.add('selected');
           
           const charImg = document.getElementById('character-img');
-          const splashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championName}_0.jpg`;
-          charImg.src = splashUrl;
+          const renderUrl = `https://wiki.leagueoflegends.com/en-us/images/${championName}_Render.png`;
+          
+          charImg.onerror = () => {
+            console.warn(`Render image failed to load for ${championName}, using thumbnail`);
+            charImg.src = `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${championName}.png`;
+          };
+          
+          charImg.src = renderUrl;
           
           selectedCharacter = championName;
           localStorage.setItem('selectedChampion', championName);
           
-          console.log(`Selected champion: ${championName}`);
+          console.log(`Selected champion: ${championName}, using render image`);
         });
         
         championCard.appendChild(championImg);
