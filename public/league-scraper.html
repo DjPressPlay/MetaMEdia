@@ -196,7 +196,17 @@ body {
 </div>
 
 <script>
-window.addEventListener("DOMContentLoaded", checkRegionStatus);
+  // 🔹 Preload handshake for faster real scrape
+window.addEventListener("DOMContentLoaded", () => {
+  // dummy fetch to warm up DNS/TLS/connection
+  fetch("https://www.leagueofgraphs.com/summoner/na/placeholder").catch(() => {});
+
+  // then continue with your existing setup
+  checkRegionStatus();
+});
+
+  
+
 
 async function checkRegionStatus() {
   const statusDiv = document.getElementById("status");
