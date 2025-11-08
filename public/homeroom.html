@@ -772,6 +772,18 @@
     const savedStyle = localStorage.getItem("selectedStyle");
     let selectedCharacter = null;
     
+    // Load summoner data from localStorage
+    const summonerData = localStorage.getItem("summonerData");
+    if (summonerData) {
+      const data = JSON.parse(summonerData);
+      document.getElementById("summoner-name").textContent = data.name || "Unknown";
+      document.getElementById("summoner-level").textContent = data.level || "—";
+      document.getElementById("summoner-rank").textContent = data.rank || "Unranked";
+      document.getElementById("summoner-lp").textContent = data.lp || "0 LP";
+      document.getElementById("summoner-wins").textContent = data.wins || "0";
+      document.getElementById("summoner-losses").textContent = data.losses || "0";
+    }
+    
     if (savedStyle) {
       const styleObj = JSON.parse(savedStyle);
       selectedCharacter = styleObj.name;
