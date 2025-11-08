@@ -260,7 +260,7 @@ async function fetchProfile(name, tagLine) {
   return html;
 }
 
-async function runScrape() {
+async function runScrape(retryAttempt = 0) {
   const name = document.getElementById("summoner").value.trim();
   const tagLineInput = document.getElementById("tagline").value.trim();
   const tagLine = tagLineInput.startsWith('#') ? tagLineInput.slice(1) : tagLineInput || "NA1";
@@ -277,7 +277,7 @@ async function runScrape() {
     return;
   }
 
-  status.textContent = "Fetching data from League of Graphs...";
+  status.textContent = retryAttempt > 0 ? "Retrying search..." : "Fetching data from League of Graphs...";
   status.className = "status loading";
   try {
     const html = await fetchProfile(name, tagLine);
@@ -335,6 +335,12 @@ async function runScrape() {
     status.textContent = "✅ Profile loaded. Please confirm to continue.";
     status.className = "status success";
   } catch (err) {
+    if (retryAttempt === 0) {
+      status.textContent = "Search failed. Retrying automatically...";
+      status.className = "status loading";
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      return runScrape(1);
+    }
     status.textContent = "Error: " + err.message;
     status.className = "status error";
   }
