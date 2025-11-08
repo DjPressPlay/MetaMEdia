@@ -43,13 +43,18 @@ body {
   margin-bottom: 20px;
 }
 .search-row input {
-  flex: 1;
   background: #111;
   border: 1px solid #00ffff;
   border-radius: 6px;
   color: #fff;
   padding: 8px 12px;
   font-size: 14px;
+}
+.search-row input:first-of-type {
+  flex: 2;
+}
+.search-row input:nth-of-type(2) {
+  flex: 1;
 }
 .search-row button {
   background: #00ffff;
@@ -165,7 +170,8 @@ body {
   <div class="selector-header">Summoner Setup</div>
 
   <div class="search-row">
-    <input id="summoner" placeholder="Enter Summoner Name..." onkeypress="if(event.key==='Enter')runScrape()" disabled>
+    <input id="summoner" placeholder="Game Name" onkeypress="if(event.key==='Enter')runScrape()" disabled>
+    <input id="tagline" placeholder="#NA1" onkeypress="if(event.key==='Enter')runScrape()" disabled>
     <button id="searchBtn" onclick="runScrape()" disabled>Search</button>
   </div>
 
@@ -211,30 +217,41 @@ window.addEventListener("DOMContentLoaded", () => {
 async function checkRegionStatus() {
   const statusDiv = document.getElementById("status");
   const input = document.getElementById("summoner");
+  const tagInput = document.getElementById("tagline");
   const btn = document.getElementById("searchBtn");
-  statusDiv.textContent = "Checking online status...";
-  statusDiv.className = "status loading";
+  
   try {
+    statusDiv.textContent = "Checking Riot server status...";
+    statusDiv.className = "status loading";
+    
     const res = await fetch("/.netlify/functions/checkStatus");
-    if (!res.ok) throw new Error("Unable to reach status endpoint");
+    if (!res.ok) throw new Error("Failed to check server status");
+    
     const data = await res.json();
+    
     if (data.allOnline) {
-      statusDiv.textContent = "✅ All regions online.";
+      statusDiv.textContent = "All servers online. Ready to search!";
       statusDiv.className = "status success";
-      input.disabled = false;
-      btn.disabled = false;
     } else {
-      statusDiv.textContent = `⚠️ Offline: ${data.offlineRegions.join(", ")}`;
-      statusDiv.className = "status error";
+      statusDiv.textContent = `Some servers offline: ${data.offlineRegions.join(', ')}. You can still search.`;
+      statusDiv.className = "status loading";
     }
+    
+    input.disabled = false;
+    tagInput.disabled = false;
+    btn.disabled = false;
   } catch (err) {
-    statusDiv.textContent = "⚠️ Could not reach Riot servers.";
+    statusDiv.textContent = "Unable to check server status. You can still search.";
     statusDiv.className = "status error";
+    input.disabled = false;
+    tagInput.disabled = false;
+    btn.disabled = false;
   }
 }
 
-async function fetchProfile(name) {
-  const url = `https://www.leagueofgraphs.com/summoner/na/${encodeURIComponent(name)}`;
+async function fetchProfile(name, tagLine) {
+  const searchName = `${name}-${tagLine}`.toLowerCase().replace(/#/g, '');
+  const url = `https://www.leagueofgraphs.com/summoner/na/${encodeURIComponent(searchName)}`;
   const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
   const res = await fetch(proxied);
   if (!res.ok) throw new Error("Failed to load player page");
@@ -245,10 +262,13 @@ async function fetchProfile(name) {
 
 async function runScrape() {
   const name = document.getElementById("summoner").value.trim();
+  const tagLineInput = document.getElementById("tagline").value.trim();
+  const tagLine = tagLineInput.startsWith('#') ? tagLineInput.slice(1) : tagLineInput || "NA1";
   const status = document.getElementById("status");
   const miniCard = document.getElementById("mini-card");
   const confirmBtn = document.getElementById("save-profile");
   const homeBtn = document.getElementById("goto-home");
+  const profileIcon = document.getElementById("profile-icon");
 
   homeBtn.disabled = true;
   if (!name) {
@@ -257,19 +277,32 @@ async function runScrape() {
     return;
   }
 
-  status.textContent = "Fetching data...";
+  status.textContent = "Fetching data from League of Graphs...";
   status.className = "status loading";
   try {
-    const html = await fetchProfile(name);
+    const html = await fetchProfile(name, tagLine);
     const doc = new DOMParser().parseFromString(html, "text/html");
 
-    const level = doc.querySelector(".bannerSubtitle")?.textContent.replace("Level","").trim() || "Unknown";
+    const levelText = doc.querySelector(".bannerSubtitle")?.textContent || "";
+    const level = levelText.replace(/Level/gi, "").trim() || "Unknown";
+    
     const rankTier = doc.querySelector(".leagueTier")?.textContent.trim() || "Unranked";
     const lp = doc.querySelector(".leaguePoints")?.textContent.trim() || "0 LP";
-    const wins = doc.querySelector(".wins")?.textContent.replace("Wins:","").trim() || "0";
-    const losses = doc.querySelector(".losses")?.textContent.replace("Losses:","").trim() || "0";
+    
+    const winsText = doc.querySelector(".wins")?.textContent || "0";
+    const wins = winsText.replace(/Wins:/gi, "").trim();
+    
+    const lossesText = doc.querySelector(".losses")?.textContent || "0";
+    const losses = lossesText.replace(/Losses:/gi, "").trim();
 
-    document.getElementById("player-name").textContent = name;
+    const profileIconElement = doc.querySelector(".summonerProfileImage img");
+    let profileIconUrl = "./METAMEDIA/lol.jpeg";
+    if (profileIconElement && profileIconElement.src) {
+      profileIconUrl = profileIconElement.src;
+    }
+
+    profileIcon.src = profileIconUrl;
+    document.getElementById("player-name").textContent = `${name}#${tagLine}`;
     document.getElementById("player-level").textContent = `Level ${level}`;
     document.getElementById("player-rank").textContent = rankTier;
 
@@ -280,16 +313,22 @@ async function runScrape() {
     document.getElementById("mini-losses").textContent = losses;
     miniCard.style.display = "flex";
 
-    // ✅ Auto-save right here
-    localStorage.setItem("summonerData", JSON.stringify({ name, level, rank: rankTier, lp, wins, losses }));
+    localStorage.setItem("summonerData", JSON.stringify({ 
+      name, 
+      tagLine, 
+      level, 
+      rank: rankTier, 
+      lp, 
+      wins, 
+      losses,
+      profileIconUrl
+    }));
 
-    // 🔹 Change button to "Confirm" mode
     confirmBtn.textContent = "Confirm Profile";
     confirmBtn.disabled = false;
     confirmBtn.style.background = "#ffd24d";
     confirmBtn.style.color = "#000";
 
-    // lock home until confirmed
     homeBtn.disabled = true;
     homeBtn.style.opacity = "0.5";
 
