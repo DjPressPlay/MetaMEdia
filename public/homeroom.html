@@ -14,31 +14,76 @@
   }
 .frame {
   position: relative;
-  width: 100vw;
-  height: 100vh;
+  width: 90vw;
+  max-width: 1400px;
+  height: 80vh;
+  max-height: 800px;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
+  border: 8px solid #00ffff;
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(0,255,255,0.5), inset 0 0 20px rgba(0,255,255,0.2);
+  background: #000;
 }
 
 
   .room {
     position:relative;
     width:100%; height:100%;
-    background:url("https://ik.imagekit.io/q2zhbhqmf/Gemini_Generated_Image_fwn9dlfwn9dlfwn9.png?updatedAt=1762651939683")
-               center/cover no-repeat;
-    cursor:none;
+    background: url('https://ik.imagekit.io/q2zhbhqmf/arcane-league-of-.jpg?updatedAt=1762676313439') center/cover no-repeat;
+    cursor:default;
     overflow:hidden;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
   }
+
+  .ground {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 15%;
+    background: #000;
+    border-top: 3px solid #00ffff;
+  }
+
+  .platform-spots {
+    position: absolute;
+    bottom: 15%;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: flex-end;
+  }
+
+  .spot-marker {
+    position: absolute;
+    width: 80px;
+    height: 3px;
+    background: rgba(0,255,255,0.3);
+    bottom: 15%;
+  }
+
+  .spot-marker:nth-child(1) { left: 20%; }
+  .spot-marker:nth-child(2) { left: 50%; transform: translateX(-50%); }
+  .spot-marker:nth-child(3) { left: 80%; }
 
   .character {
     position:absolute;
-    width:14%;
+    width:18%;
+    min-width: 120px;
+    max-width: 220px;
     aspect-ratio:220/390;
-    transform:translate(-50%,-50%);
+    bottom: 5%;
+    left: 50%;
+    transform:translateX(-50%);
     pointer-events:none;
-    transition:left 0.15s ease, top 0.15s ease;
+    transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     overflow:visible;
     z-index:20;
   }
@@ -54,18 +99,18 @@
 .character::before {
   content: "";
   position: absolute;
-  width: 30px;
-  height: 15px;
-  bottom: -8px;
+  width: 40px;
+  height: 10px;
+  bottom: -5px;
   left: 50%;
   transform: translateX(-50%);
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.7) 0%,
     transparent 70%
   );
-  filter: blur(4px);
+  filter: blur(3px);
   z-index: -1;
   pointer-events: none;
 }
@@ -77,17 +122,6 @@
   .depth-dot {
     display:none;
   }
-
-  /* Invisible walls */
-  .wall-top, .wall-left, .wall-right {
-    position:absolute;
-    background:rgba(255,0,0,0);
-    pointer-events:auto;
-  }
-
-  .wall-top { top:0; left:0; width:100%; height:25%; }
-  .wall-left { top:0; left:0; width:10%; height:100%; }
-  .wall-right { top:0; right:0; width:10%; height:100%; }
   
   
   :root {
@@ -207,12 +241,12 @@
   width: 2.2%;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  background: radial-gradient(circle, #00ffff 0%, #0088ff 60%, transparent 100%);
-  box-shadow: 0 0 12px #00ffff, 0 0 24px #00ffff;
-  border: 2px solid rgba(255, 255, 255, 0.9); /* white outline around orb */
+  background: radial-gradient(circle, rgba(0, 255, 255, 0.4) 0%, rgba(0, 136, 255, 0.3) 60%, transparent 100%);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.5), 0 0 24px rgba(0, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.4);
   cursor: none;
   animation: pulse 2s infinite ease-in-out;
-  z-index: 10;
+  z-index: 25;
   transition: transform 0.2s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
@@ -257,6 +291,7 @@
   box-shadow:
     0 0 25px rgba(0,255,255,0.8),
     inset 0 0 10px rgba(255,255,255,0.3);
+  z-index: 30;
 }
 
 /* ✴️ Label shows on hover or when character is close */
@@ -276,14 +311,14 @@
 }
 
 /* Placement */
-#spot1 { left: 63%; top: 78%; }
-#spot2 { left: 25%; top: 80%; }
-#spot3 { left: 93%; top: 89%; }
+#spot1 { left: 20%; bottom: 20%; }
+#spot2 { left: 50%; bottom: 20%; }
+#spot3 { left: 80%; bottom: 20%; }
 
 /* Breathing motion */
 @keyframes pulse {
-  0%, 100% { transform: translateY(-50%) scale(1); opacity: 0.8; }
-  50%      { transform: translateY(-50%) scale(1.15); opacity: 1; }
+  0%, 100% { transform: translateY(-50%) scale(1); opacity: 0.5; }
+  50%      { transform: translateY(-50%) scale(1.15); opacity: 0.7; }
 }
 
 /* ============================= */
@@ -686,20 +721,17 @@
     
 <!-- 🔹 Frame inside ---------->
     <div class="room">
-      <div class="wall-top"></div>
-      <div class="wall-left"></div>
-      <div class="wall-right"></div>
+      <div class="ground"></div>
       
-      
-<!-- 🔹3d points on 2d plane ---------------------->
-      
+      <div class="spot-marker"></div>
+      <div class="spot-marker"></div>
+      <div class="spot-marker"></div>
       
      <div class="character">
         <img id="character-img" src="" alt="Character">
       </div>
       
-      
-<!-- 🔹 Hotspot placement (inside room now) -->
+<!-- 🔹 Hotspot placement -->
 <div class="hotspot" id="spot1" data-label="PC"></div>
 <div class="hotspot" id="spot2" data-label="STYLE"></div>
 <div class="hotspot" id="spot3" data-label="PHONE"></div>
@@ -772,9 +804,6 @@
     const room = document.querySelector('.room');
     const character = document.querySelector('.character');
     const charImg = document.getElementById('character-img');
-    const wallTop = document.querySelector('.wall-top');
-    const wallLeft = document.querySelector('.wall-left');
-    const wallRight = document.querySelector('.wall-right');
 
     const controller = window.MetaMeda;
     const savedStyle = localStorage.getItem("selectedStyle");
@@ -972,36 +1001,62 @@ if (spot2) {
 
 
   //==================================================================
-    let targetX = window.innerWidth / 2;
-    let targetY = window.innerHeight / 2;
-    let currentX = targetX;
-    let currentY = targetY;
+    const platformPositions = [20, 50, 80];
+    let currentPlatform = 1;
 
-    document.addEventListener('mousemove', e => {
-      const rect = room.getBoundingClientRect();
-      targetX = e.clientX - rect.left;
-      targetY = e.clientY - rect.top;
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        if (currentPlatform > 0) {
+          currentPlatform--;
+          updateCharacterPosition();
+        }
+      } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        if (currentPlatform < 2) {
+          currentPlatform++;
+          updateCharacterPosition();
+        }
+      } else if (e.key === 'Enter') {
+        const nearHotspot = document.querySelector('.hotspot.near');
+        if (nearHotspot) {
+          nearHotspot.click();
+        }
+      }
     });
 
-    function smoothMoveCharacter() {
+    document.addEventListener('click', e => {
       const rect = room.getBoundingClientRect();
-      const speed = 0.08;
+      const clickX = ((e.clientX - rect.left) / rect.width) * 100;
       
-      currentX += (targetX - currentX) * speed;
-      currentY += (targetY - currentY) * speed;
+      if (clickX < 35) {
+        currentPlatform = 0;
+      } else if (clickX < 65) {
+        currentPlatform = 1;
+      } else {
+        currentPlatform = 2;
+      }
+      updateCharacterPosition();
+    });
 
-      const margin = 30;
-      const clampedX = Math.min(Math.max(margin, currentX), rect.width - margin);
-      const clampedY = Math.min(Math.max(margin, currentY), rect.height - margin);
+    room.addEventListener('mousemove', e => {
+      const rect = room.getBoundingClientRect();
+      const mouseX = ((e.clientX - rect.left) / rect.width) * 100;
+      
+      if (mouseX < 35) {
+        currentPlatform = 0;
+      } else if (mouseX < 65) {
+        currentPlatform = 1;
+      } else {
+        currentPlatform = 2;
+      }
+      updateCharacterPosition();
+    });
 
-      character.style.left = `${clampedX}px`;
-      character.style.top = `${clampedY}px`;
-
+    function updateCharacterPosition() {
+      character.style.left = `${platformPositions[currentPlatform]}%`;
       checkHotspotProximity();
-      requestAnimationFrame(smoothMoveCharacter);
     }
 
-    smoothMoveCharacter();
+    updateCharacterPosition();
 
 
  
@@ -1009,18 +1064,12 @@ if (spot2) {
 // 🔍 Proximity detection for hotspot labels
 function checkHotspotProximity() {
   const character = document.querySelector('.character');
-  const charImg = document.getElementById('character-img');
   const hotspots = document.querySelectorAll('.hotspot');
-  const proximityThreshold = 120;
-  const maxInfluenceDistance = 250;
+  const proximityThreshold = 150;
 
   const charRect = character.getBoundingClientRect();
   const charCenterX = charRect.left + charRect.width / 2;
   const charCenterY = charRect.top + charRect.height / 2;
-
-  let spot1Distance = Infinity;
-  let spot2Distance = Infinity;
-  let spot3Distance = Infinity;
 
   hotspots.forEach(hotspot => {
     const hotspotRect = hotspot.getBoundingClientRect();
@@ -1037,46 +1086,8 @@ function checkHotspotProximity() {
     } else {
       hotspot.classList.remove('near');
     }
-
-    if (hotspot.id === 'spot1') {
-      spot1Distance = distance;
-    } else if (hotspot.id === 'spot2') {
-      spot2Distance = distance;
-    } else if (hotspot.id === 'spot3') {
-      spot3Distance = distance;
-    }
   });
-
-  let targetScale = 1.0;
-
-  const spot1Influence = Math.max(0, 1 - (spot1Distance / maxInfluenceDistance));
-  const spot2Influence = Math.max(0, 1 - (spot2Distance / maxInfluenceDistance));
-  const spot3Influence = Math.max(0, 1 - (spot3Distance / maxInfluenceDistance));
-
-  if (spot1Influence > 0) {
-    const spot1Scale = 1.0 - (0.5 * spot1Influence);
-    targetScale *= spot1Scale;
-  }
-
-  if (spot2Influence > 0) {
-    const spot2Scale = 1.0 + (0.15 * spot2Influence);
-    targetScale *= spot2Scale;
-  }
-
-  if (spot3Influence > 0) {
-    const spot3Scale = 1.0 + (0.8 * spot3Influence);
-    targetScale *= spot3Scale;
-  }
-
-  charImg.style.transform = `scale(${targetScale})`;
 }
-    // 👁️ Cursor visibility
-    const showCursor = () => room.style.cursor = 'default';
-    const hideCursor = () => room.style.cursor = 'none';
-    [wallTop, wallLeft, wallRight].forEach(w => {
-      w.addEventListener('mouseenter', showCursor);
-      w.addEventListener('mouseleave', hideCursor);
-    });
   });
 
 
