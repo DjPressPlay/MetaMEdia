@@ -449,6 +449,215 @@
   z-index: 5;
 }
 
+/* ============================= */
+/* 📋 Dropdown Tabs Container */
+/* ============================= */
+.tabs-container {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 5;
+}
+
+.tab-item {
+  background: rgba(20, 20, 20, 0.85);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  box-shadow:
+    inset 0 0 15px rgba(0, 255, 255, 0.25),
+    0 0 25px rgba(0, 255, 255, 0.6),
+    0 0 60px rgba(0, 180, 255, 0.35),
+    0 4px 25px rgba(0, 0, 0, 0.6);
+  animation: plateGlow 4s ease-in-out infinite;
+  overflow: hidden;
+  min-width: 180px;
+}
+
+.tab-header {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  padding: 12px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.tab-header:hover {
+  background: rgba(0, 255, 255, 0.1);
+}
+
+.tab-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 6px rgba(0, 255, 255, 0.9),
+    0 0 12px rgba(0, 200, 255, 0.4);
+}
+
+.tab-icon {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.tab-item.active .tab-icon {
+  transform: rotate(180deg);
+}
+
+.tab-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.tab-item.active .tab-content {
+  max-height: 400px;
+  border-top: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.tab-content-inner {
+  padding: 15px;
+  color: #fff;
+  font-size: 13px;
+  overflow-y: auto;
+  max-height: 370px;
+}
+
+.tab-content-inner p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+}
+
+/* Champion Progress Items */
+.champion-progress-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.champion-progress-item:hover {
+  background: rgba(0, 255, 255, 0.1);
+  border-color: rgba(0, 255, 255, 0.4);
+}
+
+.champion-progress-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid rgba(0, 255, 255, 0.4);
+}
+
+.champion-progress-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.champion-progress-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.champion-progress-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  text-shadow: 0 0 4px rgba(0, 255, 255, 0.6);
+}
+
+.champion-progress-bar-container {
+  width: 100%;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.champion-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0, 255, 255, 0.6), rgba(0, 200, 255, 0.8));
+  border-radius: 6px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.champion-progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 3px #000, 0 0 6px rgba(0, 255, 255, 0.8);
+  pointer-events: none;
+}
+
+/* Lore Items */
+.lore-item {
+  padding: 10px;
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.lore-item:hover {
+  background: rgba(0, 255, 255, 0.1);
+  border-color: rgba(0, 255, 255, 0.4);
+  transform: translateX(2px);
+}
+
+.lore-item-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  text-shadow: 0 0 4px rgba(0, 255, 255, 0.6);
+}
+
+.lore-item-preview {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.3;
+}
+
+.lore-item.collected {
+  background: rgba(0, 255, 255, 0.15);
+  border-color: rgba(0, 255, 255, 0.6);
+}
+
+.lore-item.collected .lore-item-title::before {
+  content: '✓ ';
+  color: #0f0;
+}
+
 .rank-badge-large {
   width: 80px;
   height: 80px;
@@ -949,6 +1158,45 @@
   <div class="rank-text" id="rank-text"></div>
 </div>
 
+<!-- 📋 Dropdown Tabs Container -->
+<div class="tabs-container">
+  <div class="tab-item">
+    <button class="tab-header" data-tab="quests">
+      <span class="tab-title">Quests</span>
+      <span class="tab-icon">▼</span>
+    </button>
+    <div class="tab-content" id="tab-quests">
+      <div class="tab-content-inner">
+        <p>Quest list will be populated here</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-item">
+    <button class="tab-header" data-tab="champions">
+      <span class="tab-title">Champion Progress</span>
+      <span class="tab-icon">▼</span>
+    </button>
+    <div class="tab-content" id="tab-champions">
+      <div class="tab-content-inner">
+        <p>Champion progress will be populated here</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-item">
+    <button class="tab-header" data-tab="lore">
+      <span class="tab-title">Lore Box</span>
+      <span class="tab-icon">▼</span>
+    </button>
+    <div class="tab-content" id="tab-lore">
+      <div class="tab-content-inner">
+        <p>Lore files will be populated here</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- 🩵 HUD Nameplate -->
 <div class="nameplate" id="hud">
   <div class="header">
@@ -1050,6 +1298,24 @@
 <script type="module" src="src/gameController.js"></script>
   <script>
   window.addEventListener("DOMContentLoaded", () => {
+    
+    // Tab functionality
+    const tabHeaders = document.querySelectorAll('.tab-header');
+    
+    tabHeaders.forEach(header => {
+      header.addEventListener('click', (e) => {
+        const tabItem = header.closest('.tab-item');
+        const isActive = tabItem.classList.contains('active');
+        
+        if (isActive) {
+          tabItem.classList.remove('active');
+        } else {
+          tabItem.classList.add('active');
+        }
+      });
+    });
+    
+  
     const room = document.querySelector('.room');
     const character = document.querySelector('.character-container');
     const charImg = document.getElementById('character-img');
@@ -1185,6 +1451,219 @@
       loadChampionBackground(selectedCharacter);
     }
     
+    // Initialize champion progress and lore system
+    initializeChampionProgress();
+    initializeLoreSystem();
+    
+
+// ===============================
+// 🏆 CHAMPION PROGRESS SYSTEM
+// ===============================
+async function initializeChampionProgress() {
+  const progressContainer = document.querySelector('#tab-champions .tab-content-inner');
+  
+  // Get champion progress from localStorage or initialize
+  let championProgress = JSON.parse(localStorage.getItem('championProgress') || '{}');
+  
+  // Fetch champions from recent match
+  const summonerData = localStorage.getItem("summonerData");
+  if (!summonerData) {
+    progressContainer.innerHTML = '<p style="color: #ff6b6b;">No summoner data found. Please login first.</p>';
+    return;
+  }
+
+  const data = JSON.parse(summonerData);
+  const puuid = data.puuid;
+
+  if (!puuid) {
+    progressContainer.innerHTML = '<p style="color: #ff6b6b;">PUUID not found. Please refresh your profile.</p>';
+    return;
+  }
+
+  try {
+    const matchIdsRes = await fetch(`/.netlify/functions/riot-api?endpoint=/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=1&region=americas`);
+    if (!matchIdsRes.ok) throw new Error("Failed to fetch match IDs");
+    
+    const matchIds = await matchIdsRes.json();
+    
+    if (!matchIds || matchIds.length === 0) {
+      progressContainer.innerHTML = '<p style="color: #aaa;">No recent matches found.</p>';
+      return;
+    }
+
+    const recentMatchId = matchIds[0];
+    const matchRes = await fetch(`/.netlify/functions/riot-api?endpoint=/lol/match/v5/matches/${recentMatchId}&region=americas`);
+    if (!matchRes.ok) throw new Error("Failed to fetch match details");
+    
+    const matchData = await matchRes.json();
+    const participants = matchData.info.participants;
+    const summoner = participants.find(p => p.puuid === puuid);
+    
+    if (!summoner) {
+      progressContainer.innerHTML = '<p style="color: #ff6b6b;">Could not find summoner in match.</p>';
+      return;
+    }
+
+    const teamId = summoner.teamId;
+    const teamChampions = participants.filter(p => p.teamId === teamId);
+
+    const championsRes = await fetch('https://ddragon.leagueoflegends.com/cdn/14.1.1/data/en_US/champion.json');
+    if (!championsRes.ok) throw new Error("Failed to fetch champion data");
+    
+    const championsData = await championsRes.json();
+    const championMap = {};
+    
+    for (const champKey in championsData.data) {
+      const champ = championsData.data[champKey];
+      championMap[champ.key] = champ.id;
+    }
+
+    progressContainer.innerHTML = '';
+
+    teamChampions.forEach(participant => {
+      const championId = participant.championId.toString();
+      const championName = championMap[championId];
+      
+      if (championName) {
+        // Initialize progress if not exists
+        if (!championProgress[championName]) {
+          championProgress[championName] = {
+            loreCollected: 0,
+            totalLore: 5,
+            progress: 0
+          };
+        }
+
+        const progress = championProgress[championName];
+        const progressPercent = (progress.loreCollected / progress.totalLore) * 100;
+
+        const progressItem = document.createElement('div');
+        progressItem.className = 'champion-progress-item';
+        progressItem.innerHTML = `
+          <div class="champion-progress-icon">
+            <img src="https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${championName}.png" alt="${championName}">
+          </div>
+          <div class="champion-progress-details">
+            <div class="champion-progress-name">${championName}</div>
+            <div class="champion-progress-bar-container">
+              <div class="champion-progress-bar-fill" style="width: ${progressPercent}%"></div>
+              <div class="champion-progress-text">${progress.loreCollected}/${progress.totalLore} Lore</div>
+            </div>
+          </div>
+        `;
+        
+        progressContainer.appendChild(progressItem);
+      }
+    });
+
+    // Save to localStorage
+    localStorage.setItem('championProgress', JSON.stringify(championProgress));
+    
+  } catch (err) {
+    console.error('Error loading champion progress:', err);
+    progressContainer.innerHTML = `<p style="color: #ff6b6b;">Error: ${err.message}</p>`;
+  }
+}
+
+// ===============================
+// 📜 LORE SYSTEM
+// ===============================
+function initializeLoreSystem() {
+  const loreContainer = document.querySelector('#tab-lore .tab-content-inner');
+  
+  // Get collected lore from localStorage
+  let collectedLore = JSON.parse(localStorage.getItem('collectedLore') || '[]');
+  
+  // Define lore pieces for each champion
+  const lorePieces = [
+    {
+      id: 'lore_1',
+      champion: 'Ahri',
+      title: 'The Nine-Tailed Fox',
+      preview: 'Ahri is a mysterious fox-like Vastaya who roams Runeterra...',
+      content: 'Ahri is a mysterious fox-like Vastaya who roams Runeterra in search of her lost memories and true purpose.'
+    },
+    {
+      id: 'lore_2',
+      champion: 'Lux',
+      title: 'The Lady of Luminosity',
+      preview: 'Luxanna Crownguard hails from Demacia, where magic is feared...',
+      content: 'Luxanna Crownguard hails from Demacia, an insular realm where magical abilities are viewed with fear and suspicion.'
+    },
+    {
+      id: 'lore_3',
+      champion: 'Yasuo',
+      title: 'The Unforgiven',
+      preview: 'An Ionian of deep resolve, Yasuo is an agile swordsman...',
+      content: 'An Ionian of deep resolve, Yasuo is an agile swordsman who wields the air itself against his enemies.'
+    },
+    {
+      id: 'lore_4',
+      champion: 'Jinx',
+      title: 'The Loose Cannon',
+      preview: 'A manic and impulsive criminal from Zaun, Jinx lives to wreak havoc...',
+      content: 'A manic and impulsive criminal from Zaun, Jinx lives to wreak havoc without care for the consequences.'
+    },
+    {
+      id: 'lore_5',
+      champion: 'Ezreal',
+      title: 'The Prodigal Explorer',
+      preview: 'A dashing adventurer, unknowingly gifted in the magical arts...',
+      content: 'A dashing adventurer, unknowingly gifted in the magical arts, Ezreal raids long-lost catacombs.'
+    }
+  ];
+  
+  loreContainer.innerHTML = '';
+  
+  lorePieces.forEach(lore => {
+    const isCollected = collectedLore.includes(lore.id);
+    
+    const loreItem = document.createElement('div');
+    loreItem.className = `lore-item ${isCollected ? 'collected' : ''}`;
+    loreItem.innerHTML = `
+      <div class="lore-item-title">${lore.title} (${lore.champion})</div>
+      <div class="lore-item-preview">${lore.preview}</div>
+    `;
+    
+    loreItem.addEventListener('click', () => {
+      if (!isCollected) {
+        collectLore(lore.id, lore.champion);
+        loreItem.classList.add('collected');
+        alert(`✅ Lore collected: ${lore.title}\n\n${lore.content}`);
+      } else {
+        alert(`📖 ${lore.title}\n\n${lore.content}`);
+      }
+    });
+    
+    loreContainer.appendChild(loreItem);
+  });
+}
+
+function collectLore(loreId, championName) {
+  // Add to collected lore
+  let collectedLore = JSON.parse(localStorage.getItem('collectedLore') || '[]');
+  if (!collectedLore.includes(loreId)) {
+    collectedLore.push(loreId);
+    localStorage.setItem('collectedLore', JSON.stringify(collectedLore));
+  }
+  
+  // Update champion progress
+  let championProgress = JSON.parse(localStorage.getItem('championProgress') || '{}');
+  if (championProgress[championName]) {
+    championProgress[championName].loreCollected = Math.min(
+      championProgress[championName].loreCollected + 1,
+      championProgress[championName].totalLore
+    );
+    championProgress[championName].progress = 
+      (championProgress[championName].loreCollected / championProgress[championName].totalLore) * 100;
+    
+    localStorage.setItem('championProgress', JSON.stringify(championProgress));
+    
+    // Refresh the progress display
+    initializeChampionProgress();
+  }
+}
+
 
 async function loadClosetChampions() {
   const summonerData = localStorage.getItem("summonerData");
