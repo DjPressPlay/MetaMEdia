@@ -1108,6 +1108,10 @@
     
     loadRiotProfile();
     
+    if (selectedCharacter) {
+      loadChampionBackground(selectedCharacter);
+    }
+    
 
 async function loadClosetChampions() {
   const summonerData = localStorage.getItem("summonerData");
@@ -1185,7 +1189,7 @@ async function loadClosetChampions() {
         championImg.src = `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${championName}.png`;
         championImg.alt = championName;
         
-        championCard.addEventListener('click', () => {
+        championCard.addEventListener('click', async () => {
           document.querySelectorAll('.champion-card').forEach(card => {
             card.classList.remove('selected');
           });
@@ -1208,6 +1212,8 @@ async function loadClosetChampions() {
           localStorage.setItem('selectedChampion', championName);
           
           console.log(`Selected champion: ${championName}, using render image`);
+          
+          await loadChampionBackground(championName);
         });
         
         championCard.appendChild(championImg);
@@ -1220,6 +1226,49 @@ async function loadClosetChampions() {
   } catch (err) {
     console.error('Error loading closet champions:', err);
     document.getElementById("closet-champions").innerHTML = `<p style="color: #ff6b6b;">Error: ${err.message}</p>`;
+  }
+}
+
+async function loadChampionBackground(championName) {
+  try {
+    const cachedBackgrounds = JSON.parse(localStorage.getItem('championBackgrounds') || '{}');
+    
+    if (cachedBackgrounds[championName]) {
+      console.log(`Using cached background for ${championName}`);
+      applyChampionBackground(cachedBackgrounds[championName]);
+      return;
+    }
+    
+    console.log(`Fetching background for ${championName} from wiki...`);
+    
+    const response = await fetch(`/.netlify/functions/champion-bg-scraper?champion=${encodeURIComponent(championName)}`);
+    
+    if (!response.ok) {
+      console.warn(`Failed to fetch background for ${championName}`);
+      return;
+    }
+    
+    const data = await response.json();
+    
+    if (data.backgroundUrl) {
+      cachedBackgrounds[championName] = data.backgroundUrl;
+      localStorage.setItem('championBackgrounds', JSON.stringify(cachedBackgrounds));
+      
+      applyChampionBackground(data.backgroundUrl);
+      console.log(`Background loaded and cached for ${championName}`);
+    }
+  } catch (error) {
+    console.error(`Error loading background for ${championName}:`, error);
+  }
+}
+
+function applyChampionBackground(backgroundUrl) {
+  const room = document.querySelector('.room');
+  if (room) {
+    room.style.backgroundImage = `url('${backgroundUrl}')`;
+    room.style.backgroundSize = 'cover';
+    room.style.backgroundPosition = 'center';
+    room.style.backgroundRepeat = 'no-repeat';
   }
 }
 
