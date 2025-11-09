@@ -130,27 +130,77 @@
   .spot-marker:nth-child(2) { left: 50%; transform: translateX(-50%); }
   .spot-marker:nth-child(3) { left: 80%; }
 
-  .character {
-    position:absolute;
-    width:18%;
-    min-width: 120px;
-    max-width: 220px;
-    aspect-ratio:220/390;
-    bottom: -25%;
+  .character-container {
+    position: absolute;
+    bottom: 0;
     left: 50%;
-    transform:translateX(-50%);
-    pointer-events:none;
+    transform: translateX(-50%);
+    width: 480px;
+    height: 480px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    pointer-events: none;
     transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow:visible;
-    z-index:20;
+    z-index: 20;
+    overflow: hidden;
+  }
+
+  .character {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
   }
 
   .character img {
-    width:100%; 
-    height:auto; 
-    object-fit:contain; 
-    object-position:center bottom;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center bottom;
     transition: transform 0.3s ease;
+  }
+
+  .character img.fallback-orb {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 
+      0 0 40px rgba(0, 255, 255, 0.8),
+      0 0 80px rgba(0, 255, 255, 0.6),
+      inset 0 0 30px rgba(0, 255, 255, 0.4);
+    border: 3px solid rgba(0, 255, 255, 0.9);
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%);
+    animation: orbGlow 3s ease-in-out infinite, orbFloat 4s ease-in-out infinite;
+    position: relative;
+    z-index: 30;
+  }
+
+  @keyframes orbGlow {
+    0%, 100% {
+      box-shadow: 
+        0 0 40px rgba(0, 255, 255, 0.8),
+        0 0 80px rgba(0, 255, 255, 0.6),
+        inset 0 0 30px rgba(0, 255, 255, 0.4);
+    }
+    50% {
+      box-shadow: 
+        0 0 60px rgba(0, 255, 255, 1),
+        0 0 120px rgba(0, 255, 255, 0.8),
+        inset 0 0 50px rgba(0, 255, 255, 0.6);
+    }
+  }
+
+  @keyframes orbFloat {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
   }
 
   .character::after {
@@ -786,8 +836,10 @@
       <div class="spot-marker"></div>
       <div class="spot-marker"></div>
       
-     <div class="character">
-        <img id="character-img" src="" alt="Character">
+     <div class="character-container">
+        <div class="character">
+          <img id="character-img" src="" alt="Character">
+        </div>
       </div>
       
 <!-- 🔹 Hotspot placement -->
@@ -861,7 +913,7 @@
   <script>
   window.addEventListener("DOMContentLoaded", () => {
     const room = document.querySelector('.room');
-    const character = document.querySelector('.character');
+    const character = document.querySelector('.character-container');
     const charImg = document.getElementById('character-img');
 
     const controller = window.MetaMeda;
@@ -889,9 +941,11 @@
       if (selectedCharacter) {
         const championRenderUrl = `https://wiki.leagueoflegends.com/en-us/images/${selectedCharacter}_Render.png`;
         charImg.onerror = () => {
-          console.warn(`Render image failed to load for ${selectedCharacter}, using thumbnail`);
+          console.warn(`Render image failed to load for ${selectedCharacter}, using thumbnail in orb`);
+          charImg.classList.add('fallback-orb');
           charImg.src = `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${selectedCharacter}.png`;
         };
+        charImg.classList.remove('fallback-orb');
         charImg.src = championRenderUrl;
         console.log(`Restored selected champion: ${selectedCharacter} with render image`);
       } else if (data.profileIconUrl) {
@@ -1026,10 +1080,12 @@ async function loadClosetChampions() {
           const renderUrl = `https://wiki.leagueoflegends.com/en-us/images/${championName}_Render.png`;
           
           charImg.onerror = () => {
-            console.warn(`Render image failed to load for ${championName}, using thumbnail`);
+            console.warn(`Render image failed to load for ${championName}, using thumbnail in orb`);
+            charImg.classList.add('fallback-orb');
             charImg.src = `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${championName}.png`;
           };
           
+          charImg.classList.remove('fallback-orb');
           charImg.src = renderUrl;
           
           selectedCharacter = championName;
@@ -1111,7 +1167,10 @@ if (spot2) {
     });
 
     function updateCharacterPosition() {
-      character.style.left = `${platformPositions[currentPlatform]}%`;
+      const characterContainer = document.querySelector('.character-container');
+      if (characterContainer) {
+        characterContainer.style.left = `${platformPositions[currentPlatform]}%`;
+      }
       checkHotspotProximity();
     }
 
@@ -1122,7 +1181,7 @@ if (spot2) {
 
 // 🔍 Proximity detection for hotspot labels
 function checkHotspotProximity() {
-  const character = document.querySelector('.character');
+  const character = document.querySelector('.character-container');
   const hotspots = document.querySelectorAll('.hotspot');
   const proximityThreshold = 150;
 
