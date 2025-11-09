@@ -406,6 +406,51 @@
   text-align: center;
 }
 
+.quest-progress-bar {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.quest-progress-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #aaa;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.quest-progress-container {
+  width: 100%;
+  height: 16px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.quest-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0, 255, 255, 0.6), rgba(0, 200, 255, 0.8));
+  border-radius: 8px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.quest-progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 3px #000, 0 0 6px rgba(0, 255, 255, 0.8);
+  pointer-events: none;
+}
+
 .stat-value {
   color: var(--accent);
   font-weight: 700;
@@ -488,6 +533,36 @@
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'Segoe UI', sans-serif;
+  position: relative;
+}
+
+.quest-notification {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  background: #ff6b6b;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  animation: questFlash 1s infinite;
+  box-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
+}
+
+@keyframes questFlash {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
 }
 
 .tab-header:hover {
@@ -625,6 +700,39 @@
   margin-bottom: 8px;
   transition: all 0.3s ease;
   cursor: pointer;
+}
+
+.quest-item {
+  padding: 12px;
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.quest-item.completed {
+  background: rgba(0, 255, 0, 0.1);
+  border-color: rgba(0, 255, 0, 0.4);
+}
+
+.quest-item-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  text-shadow: 0 0 4px rgba(0, 255, 255, 0.6);
+}
+
+.quest-item.completed .quest-item-title {
+  color: #0f0;
+}
+
+.quest-item-description {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
 }
 
 .lore-item:hover {
@@ -1160,13 +1268,14 @@
 
 <!-- 📋 Dropdown Tabs Container -->
 <div class="tabs-container">
-  <div class="tab-item">
+  <div class="tab-item" id="quest-tab-item">
     <button class="tab-header" data-tab="quests">
       <span class="tab-title">Quests</span>
       <span class="tab-icon">▼</span>
+      <span class="quest-notification" id="quest-notification" style="display: none;">!</span>
     </button>
     <div class="tab-content" id="tab-quests">
-      <div class="tab-content-inner">
+      <div class="tab-content-inner" id="quest-list">
         <p>Quest list will be populated here</p>
       </div>
     </div>
@@ -1209,6 +1318,14 @@
     <div><div class="stat-value" id="summoner-lp"></div><div class="stat-label">LP</div></div>
     <div><div class="stat-value" id="summoner-wins"></div><div class="stat-label">Wins</div></div>
     <div><div class="stat-value" id="summoner-losses"></div><div class="stat-label">Losses</div></div>
+  </div>
+  
+  <div class="quest-progress-bar">
+    <div class="quest-progress-label" id="quest-progress-label">Quest Level 1</div>
+    <div class="quest-progress-container">
+      <div class="quest-progress-fill" id="quest-progress-fill" style="width: 0%"></div>
+      <div class="quest-progress-text" id="quest-progress-text">0/5</div>
+    </div>
   </div>
 </div>
 
@@ -1314,6 +1431,9 @@
         }
       });
     });
+    
+    // Initialize quest system
+    initializeQuestSystem();
     
   
     const room = document.querySelector('.room');
@@ -1455,6 +1575,180 @@
     initializeChampionProgress();
     initializeLoreSystem();
     
+
+// ===============================
+// 🎯 QUEST SYSTEM
+// ===============================
+function initializeQuestSystem() {
+  let questData = JSON.parse(localStorage.getItem('questData') || '{"quests": [], "completedQuests": [], "questLevel": 1, "questPoints": 0}');
+  
+  if (questData.quests.length === 0) {
+    questData.quests = [
+      {
+        id: 1,
+        name: 'Load Profile',
+        description: 'Load your summoner profile from League of Legends',
+        completed: false,
+        active: false
+      },
+      {
+        id: 2,
+        name: 'Select Champion',
+        description: 'Select a champion from your closet in the Home Room',
+        completed: false,
+        active: false
+      }
+    ];
+  }
+  
+  checkQuestCompletion(questData);
+  renderQuests(questData);
+  updateQuestProgress(questData);
+  
+  localStorage.setItem('questData', JSON.stringify(questData));
+}
+
+function checkQuestCompletion(questData) {
+  const summonerData = localStorage.getItem('summonerData');
+  const selectedChampion = localStorage.getItem('selectedChampion');
+  
+  questData.quests.forEach(quest => {
+    if (quest.id === 1 && summonerData && !quest.completed) {
+      completeQuest(questData, quest.id);
+    }
+    
+    if (quest.id === 2 && selectedChampion && !quest.completed) {
+      completeQuest(questData, quest.id);
+    }
+  });
+}
+
+function completeQuest(questData, questId) {
+  const quest = questData.quests.find(q => q.id === questId);
+  if (!quest || quest.completed) return;
+  
+  quest.completed = true;
+  quest.active = false;
+  
+  if (!questData.completedQuests.includes(questId)) {
+    questData.completedQuests.push(questId);
+    questData.questPoints += 1;
+    
+    if (questData.questPoints >= 5) {
+      questData.questLevel += 1;
+      questData.questPoints = 0;
+      showNotification(`🎉 Quest Level Up! You are now Quest Level ${questData.questLevel}!`);
+    } else {
+      showNotification(`✅ Quest Complete: ${quest.name}!`);
+    }
+    
+    updateQuestNotification(questData);
+    updateQuestProgress(questData);
+    renderQuests(questData);
+    
+    localStorage.setItem('questData', JSON.stringify(questData));
+  }
+}
+
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.style.position = 'fixed';
+  notification.style.top = '50%';
+  notification.style.left = '50%';
+  notification.style.transform = 'translate(-50%, -50%)';
+  notification.style.background = 'rgba(0, 255, 255, 0.95)';
+  notification.style.color = '#000';
+  notification.style.padding = '20px 40px';
+  notification.style.borderRadius = '12px';
+  notification.style.fontSize = '18px';
+  notification.style.fontWeight = 'bold';
+  notification.style.zIndex = '99999';
+  notification.style.boxShadow = '0 0 30px rgba(0, 255, 255, 0.8)';
+  notification.style.animation = 'fadeInOut 3s ease-in-out';
+  notification.textContent = message;
+  
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    }
+  `;
+  document.head.appendChild(style);
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.remove();
+    style.remove();
+  }, 3000);
+}
+
+function updateQuestNotification(questData) {
+  const notification = document.getElementById('quest-notification');
+  const hasActiveQuests = questData.quests.some(q => !q.completed);
+  const hasCompletedQuests = questData.quests.some(q => q.completed && !q.notified);
+  
+  if (hasActiveQuests || hasCompletedQuests) {
+    notification.style.display = 'flex';
+  } else {
+    notification.style.display = 'none';
+  }
+}
+
+function renderQuests(questData) {
+  const questList = document.getElementById('quest-list');
+  questList.innerHTML = '';
+  
+  if (questData.quests.length === 0) {
+    questList.innerHTML = '<p style="color: #aaa; text-align: center;">No quests available</p>';
+    return;
+  }
+  
+  questData.quests.forEach(quest => {
+    const questItem = document.createElement('div');
+    questItem.style.padding = '12px';
+    questItem.style.background = quest.completed ? 'rgba(0, 255, 0, 0.1)' : 'rgba(0, 255, 255, 0.05)';
+    questItem.style.border = quest.completed ? '1px solid rgba(0, 255, 0, 0.4)' : '1px solid rgba(0, 255, 255, 0.2)';
+    questItem.style.borderRadius = '8px';
+    questItem.style.marginBottom = '8px';
+    questItem.style.transition = 'all 0.3s ease';
+    
+    const questTitle = document.createElement('div');
+    questTitle.style.fontSize = '13px';
+    questTitle.style.fontWeight = '700';
+    questTitle.style.color = quest.completed ? '#0f0' : '#00ffff';
+    questTitle.style.textTransform = 'uppercase';
+    questTitle.style.marginBottom = '6px';
+    questTitle.style.textShadow = '0 0 4px rgba(0, 255, 255, 0.6)';
+    questTitle.textContent = `${quest.completed ? '✓' : '○'} ${quest.name}`;
+    
+    const questDesc = document.createElement('div');
+    questDesc.style.fontSize = '11px';
+    questDesc.style.color = 'rgba(255, 255, 255, 0.7)';
+    questDesc.style.lineHeight = '1.4';
+    questDesc.textContent = quest.description;
+    
+    questItem.appendChild(questTitle);
+    questItem.appendChild(questDesc);
+    questList.appendChild(questItem);
+  });
+}
+
+function updateQuestProgress(questData) {
+  const progressFill = document.getElementById('quest-progress-fill');
+  const progressText = document.getElementById('quest-progress-text');
+  const progressLabel = document.getElementById('quest-progress-label');
+  
+  const progress = (questData.questPoints / 5) * 100;
+  
+  progressFill.style.width = `${progress}%`;
+  progressText.textContent = `${questData.questPoints}/5`;
+  progressLabel.textContent = `Quest Level ${questData.questLevel}`;
+}
+
 
 // ===============================
 // 🏆 CHAMPION PROGRESS SYSTEM
@@ -1766,6 +2060,15 @@ async function loadClosetChampions() {
           console.log(`Selected champion: ${championName}, using render image`);
           
           await loadChampionBackground(championName);
+          
+          const questData = JSON.parse(localStorage.getItem('questData') || '{"quests": [], "completedQuests": [], "questLevel": 1, "questPoints": 0}');
+          if (questData.quests) {
+            checkQuestCompletion(questData);
+            updateQuestNotification(questData);
+            updateQuestProgress(questData);
+            renderQuests(questData);
+            localStorage.setItem('questData', JSON.stringify(questData));
+          }
         });
         
         championCard.appendChild(championImg);
