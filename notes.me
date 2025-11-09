@@ -1,172 +1,185 @@
-API Usage Analysis
-Overview
-The project uses the Riot Games API to fetch League of Legends player data through a Netlify serverless function proxy. The API integration enables users to search for summoner profiles, view ranked statistics, and monitor server status.
+Application Overview
+===================
 
-Architecture
-Netlify Function Proxy (netlify/functions/riot-api.js)
-The API implementation uses a serverless function that acts as a secure proxy between the frontend and Riot Games API:
+This application is a League of Legends summoner profile viewer that combines multiple data sources to create an immersive, game-themed experience. The project fetches and displays player statistics, ranked information, and visual assets through a hybrid approach using the Riot Games API, Data Dragon CDN, and web scraping techniques.
 
-Key Features:
+Core Functionality
+==================
 
-Environment Variable Security: API key stored in RIOT_API_KEY environment variable, never exposed to client
-Dynamic Region Support: Accepts region query parameter (e.g., NA1, EUW1, KR) to route requests to regional endpoints
-Flexible Endpoint Routing: Uses endpoint query parameter to specify Riot API paths dynamically
-Response Caching: Implements 5-minute cache (Cache-Control: public, max-age=300) to reduce API calls
-Error Handling: Returns structured JSON errors for missing configurations, invalid requests, or API failures
+The app allows users to:
+- Search for League of Legends players by summoner name and region
+- View detailed profile information including level, rank, LP, and win/loss records
+- Display profile icons and champion images
+- Monitor regional server status
+- Save and persist summoner profiles across sessions
+- Access profiles through an interactive "home room" interface
+
+Data Sources and Integration
+=============================
+
+1. Riot Games API (Primary Official Source)
+-------------------------------------------
+
+The Riot API provides authoritative, real-time player data through a secure serverless function proxy.
+
+Implementation: netlify/functions/riot-api.js
+- Serverless edge function acting as secure API proxy
+- Keeps RIOT_API_KEY hidden from client-side code
+- Supports all 15 regional endpoints (NA1, EUW1, KR, etc.)
+- Implements 5-minute response caching to optimize rate limits
+- Returns structured JSON data with proper error handling
+
+Key Endpoints Used:
+a) Platform Status API (/lol/status/v4/platform-data)
+   - Real-time server status monitoring
+   - Maintenance and incident tracking
+   - Auto-checks on page load and region changes
+
+b) Summoner API (/lol/summoner/v4/summoners/by-name/{name})
+   - Core account information retrieval
+   - Returns: puuid, summoner ID, level, profileIconId
+   - Used in both Summoner Selector and Home Room views
+
+c) League API (/lol/league/v4/entries/by-summoner/{id})
+   - Ranked queue statistics
+   - Filters for RANKED_SOLO_5x5 queue
+   - Provides tier, rank, LP, wins, and losses
+
 Request Flow:
+Frontend → Netlify redirect (/api/*) → Serverless function → Regional Riot API → Response with cache headers → Client display
 
-Frontend calls /api/riot-api?endpoint=/lol/summoner/...&region=na1
-Netlify redirect rule routes /api/* to /.netlify/functions/:splat
-Function constructs full Riot API URL: https://{region}.api.riotgames.com{endpoint}
-Request authenticated with X-Riot-Token header
-Response proxied back to client with appropriate status codes
-Netlify Configuration (netlify.toml)
-The redirect configuration enables clean API URLs:
+Files: public/Summoner-Selector.html (lines 133-178), public/homeroom.html (lines 1226-1273), netlify/functions/riot-api.js
 
-from = "/api/*"
-to = "/.netlify/functions/:splat"
-This maps /api/riot-api → /.netlify/functions/riot-api transparently.
+2. Data Dragon CDN (Static Asset Delivery)
+-------------------------------------------
 
-Frontend Implementation
-Summoner Selector (public/Summoner-Selector.html)
-The summoner selector page makes three distinct API calls:
+Data Dragon is Riot's official content delivery network for game assets. The app uses it to fetch visual resources without authentication requirements.
 
-1. Server Status Check (Lines 133-159)
-/api/riot-api?endpoint=/lol/status/v4/platform-data&region={region}
-Purpose: Fetches platform status including maintenance schedules and incidents
-Trigger: Automatically on page load and when region changes
-Response Handling:
-Green status: "All systems operational"
-Orange warning: Shows maintenance count
-Red alert: Displays incident count
-Error Handling: Displays "Unable to check server status" on failure
-2. Summoner Profile Lookup (Lines 169-172)
-/api/riot-api?endpoint=/lol/summoner/v4/summoners/by-name/{name}&region={region}
-Purpose: Retrieves summoner account information by name
-Data Retrieved: puuid, id, summonerLevel, profileIconId, name
-Trigger: User clicks "Search" button or presses Enter in input field
-Name Processing: Trims whitespace, removes # tags, normalizes spaces
-Profile Display: Updates icon from Data Dragon CDN (ddragon.leagueoflegends.com)
-3. Ranked Statistics (Lines 177-178)
-/api/riot-api?endpoint=/lol/league/v4/entries/by-summoner/{id}&region={region}
-Purpose: Fetches ranked queue information for the summoner
-Data Retrieved: Array of ranked entries (Flex, Solo/Duo)
-Filtering: Extracts RANKED_SOLO_5x5 queue type specifically
-Display: Shows tier, rank, and LP (e.g., "GOLD II · 73 LP") or "Unranked"
-Data Flow:
+Base URL: https://ddragon.leagueoflegends.com/cdn/14.1.1/
 
-User enters summoner name → Fetch summoner profile
-Extract summoner.id from response → Fetch ranked stats
-Combine data → Display in UI and store in localStorage
-Home Room (public/homeroom.html)
-The home room page includes a "League Profile" mini-app within the PC hotspot:
+Asset Types Fetched:
+a) Profile Icons
+   - Endpoint: /img/profileicon/{iconId}.png
+   - Used to display summoner avatars
+   - IconId obtained from Summoner API response
+   - Updates dynamically when profile is loaded
 
-League Profile App (Lines 1226-1273)
-/api/riot-api?endpoint=/lol/summoner/v4/summoners/by-name/{name}&region=na1
-/api/riot-api?endpoint=/lol/league/v4/entries/by-summoner/{id}&region=na1
-Purpose: Displays full summoner profile within in-game PC interface
-Default Profile: Loads "Faker" as example (line 1224)
-Trigger: Clicking the League app icon in desktop (line 1277-1280)
-Display Elements:
-Summoner icon and level
-Rank tier and LP
-Win/loss record and winrate calculation
-Favorite champion section (placeholder)
-Error Handling: Console logging with fallback UI messages
-API Endpoints Used
-Status API
-Endpoint: /lol/status/v4/platform-data
-Regions: All (dynamic based on user selection)
-Usage: Automatic status monitoring
-Summoner API
-Endpoint: /lol/summoner/v4/summoners/by-name/{summonerName}
-Regions: All (user-selected)
-Usage: Profile searches in Summoner Selector and Home Room
-League API
-Endpoint: /lol/league/v4/entries/by-summoner/{encryptedSummonerId}
-Regions: All (user-selected)
-Usage: Ranked statistics display
-Data Persistence
-LocalStorage Integration
-The application stores fetched summoner data in browser localStorage:
+b) Champion Portraits
+   - Endpoint: /img/champion/{championName}.png
+   - Powers champion selection in home room
+   - 160+ champion images available
 
-Stored Object Structure:
+c) Champion Metadata
+   - Endpoint: /data/en_US/champion.json
+   - Complete champion roster with names and IDs
+   - Used to populate champion selector dropdown
+   - Parsed to build selectable champion list
 
-{
-  name: string,
-  id: string,
-  puuid: string,
-  level: number,
-  profileIconId: number,
-  region: string,
-  rank: {
-    tier: string,
-    rank: string,
-    leaguePoints: number
-  } | null
-}
-Key: "selectedSummoner"
+Implementation Details:
+- No authentication required (public CDN)
+- Versioned URLs (14.1.1) ensure consistency
+- Images loaded directly via <img src> tags
+- Champion data fetched once and cached in memory
 
-Usage Points:
+Files: public/homeroom.html (lines 1059, 1091, 1156, 1185, 1201)
 
-Saved when user clicks "Save" button (line 224-231)
-Auto-saved before navigation to home room (line 240-242)
-Auto-restored on page reload (line 246-269)
+3. Web Scraping (Supplementary Data Source)
+--------------------------------------------
+
+The scraper component fetches additional profile data not available through the official API by parsing League of Graphs HTML pages.
+
+Implementation: public/league-scraper.html
+
+Target: https://www.leagueofgraphs.com/summoner/na/{gameName}-{tagLine}
+
+Proxy Layer:
+- Uses allorigins.win proxy service to bypass CORS restrictions
+- Fetches raw HTML from League of Graphs
+- Parses response with DOMParser browser API
+
+Data Extracted via CSS Selectors:
+- .bannerSubtitle → Summoner level
+- .leagueTier → Rank tier (Gold, Platinum, etc.)
+- .leaguePoints → Current LP
+- .wins → Total wins
+- .losses → Total losses
+- .summonerProfileImage img → Profile icon URL
+
+Extraction Process:
+1. User enters game name and tag (e.g., "Faker" + "#NA1")
+2. Constructs League of Graphs URL with normalized name
+3. Proxies request through allorigins.win
+4. Parses HTML response into DOM document
+5. Queries specific CSS selectors for stat elements
+6. Extracts text content and cleans formatting
+7. Displays in UI and stores to localStorage
+
+Reliability Features:
+- Automatic retry logic (retries once on failure)
+- DNS/TLS preload optimization on page load
+- Graceful error handling with user feedback
+- Fallback to default icon if scrape fails
+
+Status Check:
+- Separate endpoint netlify/functions/checkStatus.js verifies Riot server availability
+- Checks multiple regions simultaneously
+- Enables/disables search form based on results
+- Provides user feedback on regional outages
+
+Files: public/league-scraper.html (lines 206-346), netlify/functions/checkStatus.js
+
+Data Persistence and State Management
+======================================
+
+LocalStorage Integration:
+- Key: "summonerData" or "selectedSummoner"
+- Stores: name, tagLine, level, rank, LP, wins, losses, profileIconUrl, region, puuid
+- Auto-saves before navigation to home room
+- Auto-restores on page reload
+- Enables seamless cross-page profile persistence
+
+Security Architecture
+=====================
+
+API Key Protection:
+- RIOT_API_KEY stored as environment variable in Netlify
+- Never exposed to client-side JavaScript
+- Serverless function acts as authentication gateway
+- CORS handling via proxy architecture
+
+Rate Limiting Strategy:
+- Riot API limits: 100 requests/2 minutes (app-level), 20,000/10 seconds (method-level)
+- 5-minute cache reduces redundant calls
+- Status checks occur once per session
+- Profile data cached locally after first fetch
+
 Regional Support
-Supported Regions (15 total):
+================
 
-Americas: NA1, BR1, LA1, LA2
-Europe: EUW1, EUN1, TR1, RU
-Asia: KR, JP1, OC1, TW2, VN2, SG2, ME1
-Each region has its own rate limit tracking and endpoint routing through the Riot API regional infrastructure.
+Supported Regions (15):
+- Americas: NA1, BR1, LA1, LA2
+- Europe: EUW1, EUN1, TR1, RU
+- Asia: KR, JP1, OC1, TW2, VN2, SG2, ME1
 
-Error Handling Strategy
-Function-Level Errors:
+Each region has dedicated API endpoints with independent rate limit tracking.
 
-Missing API key → 500 with descriptive message
-Missing endpoint param → 400 bad request
-Fetch failures → 500 with error details
-Client-Level Errors:
+Technology Stack Summary
+========================
 
-API failures → Display error message in UI
-Invalid summoner → "Summoner not found" status
-Network errors → Graceful fallback with console logging
-State Management:
+Data Retrieval:
+- Riot Games API (official, authenticated, real-time)
+- Data Dragon CDN (official, public, versioned assets)
+- League of Graphs scraper (supplementary, HTML parsing)
 
-Failed requests clear currentSummoner variable
-Save button disabled on errors
-Previous valid data retained in localStorage
-Rate Limiting Considerations
-The Riot API implements rate limiting headers visible in the function responses:
+Infrastructure:
+- Netlify Edge Functions for serverless API proxy
+- AllOrigins proxy for CORS-free web scraping
+- localStorage for client-side persistence
 
-X-App-Rate-Limit: Application-level limits (100 requests per 2 minutes)
-X-Method-Rate-Limit: Endpoint-specific limits (20,000 per 10 seconds)
-The 5-minute cache on the serverless function helps reduce redundant API calls within the allowed limits.
+Frontend:
+- Vanilla JavaScript (no frameworks)
+- DOMParser for HTML parsing
+- Fetch API for all HTTP requests
+- CSS Grid/Flexbox for responsive layouts
 
-Security Implementation
-Strengths:
-
-API key never exposed to client-side code
-Server-side validation of requests
-No direct client access to Riot API
-Architecture Benefits:
-
-Centralized authentication through single function
-Environment variable management through Netlify
-CORS handling via serverless function proxy
-Protection against API key theft or abuse
-Data Flow Summary
-User Action (Search/Navigate)
-    ↓
-Frontend JavaScript (fetch call)
-    ↓
-Netlify Redirect (/api/* → /.netlify/functions/*)
-    ↓
-Serverless Function (riot-api.js)
-    ↓
-Riot Games Regional API (https://{region}.api.riotgames.com)
-    ↓
-Response with Cache Headers
-    ↓
-Frontend Display + LocalStorage
-This architecture ensures secure, performant, and maintainable integration with the Riot Games API while providing a seamless user experience across the summoner selector and home room interfaces.
+The hybrid approach ensures comprehensive data coverage: the Riot API provides authoritative player stats, Data Dragon delivers official visual assets, and the scraper supplements with community-aggregated statistics not exposed through official endpoints.
