@@ -183,3 +183,278 @@ Frontend:
 - CSS Grid/Flexbox for responsive layouts
 
 The hybrid approach ensures comprehensive data coverage: the Riot API provides authoritative player stats, Data Dragon delivers official visual assets, and the scraper supplements with community-aggregated statistics not exposed through official endpoints.
+
+Home Room Interactive Features
+================================
+
+The home room interface has been enhanced with several immersive features that create a gamified user experience:
+
+1. Quest System
+---------------
+
+Implementation: public/homeroom.html (lines 1580-1750)
+
+A fully functional quest tracking system that monitors player progress and achievements:
+
+Features:
+- Dynamic quest list with completion tracking
+- Quest progress bar showing advancement toward next level (0-5 points per level)
+- Visual notifications for quest completion and level-ups
+- Persistent storage via localStorage
+- Expandable dropdown tabs interface for quest viewing
+
+Current Quests:
+a) "Load Profile" - Automatically completes when summoner data is loaded
+b) "Select Champion" - Completes when player selects a champion from the style overlay
+
+Quest Progression:
+- Each completed quest awards 1 quest point
+- 5 quest points required to advance to next quest level
+- Completion triggers animated notifications with cyan glow effects
+- Quest notification indicator (!) appears on quest tab when active/completed quests exist
+
+Data Storage:
+- Key: "questData" in localStorage
+- Stores: quests array, completedQuests array, questLevel, questPoints
+- Auto-saves after each quest update
+
+Visual Elements:
+- Completed quests show green checkmark (✓) with green border
+- Active quests show circle (○) with cyan border
+- Progress bar displayed in HUD nameplate with fill animation
+- Dynamic quest level label updates in real-time
+
+Files: public/homeroom.html (lines 389-442, 1270-1282, 1323-1329, 1580-1750)
+
+2. Champion Progress Tracker
+-----------------------------
+
+Implementation: public/homeroom.html (lines 1754-1860)
+
+Displays champion mastery progress by analyzing recent match data from Riot API:
+
+Data Source:
+- Fetches recent match data via /lol/match/v5/matches/{matchId} endpoint
+- Analyzes team composition from most recent game
+- Filters champions by player's team (teamId)
+- Maps championId to champion names using Data Dragon JSON
+
+Features:
+- Automatically tracks champions from last played match
+- Shows lore collection progress for each champion (X/5 format)
+- Visual progress bars with percentage fill
+- Champion portrait icons from Data Dragon CDN
+- Persistent progress tracking via localStorage
+
+Display Format:
+- Champion icon thumbnail (64x64)
+- Champion name in cyan glow text
+- Progress bar showing lore collection (0-5 pieces)
+- "X/5 Lore" text overlay on progress bar
+
+Storage:
+- Key: "championProgress" in localStorage
+- Structure: { championName: { loreCollected, totalLore, progress } }
+- Updates when match data is fetched
+
+Integration:
+- Requires valid puuid from summoner data
+- Fetches match IDs from Americas regional endpoint
+- Handles errors gracefully with user-friendly messages
+- Auto-initializes progress for new champions at 0/5
+
+Files: public/homeroom.html (lines 617-693, 1285-1294, 1754-1860)
+
+3. Lore Collection System
+--------------------------
+
+Implementation: public/homeroom.html (lines 1862-1960+)
+
+A collectible lore piece system featuring champion backstories and narrative content:
+
+Features:
+- Pre-defined lore pieces for multiple champions
+- Collection status tracking (collected/uncollected)
+- Interactive hover effects on lore items
+- Visual indication of collected lore with checkmark
+- Expandable preview text and full content
+- Persistent collection via localStorage
+
+Lore Structure:
+Each lore piece contains:
+- Unique ID (lore_1, lore_2, etc.)
+- Associated champion name
+- Title (e.g., "The Nine-Tailed Fox")
+- Preview text snippet
+- Full content text
+
+Champions Included:
+- Ahri: "The Nine-Tailed Fox"
+- Lux: "The Lady of Luminosity"
+- Yasuo: "The Unforgiven"
+- Jinx: "The Loose Cannon"
+- [Additional champions configurable]
+
+Visual Design:
+- Uncollected lore: Semi-transparent with cyan border
+- Collected lore: Full opacity with green checkmark prefix
+- Hover effect: Slight scale transform and glow
+- Organized in scrollable tab container
+
+Storage:
+- Key: "collectedLore" in localStorage
+- Array of collected lore piece IDs
+- Syncs with champion progress system
+
+Files: public/homeroom.html (lines 694-768, 1296-1306, 1862-1960+)
+
+4. Dropdown Tab Interface
+--------------------------
+
+Implementation: public/homeroom.html (lines 498-611, 1269-1307)
+
+Collapsible tab system for organizing game features in the home room:
+
+Tabs:
+a) Quests Tab
+   - Shows active and completed quests
+   - Quest notification indicator (!)
+   - Flashing animation when quests available
+
+b) Champion Progress Tab
+   - Displays champion mastery tracking
+   - Shows lore collection progress
+   - Updates after each match
+
+c) Lore Box Tab
+   - Lists all available lore pieces
+   - Shows collection status
+   - Enables reading collected lore
+
+Interaction:
+- Click tab header to expand/collapse content
+- Arrow icon (▼) rotates based on state
+- Only one tab open at a time (accordion behavior)
+- Smooth CSS transitions for expand/collapse
+
+Styling:
+- Semi-transparent cyan background
+- Hover effects with brightness increase
+- Active state with expanded content area
+- Scrollable inner content for overflow
+
+Files: public/homeroom.html (lines 498-611, 1269-1307)
+
+5. Rank Badge Display System
+-----------------------------
+
+Implementation: public/homeroom.html (lines 389-407, 769-788, 1263-1267, 1489-1535)
+
+Enhanced rank visualization with badge overlays in multiple locations:
+
+Rank Badge Locations:
+a) HUD Nameplate (small badge)
+   - Positioned next to summoner name
+   - Shows profile icon or champion icon
+   - Updates dynamically on profile load
+
+b) Top Right Display (large badge)
+   - Prominent rank badge with glow effects
+   - Displays current competitive rank
+   - Semi-transparent with backdrop blur
+
+Badge Sources:
+- Rank icons: METAMEDIA/Rank={tier}.png
+- Profile icons: Data Dragon CDN or Riot API
+- Champion icons: Data Dragon thumbnails
+
+Supported Ranks:
+- Iron, Bronze, Silver, Gold, Platinum, Emerald, Diamond
+- Master, Grandmaster, Challenger
+
+Visual Effects:
+- Background image positioning and sizing
+- Box shadow with cyan glow
+- Blur backdrop for depth effect
+- Responsive sizing based on location
+
+Files: public/homeroom.html (lines 389-407, 769-788, 1263-1267, 1489-1535)
+
+6. Champion Background Scraper
+-------------------------------
+
+Implementation: netlify/functions/champion-bg-scraper.js
+
+Serverless function for fetching champion splash art backgrounds:
+
+Functionality:
+- Accepts champion name as query parameter
+- Attempts to fetch champion splash art (splash/{Champion}_0.jpg)
+- Falls back to loading screen art if splash unavailable
+- Returns background URL as JSON response
+
+Endpoints Used:
+a) Primary: https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{Champion}_0.jpg
+b) Fallback: https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{Champion}_0.jpg
+
+Features:
+- HEAD request verification for image existence
+- 3-second timeout for performance
+- 24-hour cache headers for optimization
+- CORS headers for client access
+- Error handling with fallback logic
+
+Response Format:
+{
+  "champion": "ChampionName",
+  "backgroundUrl": "https://ddragon.leagueoflegends.com/cdn/..."
+}
+
+Integration:
+- Called when champion is selected in style overlay
+- Updates home room background dynamically
+- Provides immersive champion-themed environment
+
+Files: netlify/functions/champion-bg-scraper.js
+
+7. Enhanced Visual Effects
+---------------------------
+
+New visual elements added to home room:
+
+Character Sparkles:
+- Four color variants: blue, purple, black, pink
+- Animated falling effect with opacity fade
+- Size: 18px with glow shadows
+- Spawn on character interaction
+
+Cursor Sparkles:
+- White sparkles following mouse movement
+- Smaller size (4px) than character sparkles
+- Brief animation duration (0.8s)
+- Z-index layering for proper display
+
+Rank Display Styling:
+- Top-right positioning with flexbox
+- Cyan text with shadow effects
+- Rank badge background with blur
+- Responsive sizing and spacing
+
+Files: public/homeroom.html (lines 32-96, 389-407)
+
+Technology Integration Summary
+================================
+
+New Data Flows:
+1. Quest System: localStorage ↔ Quest State ↔ UI Updates
+2. Champion Progress: Riot Match API → Team Analysis → Progress Tracking → localStorage
+3. Lore Collection: Static Data → Collection State → localStorage → UI Rendering
+4. Background Scraper: Champion Selection → Serverless Function → Data Dragon CDN → Background Display
+
+Persistence Strategy:
+- All game progress stored in browser localStorage
+- Three separate storage keys: questData, championProgress, collectedLore
+- Auto-save on every state change
+- Restore on page load for seamless experience
+
+The enhanced home room creates an engaging, game-like experience that encourages exploration while providing meaningful progress tracking for League of Legends summoners.
