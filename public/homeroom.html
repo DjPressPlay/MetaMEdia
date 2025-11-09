@@ -401,7 +401,7 @@
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 6px;
   text-align: center;
 }
@@ -424,6 +424,54 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* ============================= */
+/* 🏆 Rank Display Top Right */
+/* ============================= */
+.rank-display {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(20, 20, 20, 0.85);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 14px 18px;
+  box-shadow:
+    inset 0 0 15px rgba(0, 255, 255, 0.25),
+    0 0 25px rgba(0, 255, 255, 0.6),
+    0 0 60px rgba(0, 180, 255, 0.35),
+    0 4px 25px rgba(0, 0, 0, 0.6);
+  animation: plateGlow 4s ease-in-out infinite;
+  z-index: 5;
+}
+
+.rank-badge-large {
+  width: 80px;
+  height: 80px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  box-shadow:
+    0 0 15px rgba(0,255,255,0.8),
+    inset 0 0 12px rgba(0,255,255,0.4);
+  margin-bottom: 8px;
+}
+
+.rank-text {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow:
+    0 0 6px rgba(0,255,255,0.9),
+    0 0 12px rgba(0,200,255,0.4);
 }
 
 /* ============================= */
@@ -895,6 +943,12 @@
   <div class="frame">
 
     
+<!-- 🏆 Rank Display Top Right -->
+<div class="rank-display" id="rank-display">
+  <div class="rank-badge-large" id="rank-badge-large"></div>
+  <div class="rank-text" id="rank-text"></div>
+</div>
+
 <!-- 🩵 HUD Nameplate -->
 <div class="nameplate" id="hud">
   <div class="header">
@@ -904,7 +958,6 @@
 
   <div class="stats-grid">
     <div><div class="stat-value" id="summoner-level"></div><div class="stat-label">Level</div></div>
-    <div><div class="stat-value" id="summoner-rank"></div><div class="stat-label">Rank</div></div>
     <div><div class="stat-value" id="summoner-lp"></div><div class="stat-label">LP</div></div>
     <div><div class="stat-value" id="summoner-wins"></div><div class="stat-label">Wins</div></div>
     <div><div class="stat-value" id="summoner-losses"></div><div class="stat-label">Losses</div></div>
@@ -1044,10 +1097,30 @@
       
       document.getElementById("summoner-name").textContent = `${data.name}#${data.tagLine}` || "Unknown";
       document.getElementById("summoner-level").textContent = data.level || "—";
-      document.getElementById("summoner-rank").textContent = data.rank || "Unranked";
       document.getElementById("summoner-lp").textContent = data.lp || "0 LP";
       document.getElementById("summoner-wins").textContent = data.wins || "0";
       document.getElementById("summoner-losses").textContent = data.losses || "0";
+      
+      const rank = data.rank || "Unranked";
+      document.getElementById("rank-text").textContent = rank;
+      
+      const rankBadgeLarge = document.getElementById('rank-badge-large');
+      const rankMap = {
+        'Iron': 'METAMEDIA/Rank=Iron.png',
+        'Bronze': 'METAMEDIA/Rank=Bronze.png',
+        'Silver': 'METAMEDIA/Rank=Silver.png',
+        'Gold': 'METAMEDIA/Rank=Gold.png',
+        'Platinum': 'METAMEDIA/Rank=Platinum.png',
+        'Emerald': 'METAMEDIA/Rank=Emerald.png',
+        'Diamond': 'METAMEDIA/Rank=Diamond.png',
+        'Master': 'METAMEDIA/Rank=Master.png',
+        'Grandmaster': 'METAMEDIA/Rank=Grandmaster.png',
+        'Challenger': 'METAMEDIA/Rank=Challenger.png'
+      };
+      
+      const baseRank = rank.split(' ')[0];
+      const rankBadgePath = rankMap[baseRank] || 'METAMEDIA/lol.jpeg';
+      rankBadgeLarge.style.backgroundImage = `url(${rankBadgePath})`;
       
       const badgeEl = document.getElementById('summoner-badge');
       
