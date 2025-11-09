@@ -26,6 +26,72 @@
   border-radius: 12px;
   box-shadow: 0 0 30px rgba(0,255,255,0.5), inset 0 0 20px rgba(0,255,255,0.2);
   background: #000;
+  cursor: none;
+}
+
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  box-shadow: 0 0 4px white, 0 0 8px rgba(255,255,255,0.8);
+  animation: sparklefall 0.8s ease-out forwards;
+}
+
+.character-sparkle {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 15;
+  animation: characterSparklefall 1.2s ease-out forwards;
+}
+
+.character-sparkle.blue {
+  background: rgba(100, 150, 255, 0.95);
+  box-shadow: 0 0 10px rgba(100, 150, 255, 1), 0 0 20px rgba(100, 150, 255, 0.8), 0 0 30px rgba(100, 180, 255, 0.6);
+}
+
+.character-sparkle.purple {
+  background: rgba(180, 100, 255, 0.95);
+  box-shadow: 0 0 10px rgba(180, 100, 255, 1), 0 0 20px rgba(180, 100, 255, 0.8), 0 0 30px rgba(200, 120, 255, 0.6);
+}
+
+.character-sparkle.black {
+  background: rgba(30, 30, 30, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(200, 200, 200, 0.6), 0 0 30px rgba(150, 150, 150, 0.4);
+}
+
+.character-sparkle.pink {
+  background: rgba(255, 100, 200, 0.95);
+  box-shadow: 0 0 10px rgba(255, 100, 200, 1), 0 0 20px rgba(255, 100, 200, 0.8), 0 0 30px rgba(255, 150, 220, 0.6);
+}
+
+@keyframes characterSparklefall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.1);
+  }
+}
+
+@keyframes sparklefall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.2);
+  }
 }
 
 
@@ -143,7 +209,7 @@
     pointer-events: none;
     transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 20;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .character {
@@ -161,6 +227,25 @@
     object-fit: contain;
     object-position: center bottom;
     transition: transform 0.3s ease;
+  }
+
+  .character-container.moving .character img {
+    animation: characterHover 0.4s ease-in-out;
+  }
+
+  @keyframes characterHover {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    25% {
+      transform: translateY(-10px);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+    75% {
+      transform: translateY(-12px);
+    }
   }
 
   .character img.fallback-orb {
@@ -916,6 +1001,34 @@
     const character = document.querySelector('.character-container');
     const charImg = document.getElementById('character-img');
 
+    const frame = document.querySelector('.frame');
+    let lastSparkleTime = 0;
+    const sparkleInterval = 30;
+
+    frame.addEventListener('mousemove', (e) => {
+      const now = Date.now();
+      if (now - lastSparkleTime > sparkleInterval) {
+        createSparkle(e.clientX, e.clientY);
+        lastSparkleTime = now;
+      }
+    });
+
+    function createSparkle(x, y) {
+      const sparkle = document.createElement('div');
+      sparkle.className = 'sparkle';
+      sparkle.style.left = x + 'px';
+      sparkle.style.top = y + 'px';
+      
+      const variation = (Math.random() - 0.5) * 10;
+      sparkle.style.left = (x + variation) + 'px';
+      
+      document.body.appendChild(sparkle);
+      
+      setTimeout(() => {
+        sparkle.remove();
+      }, 800);
+    }
+
     const controller = window.MetaMeda;
     const savedStyle = localStorage.getItem("selectedStyle");
     let selectedCharacter = localStorage.getItem('selectedChampion') || null;
@@ -949,9 +1062,11 @@
         charImg.src = championRenderUrl;
         console.log(`Restored selected champion: ${selectedCharacter} with render image`);
       } else if (data.profileIconUrl) {
+        charImg.classList.add('fallback-orb');
         charImg.src = data.profileIconUrl;
         badgeEl.style.backgroundImage = `url(${data.profileIconUrl})`;
       } else {
+        charImg.classList.add('fallback-orb');
         charImg.src = "./METAMEDIA/lol.jpeg";
         badgeEl.style.backgroundImage = `url(./METAMEDIA/lol.jpeg)`;
       }
@@ -976,6 +1091,7 @@
         const riotIconUrl = `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/profileicon/${profileIconId}.png`;
         
         if (!selectedCharacter) {
+          charImg.classList.add('fallback-orb');
           charImg.src = riotIconUrl;
         }
         
@@ -1166,12 +1282,59 @@ if (spot2) {
       updateCharacterPosition();
     });
 
+    let lastCharacterX = null;
+    let lastCharacterSparkleTime = 0;
+    const characterSparkleInterval = 50;
+
     function updateCharacterPosition() {
       const characterContainer = document.querySelector('.character-container');
       if (characterContainer) {
-        characterContainer.style.left = `${platformPositions[currentPlatform]}%`;
+        const oldLeft = parseFloat(characterContainer.style.left) || 50;
+        const newLeft = platformPositions[currentPlatform];
+        characterContainer.style.left = `${newLeft}%`;
+        
+        if (oldLeft !== newLeft) {
+          createCharacterSparkleTrail(characterContainer);
+        }
       }
       checkHotspotProximity();
+    }
+
+    function createCharacterSparkleTrail(container) {
+      const rect = container.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      container.classList.add('moving');
+      setTimeout(() => {
+        container.classList.remove('moving');
+      }, 400);
+      
+      const sparkleCount = 15;
+      for (let i = 0; i < sparkleCount; i++) {
+        setTimeout(() => {
+          createCharacterSparkle(centerX, centerY);
+        }, i * 30);
+      }
+    }
+
+    function createCharacterSparkle(x, y) {
+      const sparkle = document.createElement('div');
+      const colors = ['blue', 'purple', 'black', 'pink'];
+      const colorClass = colors[Math.floor(Math.random() * colors.length)];
+      sparkle.className = `character-sparkle ${colorClass}`;
+      
+      const offsetX = (Math.random() - 0.5) * 80;
+      const offsetY = (Math.random() - 0.5) * 80;
+      
+      sparkle.style.left = (x + offsetX) + 'px';
+      sparkle.style.top = (y + offsetY) + 'px';
+      
+      document.body.appendChild(sparkle);
+      
+      setTimeout(() => {
+        sparkle.remove();
+      }, 1200);
     }
 
     updateCharacterPosition();
