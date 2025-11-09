@@ -14,23 +14,12 @@
   }
 .frame {
   position: relative;
-  width: clamp(320px, 90vw, 960px);
-  aspect-ratio: 16/9;
-  border: 14px solid;
-  border-image: linear-gradient(145deg, #888, #ccc, #555, #999) 1;
-  border-radius: 16px;
-  background: linear-gradient(145deg, #2c2c2c, #1a1a1a);
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-
-  /* ✨ Add cyan ambient glow (same as hotspots) */
-  box-shadow:
-    inset 0 0 20px rgba(255, 255, 255, 0.15),
-    0 0 25px rgba(0, 255, 255, 0.4),
-    0 0 60px rgba(0, 180, 255, 0.3),
-    0 4px 30px rgba(0, 0, 0, 0.6);
 }
 
 
@@ -40,16 +29,18 @@
     background:url("https://ik.imagekit.io/q2zhbhqmf/Gemini_Generated_Image_fwn9dlfwn9dlfwn9.png?updatedAt=1762651939683")
                center/cover no-repeat;
     cursor:none;
+    overflow:hidden;
   }
 
   .character {
     position:absolute;
-    width:14%;
-    aspect-ratio:220/390;
+    width:50px;
+    height:50px;
     transform:translate(-50%,-50%);
     pointer-events:none;
-    transition:transform 0.05s linear;
-    overflow:hidden;
+    transition:left 0.15s ease, top 0.15s ease;
+    overflow:visible;
+    z-index:20;
   }
 
   .character img {
@@ -57,44 +48,37 @@
     height:100%; 
     object-fit:cover; 
     object-position:center center;
-    border-radius:12px;
+    border-radius:50%;
+    border:3px solid #00ffff;
+    box-shadow:0 0 15px rgba(0,255,255,0.8);
   }
 
 .character::before {
   content: "";
   position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 88%;
+  width: 30px;
+  height: 15px;
+  bottom: -8px;
   left: 50%;
-  transform: translate(-50%, -50%) scale(1.5); /* ⬅️ add this scale */
+  transform: translateX(-50%);
   border-radius: 50%;
   background: radial-gradient(
-    circle at var(--glow-side, 60%) 60%,
-    rgba(0, 0, 0, 0.9) 0%,
-    rgba(0, 0, 0, 0.7) 40%,
-    transparent 90%
+    circle,
+    rgba(0, 0, 0, 0.5) 0%,
+    transparent 70%
   );
-  filter: blur(24px);
+  filter: blur(4px);
   z-index: -1;
   pointer-events: none;
-  transition: background 0.2s ease, top 0.2s ease, transform 0.2s ease;
 }
 
 
 
 
 
-  /* Depth markers */
   .depth-dot {
-    position:absolute;
-    width:8px; height:8px;
-    background:red; opacity:0;
-    border-radius:50%; pointer-events:none;
+    display:none;
   }
-
-  #far   { top:10%; left:70%; transform:translate(-50%,-50%); }
-  #close { bottom:-20px; left:50%; transform:translateX(-50%); }
 
   /* Invisible walls */
   .wall-top, .wall-left, .wall-right {
@@ -117,10 +101,9 @@
 /* ===================================== */
 .nameplate {
   position: absolute;
-  bottom: 397px;
-  left: 21%;
-  transform: translateX(-50%);
-  width: 380px;
+  top: 20px;
+  left: 20px;
+  width: 320px;
   max-width: 380px;
   background: rgba(20, 20, 20, 0.85);
   border: 2px solid var(--accent);
@@ -377,68 +360,10 @@
   transform: scale(1.2);
 }
 
-.frame::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 18%;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.5) 0%,
-    rgba(255, 255, 255, 0.15) 40%,
-    rgba(255, 255, 255, 0.05) 80%,
-    transparent 100%
-  );
-  filter: blur(10px);
-  pointer-events: none;
-  z-index: 2;
-  opacity: 0.75;
-  animation: glarePulse 6s ease-in-out infinite;
-}
   
 /* ✨ Animations */
-/* ✴️ Light rays */
-.frame::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 120%;
-  height: 120%;
-  background: repeating-linear-gradient(
-    75deg,
-    rgba(255, 255, 255, 0.25) 0px,
-    rgba(255, 255, 255, 0.1) 6px,
-    transparent 14px,
-    transparent 22px
-  );
-  opacity: 0.15;
-  transform: translate(-10%, -20%) rotate(-2deg);
-  mix-blend-mode: screen;
-  filter: blur(6px);
-  pointer-events: none;
-  z-index: 0;
-  animation: lightRaysMove 12s linear infinite;
-}
 
-@keyframes glarePulse {
-  0%, 100% {
-    opacity: 0.4;
-    filter: blur(8px) brightness(1);
-  }
-  50% {
-    opacity: 0.9;
-    filter: blur(10px) brightness(1.2);
-  }
-}
 
-@keyframes lightRaysMove {
-  0% { transform: translate(-10%, -20%) rotate(-2deg); }
-  50% { transform: translate(-5%, -25%) rotate(1deg); }
-  100% { transform: translate(-10%, -20%) rotate(-2deg); }
-}
 
 .closet-container {
   width: 90%;
@@ -769,8 +694,6 @@
       
       
 <!-- 🔹3d points on 2d plane ---------------------->
-      <div id="far" class="depth-dot"></div>
-      <div id="close" class="depth-dot"></div>
       
       
      <div class="character">
@@ -851,8 +774,6 @@
     const room = document.querySelector('.room');
     const character = document.querySelector('.character');
     const charImg = document.getElementById('character-img');
-    const closeDot = document.getElementById('close');
-    const farDot = document.getElementById('far');
     const wallTop = document.querySelector('.wall-top');
     const wallLeft = document.querySelector('.wall-left');
     const wallRight = document.querySelector('.wall-right');
@@ -1053,80 +974,39 @@ if (spot2) {
 
 
   //==================================================================
-    // 🧍 Move character with cursor depth
+    let targetX = window.innerWidth / 2;
+    let targetY = window.innerHeight / 2;
+    let currentX = targetX;
+    let currentY = targetY;
+
     document.addEventListener('mousemove', e => {
       const rect = room.getBoundingClientRect();
-      let x = e.clientX - rect.left;
-      let y = e.clientY - rect.top;
-
-      const wallTopHeight = rect.height * 0.55;
-      const wallLeftWidth = rect.width * 0.36;
-      const wallRightLimit = rect.width * 0.75;
-      const clampedY = Math.max(wallTopHeight, y);
-      const clampedX = Math.min(Math.max(wallLeftWidth, x), wallRightLimit);
-
-      character.style.left = `${clampedX}px`;
-      character.style.top  = `${clampedY}px`;
-
-      const closeRect = closeDot.getBoundingClientRect();
-      const farRect = farDot.getBoundingClientRect();
-      const dxC = e.clientX - (closeRect.left + closeRect.width/2);
-      const dyC = e.clientY - (closeRect.top  + closeRect.height/2);
-      const dxF = e.clientX - (farRect.left   + farRect.width/2);
-      const dyF = e.clientY - (farRect.top    + farRect.height/2);
-      const distClose = Math.hypot(dxC, dyC);
-      const distFar   = Math.hypot(dxF, dyF);
-
-      const scale = 3.5 + (distFar - distClose) / 150;
-      character.style.transform =
-        `translate(-50%, -50%) scale(${Math.max(0.4, Math.min(scale, 10.5))})`;
+      targetX = e.clientX - rect.left;
+      targetY = e.clientY - rect.top;
     });
 
+    function smoothMoveCharacter() {
+      const rect = room.getBoundingClientRect();
+      const speed = 0.08;
+      
+      currentX += (targetX - currentX) * speed;
+      currentY += (targetY - currentY) * speed;
+
+      const margin = 30;
+      const clampedX = Math.min(Math.max(margin, currentX), rect.width - margin);
+      const clampedY = Math.min(Math.max(margin, currentY), rect.height - margin);
+
+      character.style.left = `${clampedX}px`;
+      character.style.top = `${clampedY}px`;
+
+      checkHotspotProximity();
+      requestAnimationFrame(smoothMoveCharacter);
+    }
+
+    smoothMoveCharacter();
+
 
  
-let lastX = null;
-
-document.addEventListener('mousemove', e => {
-  const rect = room.getBoundingClientRect();
-  let x = e.clientX - rect.left;
-  let y = e.clientY - rect.top;
-
-  const wallTopHeight = rect.height * 0.55;
-  const wallLeftWidth = rect.width * 0.36;
-  const wallRightLimit = rect.width * 0.75;
-  const clampedY = Math.max(wallTopHeight, y);
-  const clampedX = Math.min(Math.max(wallLeftWidth, x), wallRightLimit);
-
-  character.style.left = `${clampedX}px`;
-  character.style.top  = `${clampedY}px`;
-
-  // 🌀 Flip glow based on movement direction
-  if (lastX !== null) {
-    const movingRight = clampedX > lastX;
-    character.style.setProperty('--glow-side', movingRight ? '20%' : '80%');
-  }
-  lastX = clampedX;
-
-  const closeRect = closeDot.getBoundingClientRect();
-  const farRect = farDot.getBoundingClientRect();
-  const dxC = e.clientX - (closeRect.left + closeRect.width/2);
-  const dyC = e.clientY - (closeRect.top  + closeRect.height/2);
-  const dxF = e.clientX - (farRect.left   + farRect.width/2);
-  const dyF = e.clientY - (farRect.top    + farRect.height/2);
-  const distClose = Math.hypot(dxC, dyC);
-  const distFar   = Math.hypot(dxF, dyF);
-
-  const scale = 3.5 + (distFar - distClose) / 150;
-  character.style.transform =
-    `translate(-50%, -50%) scale(${Math.max(0.4, Math.min(scale, 10.5))})`;
- 
-// 🖤 Apply same scaling to the shadow glow
-character.style.setProperty('--shadow-scale', Math.max(0.4, Math.min(scale, 10.5)));
-
-  // 🔍 Check proximity to hotspots and show labels
-  checkHotspotProximity();
-
-});
 
 // 🔍 Proximity detection for hotspot labels
 function checkHotspotProximity() {
