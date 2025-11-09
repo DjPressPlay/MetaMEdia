@@ -34,8 +34,8 @@
 
   .character {
     position:absolute;
-    width:50px;
-    height:50px;
+    width:14%;
+    aspect-ratio:220/390;
     transform:translate(-50%,-50%);
     pointer-events:none;
     transition:left 0.15s ease, top 0.15s ease;
@@ -48,9 +48,7 @@
     height:100%; 
     object-fit:cover; 
     object-position:center center;
-    border-radius:50%;
-    border:3px solid #00ffff;
-    box-shadow:0 0 15px rgba(0,255,255,0.8);
+    transition: transform 0.3s ease;
   }
 
 .character::before {
@@ -1011,12 +1009,18 @@ if (spot2) {
 // 🔍 Proximity detection for hotspot labels
 function checkHotspotProximity() {
   const character = document.querySelector('.character');
+  const charImg = document.getElementById('character-img');
   const hotspots = document.querySelectorAll('.hotspot');
   const proximityThreshold = 120;
+  const maxInfluenceDistance = 250;
 
   const charRect = character.getBoundingClientRect();
   const charCenterX = charRect.left + charRect.width / 2;
   const charCenterY = charRect.top + charRect.height / 2;
+
+  let spot1Distance = Infinity;
+  let spot2Distance = Infinity;
+  let spot3Distance = Infinity;
 
   hotspots.forEach(hotspot => {
     const hotspotRect = hotspot.getBoundingClientRect();
@@ -1033,7 +1037,38 @@ function checkHotspotProximity() {
     } else {
       hotspot.classList.remove('near');
     }
+
+    if (hotspot.id === 'spot1') {
+      spot1Distance = distance;
+    } else if (hotspot.id === 'spot2') {
+      spot2Distance = distance;
+    } else if (hotspot.id === 'spot3') {
+      spot3Distance = distance;
+    }
   });
+
+  let targetScale = 1.0;
+
+  const spot1Influence = Math.max(0, 1 - (spot1Distance / maxInfluenceDistance));
+  const spot2Influence = Math.max(0, 1 - (spot2Distance / maxInfluenceDistance));
+  const spot3Influence = Math.max(0, 1 - (spot3Distance / maxInfluenceDistance));
+
+  if (spot1Influence > 0) {
+    const spot1Scale = 1.0 - (0.5 * spot1Influence);
+    targetScale *= spot1Scale;
+  }
+
+  if (spot2Influence > 0) {
+    const spot2Scale = 1.0 + (0.15 * spot2Influence);
+    targetScale *= spot2Scale;
+  }
+
+  if (spot3Influence > 0) {
+    const spot3Scale = 1.0 + (0.8 * spot3Influence);
+    targetScale *= spot3Scale;
+  }
+
+  charImg.style.transform = `scale(${targetScale})`;
 }
     // 👁️ Cursor visibility
     const showCursor = () => room.style.cursor = 'default';
