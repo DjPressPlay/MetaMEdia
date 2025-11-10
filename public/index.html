@@ -30,11 +30,101 @@
     #start-screen {
       text-align: center;
     }
+    .logo-wrapper {
+      display: inline-block;
+      border: 5px solid cyan;
+      border-radius: 8px;
+      padding: 0;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.3);
+      position: relative;
+      z-index: 10;
+    }
+    .logo-wrapper img {
+      display: block;
+      max-width: 90vw;
+      height: auto;
+      margin: 0;
+    }
+    #start-btn {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      border: 5px solid cyan;
+      color: #000;
+      font-weight: bold;
+      font-size: 18px;
+      padding: 15px 40px;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+      margin: 0 auto;
+      position: relative;
+      z-index: 10;
+    }
+    #start-btn:hover {
+      background: linear-gradient(135deg, #FFA500, #FFD700);
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.8), inset 0 0 25px rgba(0, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+    .bubble {
+      position: fixed;
+      background: rgba(0, 255, 255, 0.15);
+      border: 2px solid rgba(0, 255, 255, 0.5);
+      border-radius: 50%;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      font-size: 11px;
+      color: cyan;
+      text-align: center;
+      pointer-events: none;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.4), inset 0 0 10px rgba(0, 255, 255, 0.2);
+      animation: floatUp linear infinite;
+      z-index: 1;
+      line-height: 1.3;
+      word-wrap: break-word;
+      overflow: hidden;
+    }
+    .small-bubble {
+      position: fixed;
+      background: rgba(0, 255, 255, 0.08);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      border-radius: 50%;
+      width: var(--size);
+      height: var(--size);
+      pointer-events: none;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+      animation: floatUp linear infinite;
+      z-index: 1;
+    }
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100vh) translateX(var(--drift));
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
   <div id="start-screen">
-    <h1>🚀 Meta Media</h1>
+    <div class="logo-wrapper">
+      <img src="/METAMEDIA/Myth-Ledger-League-of-Legends-11-10-2025.gif" alt="Myth Ledger" />
+    </div>
     <button id="start-btn">Start</button>
   </div>
 
@@ -42,7 +132,6 @@
   <script type="module" src="/script.js"></script>
   
   <script>
-    // Set random LoL champion splash as background
     async function setRandomChampionBackground() {
       try {
         const championsResponse = await fetch('https://ddragon.leagueoflegends.com/cdn/14.1.1/data/en_US/champion.json');
@@ -57,8 +146,151 @@
       }
     }
     
-    // Set background on page load
-    window.addEventListener('DOMContentLoaded', setRandomChampionBackground);
+    async function fetchSummonerNames() {
+      try {
+        const proxies = [
+          'https://api.allorigins.win/raw?url=',
+          'https://corsproxy.io/?',
+          'https://api.codetabs.com/v1/proxy?quest='
+        ];
+        
+        const url = 'https://www.leagueofgraphs.com/rankings/summoners/na';
+        let html = null;
+        
+        for (const proxy of proxies) {
+          try {
+            const response = await fetch(proxy + encodeURIComponent(url));
+            if (response.ok) {
+              html = await response.text();
+              break;
+            }
+          } catch (err) {
+            continue;
+          }
+        }
+        
+        if (!html) {
+          throw new Error('All proxies failed');
+        }
+        
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        const summonerRows = doc.querySelectorAll('tr[data-summonername]');
+        const summoners = [];
+        
+        for (const row of Array.from(summonerRows).slice(0, 50)) {
+          const nameElement = row.querySelector('.name');
+          const winsElement = row.querySelector('.wins');
+          
+          if (nameElement && winsElement) {
+            const name = nameElement.textContent.trim();
+            const winsText = winsElement.textContent.trim();
+            const wins = winsText.match(/\d+/)?.[0] || '0';
+            
+            if (name.length > 0) {
+              summoners.push({ name, wins });
+            }
+          }
+        }
+        
+        if (summoners.length === 0) {
+          throw new Error('No summoner data found');
+        }
+        
+        return summoners;
+      } catch (err) {
+        console.error('Failed to fetch summoner names:', err);
+        return [
+          { name: 'Faker#KR1', wins: '1247' },
+          { name: 'Doublelift#NA1', wins: '892' },
+          { name: 'Bjergsen#NA1', wins: '1034' },
+          { name: 'Sneaky#NA1', wins: '756' },
+          { name: 'Rekkles#EUW', wins: '1189' },
+          { name: 'TheShy#KR1', wins: '945' },
+          { name: 'Uzi#CN1', wins: '1523' },
+          { name: 'Caps#EUW', wins: '1067' },
+          { name: 'Perkz#EUW', wins: '978' },
+          { name: 'Jankos#EUW', wins: '823' }
+        ];
+      }
+    }
+    
+    function createBubble(summoner) {
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.innerHTML = `Riot ID:<br>${summoner.name}<br>wins: ${summoner.wins}`;
+      
+      const startX = Math.random() * window.innerWidth;
+      const drift = (Math.random() - 0.5) * 200;
+      const duration = 8 + Math.random() * 4;
+      const delay = Math.random() * 2;
+      
+      bubble.style.left = `${startX}px`;
+      bubble.style.bottom = '-50px';
+      bubble.style.setProperty('--drift', `${drift}px`);
+      bubble.style.animationDuration = `${duration}s`;
+      bubble.style.animationDelay = `${delay}s`;
+      
+      document.body.appendChild(bubble);
+      
+      setTimeout(() => {
+        bubble.remove();
+        createBubble(summoner);
+      }, (duration + delay) * 1000);
+    }
+    
+    function createSmallBubble() {
+      const bubble = document.createElement('div');
+      bubble.className = 'small-bubble';
+      
+      const size = 15 + Math.random() * 35;
+      const startX = Math.random() * window.innerWidth;
+      const drift = (Math.random() - 0.5) * 150;
+      const duration = 10 + Math.random() * 8;
+      const delay = Math.random() * 3;
+      
+      bubble.style.setProperty('--size', `${size}px`);
+      bubble.style.left = `${startX}px`;
+      bubble.style.bottom = '-50px';
+      bubble.style.setProperty('--drift', `${drift}px`);
+      bubble.style.animationDuration = `${duration}s`;
+      bubble.style.animationDelay = `${delay}s`;
+      
+      document.body.appendChild(bubble);
+      
+      setTimeout(() => {
+        bubble.remove();
+        createSmallBubble();
+      }, (duration + delay) * 1000);
+    }
+    
+    async function initBubbles() {
+      const summoners = await fetchSummonerNames();
+      const selectedSummoners = [];
+      const usedIndices = new Set();
+      
+      while (selectedSummoners.length < 5 && usedIndices.size < summoners.length) {
+        const randomIndex = Math.floor(Math.random() * summoners.length);
+        if (!usedIndices.has(randomIndex)) {
+          usedIndices.add(randomIndex);
+          selectedSummoners.push(summoners[randomIndex]);
+        }
+      }
+      
+      for (let i = 0; i < selectedSummoners.length; i++) {
+        createBubble(selectedSummoners[i]);
+      }
+      
+      for (let i = 0; i < 15; i++) {
+        createSmallBubble();
+      }
+    }
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      setRandomChampionBackground();
+      initBubbles();
+    });
   </script>
 </body>
 </html>
