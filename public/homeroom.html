@@ -9,8 +9,12 @@
   body {
     height:100vh; width:100vw; overflow:hidden;
     background:radial-gradient(circle at center,#222 0%,#000 100%);
-    display:flex; justify-content:center; align-items:center;
+    display:flex; 
+    flex-direction: column;
+    justify-content:center; 
+    align-items:center;
     font-family:"Segoe UI",sans-serif;
+    gap: 20px;
   }
 .frame {
   position: relative;
@@ -767,68 +771,73 @@
 }
 
 .tutorial-info-box {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 320px;
-  max-width: 90vw;
+  position: relative;
+  width: 90vw;
+  max-width: 1400px;
+  height: 100px;
   background: rgba(20, 20, 20, 0.95);
-  border: 2px solid var(--accent);
+  border: 8px solid #00ffff;
   border-radius: 12px;
-  padding: 16px;
   color: #fff;
   box-shadow:
-    inset 0 0 15px rgba(0, 255, 255, 0.25),
-    0 0 25px rgba(0, 255, 255, 0.6),
-    0 0 60px rgba(0, 180, 255, 0.35),
-    0 4px 25px rgba(0, 0, 0, 0.6);
-  animation: plateGlow 4s ease-in-out infinite;
+    0 0 30px rgba(0,255,255,0.5), 
+    inset 0 0 20px rgba(0,255,255,0.2);
   z-index: 1000;
   display: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+  transition: opacity 0.3s ease;
 }
 
 .tutorial-info-box.active {
   display: block;
-  animation: slideInFromRight 0.5s ease;
+  animation: slideInFromBottom 0.5s ease, flashBorder 2s ease-in-out infinite;
 }
 
-@keyframes slideInFromRight {
+@keyframes slideInFromBottom {
   0% {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateY(20px);
   }
   100% {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes flashBorder {
+  0%, 100% {
+    border-color: #00ffff;
+    box-shadow:
+      0 0 30px rgba(0,255,255,0.5), 
+      inset 0 0 20px rgba(0,255,255,0.2);
+  }
+  50% {
+    border-color: rgba(0, 255, 255, 0.7);
+    box-shadow:
+      0 0 40px rgba(0,255,255,0.7), 
+      inset 0 0 30px rgba(0,255,255,0.3);
   }
 }
 
 .tutorial-info-box-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+  display: none;
 }
 
 .tutorial-info-box-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  text-shadow: 0 0 6px rgba(0, 255, 255, 0.9);
+  display: none;
 }
 
 .tutorial-info-box-close {
+  position: absolute;
+  top: 4px;
+  right: 8px;
   background: none;
   border: none;
   color: var(--accent);
   font-size: 18px;
   cursor: pointer;
   transition: transform 0.2s ease;
+  z-index: 10;
 }
 
 .tutorial-info-box-close:hover {
@@ -837,13 +846,51 @@
 }
 
 .tutorial-info-box-content {
-  font-size: 12px;
-  line-height: 1.6;
+  width: 100%;
+  height: 100%;
+  padding: 10px 40px 10px 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.tutorial-scroll-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: scrollVertical 8s ease-in-out;
+  animation-fill-mode: forwards;
+}
+
+@keyframes scrollVertical {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+.tutorial-scroll-container.scrolling {
+  animation: scrollVertical 8s ease-in-out;
+}
+
+.tutorial-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(0, 255, 255, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+  font-size: 14px;
+  line-height: 1.5;
   color: rgba(255, 255, 255, 0.9);
+  white-space: normal;
+  min-height: 50px;
 }
 
 .tutorial-info-box-content p {
-  margin: 0 0 8px 0;
+  margin: 0;
 }
 
 .tutorial-info-box-content p:last-child {
@@ -851,11 +898,11 @@
 }
 
 .tutorial-info-box-step {
-  background: rgba(0, 255, 255, 0.1);
-  padding: 8px;
-  border-radius: 6px;
-  margin: 6px 0;
-  border-left: 3px solid var(--accent);
+  display: inline-block;
+  padding: 4px 8px;
+  background: rgba(0, 255, 255, 0.15);
+  border-radius: 4px;
+  margin: 0 4px;
 }
 
 .tutorial-info-box-highlight {
@@ -1518,12 +1565,12 @@
 </div>
 
 <div class="tutorial-info-box" id="tutorial-info-box">
-  <div class="tutorial-info-box-header">
-    <div class="tutorial-info-box-title">Quest Guide</div>
-    <button class="tutorial-info-box-close" id="tutorial-close">×</button>
-  </div>
+  <button class="tutorial-info-box-close" id="tutorial-close">×</button>
   <div class="tutorial-info-box-content" id="tutorial-content">
-    <p>Welcome! Complete quests to unlock lore and progress.</p>
+    <div class="tutorial-scroll-container" id="tutorial-scroll">
+      <div class="tutorial-message">Welcome! Complete quests to unlock lore and progress.</div>
+      <div class="tutorial-message">Welcome! Complete quests to unlock lore and progress.</div>
+    </div>
   </div>
 </div>
 
@@ -1809,10 +1856,9 @@ function checkQuestCompletion(questData, championName) {
   
   if (!progress) return;
   
-  questData.quests.forEach(quest => {
+  questData.quests.forEach((quest, index) => {
     if (quest.completed) return;
     
-    // Quest 1: Load Profile - auto-completes when summoner data exists
     if (quest.id === `${championName}_1`) {
       const summonerData = localStorage.getItem("summonerData");
       if (summonerData) {
@@ -1820,7 +1866,6 @@ function checkQuestCompletion(questData, championName) {
       }
     }
     
-    // Quest 2: Load Champion - auto-completes when champion is selected
     if (quest.id === `${championName}_2`) {
       const selectedChampion = localStorage.getItem('selectedChampion');
       if (selectedChampion === championName) {
@@ -2081,12 +2126,49 @@ function initializeTutorialSystem() {
 
 function showTutorialMessage(message) {
   const tutorialBox = document.getElementById('tutorial-info-box');
-  const tutorialContent = document.getElementById('tutorial-content');
-  const tutorialTitle = document.querySelector('.tutorial-info-box-title');
+  const tutorialScroll = document.getElementById('tutorial-scroll');
   
-  tutorialTitle.textContent = message.title || 'Quest Guide';
-  tutorialContent.innerHTML = message.content;
+  const plainText = convertHtmlToPlainText(message.content);
+  const messageText = `${message.title || 'Quest Guide'}: ${plainText}`;
+  
+  const currentMessage = tutorialScroll.querySelector('.tutorial-message')?.textContent;
+  
+  if (currentMessage === messageText) {
+    return;
+  }
+  
+  tutorialScroll.innerHTML = `
+    <div class="tutorial-message">${messageText}</div>
+  `;
+  
+  tutorialScroll.classList.remove('scrolling');
+  void tutorialScroll.offsetWidth;
+  tutorialScroll.classList.add('scrolling');
+  
+  tutorialBox.classList.remove('active');
+  void tutorialBox.offsetWidth;
   tutorialBox.classList.add('active');
+}
+
+function convertHtmlToPlainText(html) {
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+  
+  const steps = temp.querySelectorAll('.tutorial-info-box-step');
+  const highlights = temp.querySelectorAll('.tutorial-info-box-highlight');
+  
+  steps.forEach(step => {
+    step.replaceWith(` ${step.textContent.trim()} `);
+  });
+  
+  highlights.forEach(highlight => {
+    const span = document.createElement('span');
+    span.className = 'tutorial-info-box-highlight';
+    span.textContent = highlight.textContent;
+    highlight.replaceWith(span);
+  });
+  
+  return temp.textContent.replace(/\s+/g, ' ').trim();
 }
 
 function updateTutorialForQuest(questData) {
@@ -2106,6 +2188,11 @@ function updateTutorialForQuest(questData) {
     });
     return;
   }
+  
+  const lastActiveQuestId = localStorage.getItem('lastActiveQuestId');
+  const shouldScroll = lastActiveQuestId && lastActiveQuestId !== activeQuest.id;
+  
+  localStorage.setItem('lastActiveQuestId', activeQuest.id);
   
   const questTutorials = {
     '_1': {
@@ -2215,8 +2302,16 @@ function updateTutorialForQuest(questData) {
   const tutorial = questTutorials[questIdSuffix];
   
   if (tutorial) {
+    if (shouldScroll) {
+      const tutorialScroll = document.getElementById('tutorial-scroll');
+      tutorialScroll.classList.add('scrolling');
+    }
     showTutorialMessage(tutorial);
   } else {
+    if (shouldScroll) {
+      const tutorialScroll = document.getElementById('tutorial-scroll');
+      tutorialScroll.classList.add('scrolling');
+    }
     showTutorialMessage({
       title: 'Active Quest',
       content: `
@@ -2359,6 +2454,29 @@ async function initializeLoreSystem() {
   if (!progress) {
     loreContainer.innerHTML = '<p style="color: #aaa; text-align: center;">No lore available for this champion yet.</p>';
     return;
+  }
+  
+  const championQuests = JSON.parse(localStorage.getItem('championQuests') || '{}');
+  const questData = championQuests[selectedChampion];
+  
+  if (questData) {
+    questData.quests.forEach((quest, index) => {
+      if (quest.completed && index < 2) {
+        const loreId = `${selectedChampion}_lore_${index + 1}`;
+        if (!collectedLore.includes(loreId)) {
+          collectedLore.push(loreId);
+          if (!championLore[selectedChampion]) {
+            championLore[selectedChampion] = [];
+          }
+          if (!championLore[selectedChampion].includes(loreId)) {
+            championLore[selectedChampion].push(loreId);
+          }
+        }
+      }
+    });
+    
+    localStorage.setItem('collectedLore', JSON.stringify(collectedLore));
+    localStorage.setItem('championLore', JSON.stringify(championLore));
   }
   
   if (!championLoreData[selectedChampion]) {
