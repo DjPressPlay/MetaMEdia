@@ -1324,7 +1324,7 @@
     <div class="quest-progress-label" id="quest-progress-label">Quest Level 1</div>
     <div class="quest-progress-container">
       <div class="quest-progress-fill" id="quest-progress-fill" style="width: 0%"></div>
-      <div class="quest-progress-text" id="quest-progress-text">0/5</div>
+      <div class="quest-progress-text" id="quest-progress-text">0/9</div>
     </div>
   </div>
 </div>
@@ -1613,43 +1613,75 @@ function generateChampionQuests(championName) {
   return [
     {
       id: `${championName}_1`,
-      name: `Master ${championName}`,
-      description: `Complete your first game with ${championName} (Click to complete)`,
+      name: `Load Profile`,
+      description: `View your League of Legends profile (Auto-completes on load)`,
       completed: false,
       active: true,
-      manual: true
+      manual: false
     },
     {
       id: `${championName}_2`,
-      name: `Explore ${championName}'s Lore`,
-      description: `Unlock the first lore piece for ${championName} (Auto-completes)`,
+      name: `Load Champion — ${championName}`,
+      description: `Select ${championName} from the Champion Closet (Restart Point)`,
       completed: false,
       active: true,
       manual: false
     },
     {
       id: `${championName}_3`,
-      name: `${championName} Specialist`,
-      description: `Play 3 games with ${championName} (Click to complete)`,
+      name: `Visit PC`,
+      description: `Click on the PC hotspot to access desktop apps`,
       completed: false,
       active: true,
       manual: true
     },
     {
       id: `${championName}_4`,
-      name: `${championName} Expert`,
-      description: `Collect 3 lore pieces for ${championName} (Auto-completes)`,
+      name: `Check All Tabs in Profile App`,
+      description: `View Quests, Champion Progress, and Lore Box tabs`,
       completed: false,
       active: true,
-      manual: false
+      manual: true
     },
     {
       id: `${championName}_5`,
-      name: `${championName} Legend`,
-      description: `Complete all lore for ${championName} (Auto-completes)`,
+      name: `Review Lore Loot`,
+      description: `Check your Lore Loot Box for unopened lore cards`,
       completed: false,
       active: true,
-      manual: false
+      manual: true
+    },
+    {
+      id: `${championName}_6`,
+      name: `Visit LoL Messenger`,
+      description: `Access the Phone hotspot to open LoL Messenger`,
+      completed: false,
+      active: true,
+      manual: true
+    },
+    {
+      id: `${championName}_7`,
+      name: `Add Friends`,
+      description: `Connect with other League players through Messenger`,
+      completed: false,
+      active: true,
+      manual: true
+    },
+    {
+      id: `${championName}_8`,
+      name: `Open Lore Treasure Chest`,
+      description: `Unlock your first lore card from the Lore Loot Box`,
+      completed: false,
+      active: true,
+      manual: true
+    },
+    {
+      id: `${championName}_9`,
+      name: `Complete Quest List with ${championName}`,
+      description: `Finish all quests for ${championName} to restart with a new champion`,
+      completed: false,
+      active: true,
+      manual: true
     }
   ];
 }
@@ -1663,16 +1695,20 @@ function checkQuestCompletion(questData, championName) {
   questData.quests.forEach(quest => {
     if (quest.completed) return;
     
-    if (quest.id === `${championName}_2` && progress.loreCollected >= 1) {
-      completeQuest(questData, quest.id, championName);
+    // Quest 1: Load Profile - auto-completes when summoner data exists
+    if (quest.id === `${championName}_1`) {
+      const summonerData = localStorage.getItem("summonerData");
+      if (summonerData) {
+        completeQuest(questData, quest.id, championName);
+      }
     }
     
-    if (quest.id === `${championName}_4` && progress.loreCollected >= 3) {
-      completeQuest(questData, quest.id, championName);
-    }
-    
-    if (quest.id === `${championName}_5` && progress.loreCollected >= 5) {
-      completeQuest(questData, quest.id, championName);
+    // Quest 2: Load Champion - auto-completes when champion is selected
+    if (quest.id === `${championName}_2`) {
+      const selectedChampion = localStorage.getItem('selectedChampion');
+      if (selectedChampion === championName) {
+        completeQuest(questData, quest.id, championName);
+      }
     }
   });
 }
@@ -1690,7 +1726,14 @@ function completeQuest(questData, questId, championName) {
     
     unlockLoreForQuest(championName, questData.questPoints);
     
-    if (questData.questPoints >= 5) {
+    // Check if Quest 9 is completed (Complete Quest List)
+    if (questId === `${championName}_9`) {
+      showNotification(`🎉 Quest Chain Complete! Unlocking new champion for Quest 2...`);
+      // Reset to Quest 2 (Load Champion) - the restart point
+      questData.questLevel += 1;
+      questData.questPoints = 0;
+      showNotification(`🔄 Returning to Quest 2: Select a new champion to continue!`);
+    } else if (questData.questPoints >= 9) {
       questData.questLevel += 1;
       questData.questPoints = 0;
       showNotification(`🎉 Quest Level Up! ${championName} is now Quest Level ${questData.questLevel}!`);
@@ -1865,10 +1908,10 @@ function updateQuestProgress(questData, championName) {
   const progressText = document.getElementById('quest-progress-text');
   const progressLabel = document.getElementById('quest-progress-label');
   
-  const progress = (questData.questPoints / 5) * 100;
+  const progress = (questData.questPoints / 9) * 100;
   
   progressFill.style.width = `${progress}%`;
-  progressText.textContent = `${questData.questPoints}/5`;
+  progressText.textContent = `${questData.questPoints}/9`;
   progressLabel.textContent = `${championName} - Quest Level ${questData.questLevel}`;
 }
 
@@ -1946,7 +1989,7 @@ async function initializeChampionProgress() {
         if (!championProgress[championName]) {
           championProgress[championName] = {
             loreCollected: 0,
-            totalLore: 5,
+            totalLore: 9,
             progress: 0
           };
         }
@@ -2053,29 +2096,49 @@ function generateChampionLore(championName) {
   const loreTemplates = {
     default: [
       {
-        title: `Origins of ${championName}`,
-        preview: `Discover the mysterious beginnings of ${championName}...`,
-        content: `Long ago in the lands of Runeterra, ${championName} emerged as a force to be reckoned with. Their story is one of determination and power.`
+        title: `Quest 1: Profile Loaded`,
+        preview: `Welcome to the home room, summoner...`,
+        content: `You have successfully loaded your League of Legends profile and entered the Meta universe. Your journey begins here.`
       },
       {
-        title: `${championName}'s First Battle`,
-        preview: `The tale of their first legendary encounter...`,
-        content: `In their first battle, ${championName} faced overwhelming odds but emerged victorious through sheer skill and determination.`
+        title: `Quest 2: Champion Selected`,
+        preview: `${championName} has been chosen...`,
+        content: `${championName} emerges from the Champion Closet, ready to embark on this quest chain with you. Each champion brings their own unique story and power.`
       },
       {
-        title: `The Path of ${championName}`,
-        preview: `How ${championName} became a legend...`,
-        content: `Through trials and tribulations, ${championName} carved their path to greatness, leaving an indelible mark on history.`
+        title: `Quest 3: PC Visited`,
+        preview: `The digital realm opens before you...`,
+        content: `By accessing the PC, you've unlocked the gateway to Meta Reddit and other digital spaces where champions share their stories and connect with the world.`
       },
       {
-        title: `${championName}'s Greatest Victory`,
-        preview: `The defining moment that shaped their legacy...`,
-        content: `This victory would come to define ${championName}'s entire legacy, remembered throughout the ages as a turning point.`
+        title: `Quest 4: Profile Tabs Explored`,
+        preview: `Knowledge of the systems revealed...`,
+        content: `You've discovered the three pillars of progression: Quests drive your journey, Champion Progress tracks mastery, and the Lore Box holds ancient secrets.`
       },
       {
-        title: `The Legend of ${championName}`,
-        preview: `The complete saga of their heroic journey...`,
-        content: `From humble beginnings to legendary status, ${championName}'s complete story is one that inspires all who hear it. Their legacy lives on in the hearts of champions everywhere.`
+        title: `Quest 5: Lore Loot Reviewed`,
+        preview: `The treasure vault beckons...`,
+        content: `Within the Lore Loot Box lie untold stories waiting to be discovered. Each card unlocks a fragment of ${championName}'s legend and the world they inhabit.`
+      },
+      {
+        title: `Quest 6: Messenger Accessed`,
+        preview: `Communication channels established...`,
+        content: `The LoL Messenger connects you to other summoners and champions across Runeterra. Through these connections, new opportunities and stories emerge.`
+      },
+      {
+        title: `Quest 7: Friends Connected`,
+        preview: `Bonds forged in the digital realm...`,
+        content: `By adding friends, you strengthen your network within the League community. Together, summoners share knowledge, strategies, and the lore of champions like ${championName}.`
+      },
+      {
+        title: `Quest 8: First Lore Unlocked`,
+        preview: `The treasure chest reveals its secrets...`,
+        content: `Your first lore card has been opened! This marks the beginning of your collection, unveiling the rich history and tales surrounding ${championName} and their world.`
+      },
+      {
+        title: `Quest 9: Quest Chain Complete`,
+        preview: `A cycle ends, another begins...`,
+        content: `You have completed the full quest chain with ${championName}! The cycle now returns to Quest 2, allowing you to choose a new champion and continue collecting lore across all of Runeterra.`
       }
     ]
   };
