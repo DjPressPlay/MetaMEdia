@@ -176,7 +176,6 @@ async function fetchSummonerProfile(name, region = "NA1") {
     document.getElementById("summoner-rank").textContent =
       solo ? `${solo.tier} ${solo.rank} · ${solo.leaguePoints} LP` : "Unranked";
 
-    // 4️⃣ Store locally for later apps (history, replays)
     currentSummoner = {
       name: summoner.name,
       id: summoner.id,
@@ -187,6 +186,14 @@ async function fetchSummonerProfile(name, region = "NA1") {
       rank: solo || null,
     };
     localStorage.setItem("selectedSummoner", JSON.stringify(currentSummoner));
+    
+    localStorage.removeItem("selectedChampion");
+    localStorage.removeItem("championQuests");
+    localStorage.removeItem("championProgress");
+    localStorage.removeItem("championLore");
+    localStorage.removeItem("collectedLore");
+    localStorage.removeItem("championLoreData");
+    localStorage.removeItem("championBackgrounds");
 
     // 5️⃣ Optional: show puuid visibly (for debug)
     note.innerHTML = `✅ Profile loaded. <br>PUUID: <span style="color:#00ffff;font-size:11px;">${summoner.puuid}</span>`;
@@ -218,6 +225,14 @@ document.getElementById("goto-home").addEventListener("click", () => {
     document.getElementById("status-note").textContent = "⚠️ Load or save a profile first.";
     return;
   }
+  localStorage.removeItem("selectedChampion");
+  localStorage.removeItem("championQuests");
+  localStorage.removeItem("championProgress");
+  localStorage.removeItem("championLore");
+  localStorage.removeItem("collectedLore");
+  localStorage.removeItem("championLoreData");
+  localStorage.removeItem("championBackgrounds");
+  
   window.location.href = "homeroom.html";
 });
 

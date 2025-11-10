@@ -766,6 +766,104 @@
   color: #0f0;
 }
 
+.tutorial-info-box {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  max-width: 90vw;
+  background: rgba(20, 20, 20, 0.95);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 16px;
+  color: #fff;
+  box-shadow:
+    inset 0 0 15px rgba(0, 255, 255, 0.25),
+    0 0 25px rgba(0, 255, 255, 0.6),
+    0 0 60px rgba(0, 180, 255, 0.35),
+    0 4px 25px rgba(0, 0, 0, 0.6);
+  animation: plateGlow 4s ease-in-out infinite;
+  z-index: 1000;
+  display: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.tutorial-info-box.active {
+  display: block;
+  animation: slideInFromRight 0.5s ease;
+}
+
+@keyframes slideInFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.tutorial-info-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.tutorial-info-box-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 6px rgba(0, 255, 255, 0.9);
+}
+
+.tutorial-info-box-close {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 18px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.tutorial-info-box-close:hover {
+  transform: scale(1.2);
+  color: #fff;
+}
+
+.tutorial-info-box-content {
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tutorial-info-box-content p {
+  margin: 0 0 8px 0;
+}
+
+.tutorial-info-box-content p:last-child {
+  margin-bottom: 0;
+}
+
+.tutorial-info-box-step {
+  background: rgba(0, 255, 255, 0.1);
+  padding: 8px;
+  border-radius: 6px;
+  margin: 6px 0;
+  border-left: 3px solid var(--accent);
+}
+
+.tutorial-info-box-highlight {
+  color: var(--accent);
+  font-weight: 700;
+  text-shadow: 0 0 4px rgba(0, 255, 255, 0.6);
+}
+
 .rank-badge-large {
   width: 80px;
   height: 80px;
@@ -1419,6 +1517,16 @@
   <p>This is the third in-game screen.</p>
 </div>
 
+<div class="tutorial-info-box" id="tutorial-info-box">
+  <div class="tutorial-info-box-header">
+    <div class="tutorial-info-box-title">Quest Guide</div>
+    <button class="tutorial-info-box-close" id="tutorial-close">×</button>
+  </div>
+  <div class="tutorial-info-box-content" id="tutorial-content">
+    <p>Welcome! Complete quests to unlock lore and progress.</p>
+  </div>
+</div>
+
  <!-- ✅ Game Controller ------------------------------------------------------------------------>
 <script type="module" src="src/gameController.js"></script>
   <script>
@@ -1443,6 +1551,7 @@
     // Initialize quest system
     initializeQuestSystem();
     
+    initializeTutorialSystem();
   
     const room = document.querySelector('.room');
     const character = document.querySelector('.character-container');
@@ -1932,6 +2041,190 @@ function updateQuestProgress(questData, championName) {
   progressFill.style.width = `${progress}%`;
   progressText.textContent = `${questData.questPoints}/9`;
   progressLabel.textContent = `${championName} - Quest Level ${questData.questLevel}`;
+  
+  updateTutorialForQuest(questData);
+}
+
+
+function initializeTutorialSystem() {
+  const tutorialBox = document.getElementById('tutorial-info-box');
+  const tutorialClose = document.getElementById('tutorial-close');
+  
+  tutorialClose.addEventListener('click', () => {
+    tutorialBox.classList.remove('active');
+  });
+  
+  const selectedChampion = localStorage.getItem('selectedChampion');
+  
+  if (!selectedChampion) {
+    showTutorialMessage({
+      title: 'Welcome to Home Room!',
+      content: `
+        <div class="tutorial-info-box-step">
+          <p><span class="tutorial-info-box-highlight">Step 1:</span> Click on the <span class="tutorial-info-box-highlight">STYLE</span> hotspot to open the Champion Closet.</p>
+        </div>
+        <div class="tutorial-info-box-step">
+          <p><span class="tutorial-info-box-highlight">Step 2:</span> Select a champion from your recent match to begin your quest journey.</p>
+        </div>
+        <p>Your quests and lore rewards will automatically track as you progress!</p>
+      `
+    });
+  } else {
+    const championQuests = JSON.parse(localStorage.getItem('championQuests') || '{}');
+    const questData = championQuests[selectedChampion];
+    
+    if (questData) {
+      updateTutorialForQuest(questData);
+    }
+  }
+}
+
+function showTutorialMessage(message) {
+  const tutorialBox = document.getElementById('tutorial-info-box');
+  const tutorialContent = document.getElementById('tutorial-content');
+  const tutorialTitle = document.querySelector('.tutorial-info-box-title');
+  
+  tutorialTitle.textContent = message.title || 'Quest Guide';
+  tutorialContent.innerHTML = message.content;
+  tutorialBox.classList.add('active');
+}
+
+function updateTutorialForQuest(questData) {
+  if (!questData || !questData.quests) return;
+  
+  const activeQuest = questData.quests.find(q => !q.completed);
+  
+  if (!activeQuest) {
+    showTutorialMessage({
+      title: 'All Quests Complete!',
+      content: `
+        <p>🎉 You've completed all available quests!</p>
+        <div class="tutorial-info-box-step">
+          <p>Return to the <span class="tutorial-info-box-highlight">STYLE</span> hotspot to select a new champion and continue your adventure.</p>
+        </div>
+      `
+    });
+    return;
+  }
+  
+  const questTutorials = {
+    '_1': {
+      title: 'Quest 1: Profile Loaded',
+      content: `
+        <p>✅ Your profile has been automatically loaded!</p>
+        <div class="tutorial-info-box-step">
+          <p><span class="tutorial-info-box-highlight">Next:</span> Select a champion from the Champion Closet to continue.</p>
+        </div>
+      `
+    },
+    '_2': {
+      title: 'Quest 2: Load Champion',
+      content: `
+        <div class="tutorial-info-box-step">
+          <p>Click the <span class="tutorial-info-box-highlight">STYLE</span> hotspot at the bottom of the screen.</p>
+        </div>
+        <div class="tutorial-info-box-step">
+          <p>Select a champion from your recent match to unlock quests and lore.</p>
+        </div>
+      `
+    },
+    '_3': {
+      title: 'Quest 3: Visit PC',
+      content: `
+        <div class="tutorial-info-box-step">
+          <p>Move to the <span class="tutorial-info-box-highlight">PC</span> hotspot (left side).</p>
+        </div>
+        <div class="tutorial-info-box-step">
+          <p>Click on it to access desktop apps and complete this quest.</p>
+        </div>
+        <p>Use arrow keys or click to move between hotspots!</p>
+      `
+    },
+    '_4': {
+      title: 'Quest 4: Check All Tabs',
+      content: `
+        <div class="tutorial-info-box-step">
+          <p>Open the <span class="tutorial-info-box-highlight">Quests</span>, <span class="tutorial-info-box-highlight">Champion Progress</span>, and <span class="tutorial-info-box-highlight">Lore Box</span> tabs at the top center.</p>
+        </div>
+        <div class="tutorial-info-box-step">
+          <p>Review your progress and available lore cards.</p>
+        </div>
+        <p>Click each tab dropdown to explore!</p>
+      `
+    },
+    '_5': {
+      title: 'Quest 5: Review Lore Loot',
+      content: `
+        <div class="tutorial-info-box-step">
+          <p>Open the <span class="tutorial-info-box-highlight">Lore Box</span> tab.</p>
+        </div>
+        <div class="tutorial-info-box-step">
+          <p>Check which lore cards you've unlocked by completing quests.</p>
+        </div>
+        <p>Each quest completion unlocks a new lore fragment!</p>
+      `
+    },
+    '_6': {
+      title: 'Quest 6: Visit LoL Messenger',
+      content: `
+        <div class="tutorial-info-box-step">
+          <p>Move to the <span class="tutorial-info-box-highlight">PHONE</span> hotspot (right side).</p>
+        </div>
+        <div class="tutorial-info-box-step">
+          <p>Click on it to open LoL Messenger.</p>
+        </div>
+        <p>Coming soon: Connect with other League players!</p>
+      `
+    },
+    '_7': {
+      title: 'Quest 7: Add Friends',
+      content: `
+        <div class="tutorial-info-box-step">
+          <p>Connect with other League of Legends players through Messenger.</p>
+        </div>
+        <p>Feature coming soon - stay tuned!</p>
+      `
+    },
+    '_8': {
+      title: 'Quest 8: Open Lore Treasure',
+      content: `
+        <div class="tutorial-info-box-step">
+          <p>Open the <span class="tutorial-info-box-highlight">Lore Box</span> tab.</p>
+        </div>
+        <div class="tutorial-info-box-step">
+          <p>Click on an unlocked lore card to read the full story.</p>
+        </div>
+        <p>Discover your champion's legend!</p>
+      `
+    },
+    '_9': {
+      title: 'Quest 9: Complete Quest List',
+      content: `
+        <div class="tutorial-info-box-step">
+          <p>Complete all remaining quests with your champion.</p>
+        </div>
+        <div class="tutorial-info-box-step">
+          <p>Once done, you'll restart at <span class="tutorial-info-box-highlight">Quest 2</span> with a new champion!</p>
+        </div>
+        <p>Collect lore for all your favorite champions!</p>
+      `
+    }
+  };
+  
+  const questIdSuffix = activeQuest.id.substring(activeQuest.id.lastIndexOf('_'));
+  const tutorial = questTutorials[questIdSuffix];
+  
+  if (tutorial) {
+    showTutorialMessage(tutorial);
+  } else {
+    showTutorialMessage({
+      title: 'Active Quest',
+      content: `
+        <p><span class="tutorial-info-box-highlight">${activeQuest.name}</span></p>
+        <p>${activeQuest.description}</p>
+      `
+    });
+  }
 }
 
 
@@ -2372,6 +2665,7 @@ async function loadClosetChampions() {
           initializeQuestSystem();
           initializeChampionProgress();
           initializeLoreSystem();
+          initializeTutorialSystem();
         });
         
         championCard.appendChild(championImg);
