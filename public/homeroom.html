@@ -1577,53 +1577,107 @@
     
 
 // ===============================
-// 🎯 QUEST SYSTEM
+// 🎯 CHAMPION-SPECIFIC QUEST SYSTEM
 // ===============================
 function initializeQuestSystem() {
-  let questData = JSON.parse(localStorage.getItem('questData') || '{"quests": [], "completedQuests": [], "questLevel": 1, "questPoints": 0}');
-  
-  if (questData.quests.length === 0) {
-    questData.quests = [
-      {
-        id: 1,
-        name: 'Load Profile',
-        description: 'Load your summoner profile from League of Legends',
-        completed: false,
-        active: false
-      },
-      {
-        id: 2,
-        name: 'Select Champion',
-        description: 'Select a champion from your closet in the Home Room',
-        completed: false,
-        active: false
-      }
-    ];
-  }
-  
-  checkQuestCompletion(questData);
-  renderQuests(questData);
-  updateQuestProgress(questData);
-  
-  localStorage.setItem('questData', JSON.stringify(questData));
-}
-
-function checkQuestCompletion(questData) {
-  const summonerData = localStorage.getItem('summonerData');
   const selectedChampion = localStorage.getItem('selectedChampion');
   
+  if (!selectedChampion) {
+    const questList = document.getElementById('quest-list');
+    questList.innerHTML = '<p style="color: #ff9900; text-align: center;">Select a champion from the closet to view quests!</p>';
+    return;
+  }
+  
+  let championQuests = JSON.parse(localStorage.getItem('championQuests') || '{}');
+  
+  if (!championQuests[selectedChampion]) {
+    championQuests[selectedChampion] = {
+      quests: generateChampionQuests(selectedChampion),
+      completedQuests: [],
+      questLevel: 1,
+      questPoints: 0
+    };
+  }
+  
+  const questData = championQuests[selectedChampion];
+  
+  checkQuestCompletion(questData, selectedChampion);
+  renderQuests(questData, selectedChampion);
+  updateQuestProgress(questData, selectedChampion);
+  
+  championQuests[selectedChampion] = questData;
+  localStorage.setItem('championQuests', JSON.stringify(championQuests));
+}
+
+function generateChampionQuests(championName) {
+  return [
+    {
+      id: `${championName}_1`,
+      name: `Master ${championName}`,
+      description: `Complete your first game with ${championName} (Click to complete)`,
+      completed: false,
+      active: true,
+      manual: true
+    },
+    {
+      id: `${championName}_2`,
+      name: `Explore ${championName}'s Lore`,
+      description: `Unlock the first lore piece for ${championName} (Auto-completes)`,
+      completed: false,
+      active: true,
+      manual: false
+    },
+    {
+      id: `${championName}_3`,
+      name: `${championName} Specialist`,
+      description: `Play 3 games with ${championName} (Click to complete)`,
+      completed: false,
+      active: true,
+      manual: true
+    },
+    {
+      id: `${championName}_4`,
+      name: `${championName} Expert`,
+      description: `Collect 3 lore pieces for ${championName} (Auto-completes)`,
+      completed: false,
+      active: true,
+      manual: false
+    },
+    {
+      id: `${championName}_5`,
+      name: `${championName} Legend`,
+      description: `Complete all lore for ${championName} (Auto-completes)`,
+      completed: false,
+      active: true,
+      manual: false
+    }
+  ];
+}
+
+function checkQuestCompletion(questData, championName) {
+  const championProgress = JSON.parse(localStorage.getItem('championProgress') || '{}');
+  const progress = championProgress[championName];
+  
+  if (!progress) return;
+  
   questData.quests.forEach(quest => {
-    if (quest.id === 1 && summonerData && !quest.completed) {
-      completeQuest(questData, quest.id);
+    if (quest.completed) return;
+    
+    if (quest.id === `${championName}_2` && progress.loreCollected >= 1) {
+      completeQuest(questData, quest.id, championName);
     }
     
-    if (quest.id === 2 && selectedChampion && !quest.completed) {
-      completeQuest(questData, quest.id);
+    if (quest.id === `${championName}_4` && progress.loreCollected >= 3) {
+      completeQuest(questData, quest.id, championName);
+    }
+    
+    if (quest.id === `${championName}_5` && progress.loreCollected >= 5) {
+      completeQuest(questData, quest.id, championName);
     }
   });
 }
 
-function completeQuest(questData, questId) {
+function completeQuest(questData, questId, championName) {
   const quest = questData.quests.find(q => q.id === questId);
   if (!quest || quest.completed) return;
   
@@ -1634,20 +1688,63 @@ function completeQuest(questData, questId) {
     questData.completedQuests.push(questId);
     questData.questPoints += 1;
     
+    unlockLoreForQuest(championName, questData.questPoints);
+    
     if (questData.questPoints >= 5) {
       questData.questLevel += 1;
       questData.questPoints = 0;
-      showNotification(`🎉 Quest Level Up! You are now Quest Level ${questData.questLevel}!`);
+      showNotification(`🎉 Quest Level Up! ${championName} is now Quest Level ${questData.questLevel}!`);
     } else {
       showNotification(`✅ Quest Complete: ${quest.name}!`);
     }
     
-    updateQuestNotification(questData);
-    updateQuestProgress(questData);
-    renderQuests(questData);
+    const championQuests = JSON.parse(localStorage.getItem('championQuests') || '{}');
+    championQuests[championName] = questData;
+    localStorage.setItem('championQuests', JSON.stringify(championQuests));
     
-    localStorage.setItem('questData', JSON.stringify(questData));
+    updateQuestNotification(questData);
+    updateQuestProgress(questData, championName);
+    renderQuests(questData, championName);
+    
+    initializeChampionProgress();
+    initializeLoreSystem();
   }
+}
+
+function unlockLoreForQuest(championName, questPointIndex) {
+  let championLore = JSON.parse(localStorage.getItem('championLore') || '{}');
+  
+  if (!championLore[championName]) {
+    championLore[championName] = [];
+  }
+  
+  if (championLore[championName].length >= questPointIndex) {
+    return;
+  }
+  
+  const loreId = `${championName}_lore_${questPointIndex}`;
+  championLore[championName].push(loreId);
+  localStorage.setItem('championLore', JSON.stringify(championLore));
+  
+  let collectedLore = JSON.parse(localStorage.getItem('collectedLore') || '[]');
+  if (!collectedLore.includes(loreId)) {
+    collectedLore.push(loreId);
+    localStorage.setItem('collectedLore', JSON.stringify(collectedLore));
+  }
+  
+  let championProgress = JSON.parse(localStorage.getItem('championProgress') || '{}');
+  if (championProgress[championName]) {
+    championProgress[championName].loreCollected = Math.min(
+      championProgress[championName].loreCollected + 1,
+      championProgress[championName].totalLore
+    );
+    championProgress[championName].progress = 
+      (championProgress[championName].loreCollected / championProgress[championName].totalLore) * 100;
+    
+    localStorage.setItem('championProgress', JSON.stringify(championProgress));
+  }
+  
+  showNotification(`📜 New lore unlocked for ${championName}!`);
 }
 
 function showNotification(message) {
@@ -1698,12 +1795,23 @@ function updateQuestNotification(questData) {
   }
 }
 
-function renderQuests(questData) {
+function renderQuests(questData, championName) {
   const questList = document.getElementById('quest-list');
   questList.innerHTML = '';
   
+  const championHeader = document.createElement('div');
+  championHeader.style.textAlign = 'center';
+  championHeader.style.marginBottom = '12px';
+  championHeader.style.padding = '8px';
+  championHeader.style.background = 'rgba(0, 255, 255, 0.1)';
+  championHeader.style.borderRadius = '8px';
+  championHeader.style.color = '#00ffff';
+  championHeader.style.fontWeight = 'bold';
+  championHeader.textContent = `${championName} Quests`;
+  questList.appendChild(championHeader);
+  
   if (questData.quests.length === 0) {
-    questList.innerHTML = '<p style="color: #aaa; text-align: center;">No quests available</p>';
+    questList.innerHTML += '<p style="color: #aaa; text-align: center;">No quests available</p>';
     return;
   }
   
@@ -1715,6 +1823,21 @@ function renderQuests(questData) {
     questItem.style.borderRadius = '8px';
     questItem.style.marginBottom = '8px';
     questItem.style.transition = 'all 0.3s ease';
+    
+    if (quest.manual && !quest.completed) {
+      questItem.style.cursor = 'pointer';
+      questItem.addEventListener('mouseenter', () => {
+        questItem.style.background = 'rgba(0, 255, 255, 0.15)';
+        questItem.style.transform = 'translateX(4px)';
+      });
+      questItem.addEventListener('mouseleave', () => {
+        questItem.style.background = 'rgba(0, 255, 255, 0.05)';
+        questItem.style.transform = 'translateX(0)';
+      });
+      questItem.addEventListener('click', () => {
+        completeQuest(questData, quest.id, championName);
+      });
+    }
     
     const questTitle = document.createElement('div');
     questTitle.style.fontSize = '13px';
@@ -1737,7 +1860,7 @@ function renderQuests(questData) {
   });
 }
 
-function updateQuestProgress(questData) {
+function updateQuestProgress(questData, championName) {
   const progressFill = document.getElementById('quest-progress-fill');
   const progressText = document.getElementById('quest-progress-text');
   const progressLabel = document.getElementById('quest-progress-label');
@@ -1746,7 +1869,7 @@ function updateQuestProgress(questData) {
   
   progressFill.style.width = `${progress}%`;
   progressText.textContent = `${questData.questPoints}/5`;
-  progressLabel.textContent = `Quest Level ${questData.questLevel}`;
+  progressLabel.textContent = `${championName} - Quest Level ${questData.questLevel}`;
 }
 
 
@@ -1860,102 +1983,104 @@ async function initializeChampionProgress() {
 }
 
 // ===============================
-// 📜 LORE SYSTEM
+// 📜 CHAMPION-SPECIFIC LORE SYSTEM
 // ===============================
 function initializeLoreSystem() {
   const loreContainer = document.querySelector('#tab-lore .tab-content-inner');
+  const selectedChampion = localStorage.getItem('selectedChampion');
   
-  // Get collected lore from localStorage
+  if (!selectedChampion) {
+    loreContainer.innerHTML = '<p style="color: #ff9900; text-align: center;">Select a champion from the closet to view their lore!</p>';
+    return;
+  }
+  
+  let championLore = JSON.parse(localStorage.getItem('championLore') || '{}');
   let collectedLore = JSON.parse(localStorage.getItem('collectedLore') || '[]');
   
-  // Define lore pieces for each champion
-  const lorePieces = [
-    {
-      id: 'lore_1',
-      champion: 'Ahri',
-      title: 'The Nine-Tailed Fox',
-      preview: 'Ahri is a mysterious fox-like Vastaya who roams Runeterra...',
-      content: 'Ahri is a mysterious fox-like Vastaya who roams Runeterra in search of her lost memories and true purpose.'
-    },
-    {
-      id: 'lore_2',
-      champion: 'Lux',
-      title: 'The Lady of Luminosity',
-      preview: 'Luxanna Crownguard hails from Demacia, where magic is feared...',
-      content: 'Luxanna Crownguard hails from Demacia, an insular realm where magical abilities are viewed with fear and suspicion.'
-    },
-    {
-      id: 'lore_3',
-      champion: 'Yasuo',
-      title: 'The Unforgiven',
-      preview: 'An Ionian of deep resolve, Yasuo is an agile swordsman...',
-      content: 'An Ionian of deep resolve, Yasuo is an agile swordsman who wields the air itself against his enemies.'
-    },
-    {
-      id: 'lore_4',
-      champion: 'Jinx',
-      title: 'The Loose Cannon',
-      preview: 'A manic and impulsive criminal from Zaun, Jinx lives to wreak havoc...',
-      content: 'A manic and impulsive criminal from Zaun, Jinx lives to wreak havoc without care for the consequences.'
-    },
-    {
-      id: 'lore_5',
-      champion: 'Ezreal',
-      title: 'The Prodigal Explorer',
-      preview: 'A dashing adventurer, unknowingly gifted in the magical arts...',
-      content: 'A dashing adventurer, unknowingly gifted in the magical arts, Ezreal raids long-lost catacombs.'
-    }
-  ];
+  const championProgress = JSON.parse(localStorage.getItem('championProgress') || '{}');
+  const progress = championProgress[selectedChampion];
+  
+  if (!progress) {
+    loreContainer.innerHTML = '<p style="color: #aaa; text-align: center;">No lore available for this champion yet.</p>';
+    return;
+  }
+  
+  const lorePieces = generateChampionLore(selectedChampion);
   
   loreContainer.innerHTML = '';
   
-  lorePieces.forEach(lore => {
-    const isCollected = collectedLore.includes(lore.id);
+  const loreHeader = document.createElement('div');
+  loreHeader.style.textAlign = 'center';
+  loreHeader.style.marginBottom = '12px';
+  loreHeader.style.padding = '8px';
+  loreHeader.style.background = 'rgba(0, 255, 255, 0.1)';
+  loreHeader.style.borderRadius = '8px';
+  loreHeader.style.color = '#00ffff';
+  loreHeader.style.fontWeight = 'bold';
+  loreHeader.textContent = `${selectedChampion} Lore Collection`;
+  loreContainer.appendChild(loreHeader);
+  
+  lorePieces.forEach((lore, index) => {
+    const loreId = `${selectedChampion}_lore_${index + 1}`;
+    const isCollected = collectedLore.includes(loreId);
     
     const loreItem = document.createElement('div');
     loreItem.className = `lore-item ${isCollected ? 'collected' : ''}`;
-    loreItem.innerHTML = `
-      <div class="lore-item-title">${lore.title} (${lore.champion})</div>
-      <div class="lore-item-preview">${lore.preview}</div>
-    `;
     
-    loreItem.addEventListener('click', () => {
-      if (!isCollected) {
-        collectLore(lore.id, lore.champion);
-        loreItem.classList.add('collected');
-        alert(`✅ Lore collected: ${lore.title}\n\n${lore.content}`);
-      } else {
+    if (isCollected) {
+      loreItem.innerHTML = `
+        <div class="lore-item-title">${lore.title}</div>
+        <div class="lore-item-preview">${lore.preview}</div>
+      `;
+      
+      loreItem.addEventListener('click', () => {
         alert(`📖 ${lore.title}\n\n${lore.content}`);
-      }
-    });
+      });
+    } else {
+      loreItem.innerHTML = `
+        <div class="lore-item-title">??? Locked Lore Piece ${index + 1}</div>
+        <div class="lore-item-preview">Complete quests to unlock this lore piece...</div>
+      `;
+      loreItem.style.opacity = '0.5';
+      loreItem.style.cursor = 'not-allowed';
+    }
     
     loreContainer.appendChild(loreItem);
   });
 }
 
-function collectLore(loreId, championName) {
-  // Add to collected lore
-  let collectedLore = JSON.parse(localStorage.getItem('collectedLore') || '[]');
-  if (!collectedLore.includes(loreId)) {
-    collectedLore.push(loreId);
-    localStorage.setItem('collectedLore', JSON.stringify(collectedLore));
-  }
+function generateChampionLore(championName) {
+  const loreTemplates = {
+    default: [
+      {
+        title: `Origins of ${championName}`,
+        preview: `Discover the mysterious beginnings of ${championName}...`,
+        content: `Long ago in the lands of Runeterra, ${championName} emerged as a force to be reckoned with. Their story is one of determination and power.`
+      },
+      {
+        title: `${championName}'s First Battle`,
+        preview: `The tale of their first legendary encounter...`,
+        content: `In their first battle, ${championName} faced overwhelming odds but emerged victorious through sheer skill and determination.`
+      },
+      {
+        title: `The Path of ${championName}`,
+        preview: `How ${championName} became a legend...`,
+        content: `Through trials and tribulations, ${championName} carved their path to greatness, leaving an indelible mark on history.`
+      },
+      {
+        title: `${championName}'s Greatest Victory`,
+        preview: `The defining moment that shaped their legacy...`,
+        content: `This victory would come to define ${championName}'s entire legacy, remembered throughout the ages as a turning point.`
+      },
+      {
+        title: `The Legend of ${championName}`,
+        preview: `The complete saga of their heroic journey...`,
+        content: `From humble beginnings to legendary status, ${championName}'s complete story is one that inspires all who hear it. Their legacy lives on in the hearts of champions everywhere.`
+      }
+    ]
+  };
   
-  // Update champion progress
-  let championProgress = JSON.parse(localStorage.getItem('championProgress') || '{}');
-  if (championProgress[championName]) {
-    championProgress[championName].loreCollected = Math.min(
-      championProgress[championName].loreCollected + 1,
-      championProgress[championName].totalLore
-    );
-    championProgress[championName].progress = 
-      (championProgress[championName].loreCollected / championProgress[championName].totalLore) * 100;
-    
-    localStorage.setItem('championProgress', JSON.stringify(championProgress));
-    
-    // Refresh the progress display
-    initializeChampionProgress();
-  }
+  return loreTemplates.default;
 }
 
 
@@ -2061,14 +2186,9 @@ async function loadClosetChampions() {
           
           await loadChampionBackground(championName);
           
-          const questData = JSON.parse(localStorage.getItem('questData') || '{"quests": [], "completedQuests": [], "questLevel": 1, "questPoints": 0}');
-          if (questData.quests) {
-            checkQuestCompletion(questData);
-            updateQuestNotification(questData);
-            updateQuestProgress(questData);
-            renderQuests(questData);
-            localStorage.setItem('questData', JSON.stringify(questData));
-          }
+          initializeQuestSystem();
+          initializeChampionProgress();
+          initializeLoreSystem();
         });
         
         championCard.appendChild(championImg);
