@@ -352,6 +352,7 @@ async function runScrape(retryAttempt = 0) {
   status.className = "status loading";
   
   profileIcon.src = "./METAMEDIA/abo7do.gif";
+  document.getElementById("player-name").textContent = "LOADING....";
   
   try {
     const html = await fetchProfile(name, tagLine);
