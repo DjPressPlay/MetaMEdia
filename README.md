@@ -2,6 +2,8 @@
 
 An interactive web application that allows users to explore League of Legends summoner profiles with an immersive visual interface.
 
+🔗 **Live Site**: https://redditnreddit.netlify.app/
+
 ## Features
 
 - **Summoner Profile Lookup**: Search for any League of Legends summoner by game name and tag
@@ -23,12 +25,10 @@ An interactive web application that allows users to explore League of Legends su
 - Functions: Netlify serverless functions for API calls
 - External APIs: League of Legends Data Dragon API, League of Graphs web scraping
 
+## Important Note
+
+The League of Graphs and League Wiki integrations are included to demonstrate advanced gameplay analytics and lore systems. These endpoints don't exist in the official Riot API, so lightweight demo scrapers were used purely for proof-of-concept. The production version would use authorized or self-generated data.
+
 ## Getting Started
 
-```bash
-npm install
-npm run build
-netlify dev
-```
-
-Visit `http://localhost:8888` to explore the application.
+The application is already live at https://redditnreddit.netlify.app/ and ready to use. No local setup is required.
