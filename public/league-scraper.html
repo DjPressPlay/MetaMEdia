@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>League of Legends MetaDock – Summoner Setup</title>
+<title>Myth Ledger Summoner Setup</title>
 <style>
 body {
   margin: 0;
@@ -36,8 +36,9 @@ body::before {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px;
-  width: 380px;
+  padding: 32px;
+  width: 480px;
+  max-width: 90vw;
 }
 .selector-header {
   font-size: 22px;
@@ -93,7 +94,7 @@ body::before {
   height: 200px;
   border: 2px solid #00ffff;
   border-radius: 12px;
-  background: #111 url("./METAMEDIA/lol.jpeg") center/cover no-repeat;
+  background: #111;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,7 +181,7 @@ body::before {
 <body>
 
 <div class="selector-wrapper">
-  <div class="selector-header">Summoner Setup</div>
+  <div class="selector-header">Myth Ledger Summoner Setup</div>
 
   <div class="search-row">
     <input id="summoner" placeholder="Game Name" onkeypress="if(event.key==='Enter')runScrape()" disabled>
@@ -197,7 +198,7 @@ body::before {
   <div class="rank-display" id="player-rank"></div>
 
   <div class="action-row">
-    <button class="save-btn" id="save-profile">Save Profile</button>
+    <button class="save-btn" id="save-profile" style="display:none;">Confirm Profile</button>
     <button class="home-btn" id="goto-home">Enter Home Room</button>
   </div>
 
@@ -263,9 +264,11 @@ async function checkRegionStatus() {
     if (data.allOnline) {
       statusDiv.textContent = "All servers online. Ready to search!";
       statusDiv.className = "status success";
+      statusDiv.style.color = "#ffd700";
     } else {
       statusDiv.textContent = `Some servers offline: ${data.offlineRegions.join(', ')}. You can still search.`;
       statusDiv.className = "status loading";
+      statusDiv.style.color = "#ffd700";
     }
     
     input.disabled = false;
@@ -347,6 +350,9 @@ async function runScrape(retryAttempt = 0) {
 
   status.textContent = retryAttempt > 0 ? "Retrying search..." : "Fetching data from League of Graphs...";
   status.className = "status loading";
+  
+  profileIcon.src = "./METAMEDIA/abo7do.gif";
+  
   try {
     const html = await fetchProfile(name, tagLine);
     const doc = new DOMParser().parseFromString(html, "text/html");
@@ -410,6 +416,7 @@ async function runScrape(retryAttempt = 0) {
 
     confirmBtn.textContent = "Confirm Profile";
     confirmBtn.disabled = false;
+    confirmBtn.style.display = "block";
     confirmBtn.style.background = "#ffd24d";
     confirmBtn.style.color = "#000";
 
@@ -420,6 +427,7 @@ async function runScrape(retryAttempt = 0) {
     status.className = "status success";
   } catch (err) {
     console.error("Scrape error:", err);
+    profileIcon.src = "./METAMEDIA/lol.jpeg";
     if (retryAttempt === 0) {
       status.textContent = "Search failed. Retrying with alternative proxy...";
       status.className = "status loading";
