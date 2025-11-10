@@ -252,12 +252,49 @@ async function checkRegionStatus() {
 async function fetchProfile(name, tagLine) {
   const searchName = `${name}-${tagLine}`.toLowerCase().replace(/#/g, '');
   const url = `https://www.leagueofgraphs.com/summoner/na/${encodeURIComponent(searchName)}`;
-  const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-  const res = await fetch(proxied);
-  if (!res.ok) throw new Error("Failed to load player page");
-  const html = await res.text();
-  if (!html.includes("<html")) throw new Error("Invalid HTML response");
-  return html;
+  
+  const proxies = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+  ];
+  
+  let lastError = null;
+  
+  for (let i = 0; i < proxies.length; i++) {
+    try {
+      const res = await fetch(proxies[i], {
+        method: 'GET',
+        headers: {
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        }
+      });
+      
+      if (!res.ok) {
+        lastError = new Error(`HTTP ${res.status}`);
+        continue;
+      }
+      
+      const html = await res.text();
+      
+      if (!html || html.length < 100) {
+        lastError = new Error("Response too short");
+        continue;
+      }
+      
+      if (html.includes("<!DOCTYPE") || html.includes("<html") || html.includes("leagueofgraphs")) {
+        return html;
+      } else {
+        lastError = new Error("Invalid HTML response from proxy");
+        continue;
+      }
+    } catch (err) {
+      lastError = err;
+      continue;
+    }
+  }
+  
+  throw lastError || new Error("All proxy attempts failed");
 }
 
 async function runScrape(retryAttempt = 0) {
@@ -283,19 +320,35 @@ async function runScrape(retryAttempt = 0) {
     const html = await fetchProfile(name, tagLine);
     const doc = new DOMParser().parseFromString(html, "text/html");
 
-    const levelText = doc.querySelector(".bannerSubtitle")?.textContent || "";
-    const level = levelText.replace(/Level/gi, "").trim() || "Unknown";
+    let levelText = doc.querySelector(".bannerSubtitle")?.textContent || "";
+    let level = levelText.replace(/Level/gi, "").trim() || "Unknown";
     
-    const rankTier = doc.querySelector(".leagueTier")?.textContent.trim() || "Unranked";
-    const lp = doc.querySelector(".leaguePoints")?.textContent.trim() || "0 LP";
+    if (level === "Unknown") {
+      const altLevel = doc.querySelector('[class*="level"]')?.textContent || "";
+      level = altLevel.match(/\d+/)?.[0] || "Unknown";
+    }
+    
+    let rankTier = doc.querySelector(".leagueTier")?.textContent.trim() || "";
+    if (!rankTier) {
+      rankTier = doc.querySelector('[class*="rank"]')?.textContent.trim() || "Unranked";
+    }
+    if (!rankTier || rankTier === "") rankTier = "Unranked";
+    
+    let lp = doc.querySelector(".leaguePoints")?.textContent.trim() || "0 LP";
+    if (lp === "0 LP") {
+      const altLP = doc.querySelector('[class*="points"]')?.textContent.trim() || "0 LP";
+      lp = altLP.includes("LP") ? altLP : lp;
+    }
     
     const winsText = doc.querySelector(".wins")?.textContent || "0";
-    const wins = winsText.replace(/Wins:/gi, "").trim();
+    const wins = winsText.replace(/Wins:/gi, "").trim() || "0";
     
     const lossesText = doc.querySelector(".losses")?.textContent || "0";
-    const losses = lossesText.replace(/Losses:/gi, "").trim();
+    const losses = lossesText.replace(/Losses:/gi, "").trim() || "0";
 
-    const profileIconElement = doc.querySelector(".summonerProfileImage img");
+    const profileIconElement = doc.querySelector(".summonerProfileImage img") || 
+                               doc.querySelector('img[alt*="profile" i]') ||
+                               doc.querySelector('img[class*="profile" i]');
     let profileIconUrl = "./METAMEDIA/lol.jpeg";
     if (profileIconElement && profileIconElement.src) {
       profileIconUrl = profileIconElement.src;
@@ -335,14 +388,16 @@ async function runScrape(retryAttempt = 0) {
     status.textContent = "✅ Profile loaded. Please confirm to continue.";
     status.className = "status success";
   } catch (err) {
+    console.error("Scrape error:", err);
     if (retryAttempt === 0) {
-      status.textContent = "Search failed. Retrying automatically...";
+      status.textContent = "Search failed. Retrying with alternative proxy...";
       status.className = "status loading";
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       return runScrape(1);
     }
-    status.textContent = "Error: " + err.message;
+    status.textContent = `Error: ${err.message || "Failed to load profile"}. Check summoner name and tag.`;
     status.className = "status error";
+    miniCard.style.display = "none";
   }
 }
 

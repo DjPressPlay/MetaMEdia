@@ -954,6 +954,14 @@
 
   
 /* ✨ Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
 
 
@@ -1726,6 +1734,24 @@ function completeQuest(questData, questId, championName) {
     
     unlockLoreForQuest(championName, questData.questPoints);
     
+    let championProgress = JSON.parse(localStorage.getItem('championProgress') || '{}');
+    if (!championProgress[championName]) {
+      championProgress[championName] = {
+        loreCollected: 0,
+        totalLore: 9,
+        progress: 0
+      };
+    }
+    
+    championProgress[championName].loreCollected = Math.min(
+      championProgress[championName].loreCollected + 1,
+      championProgress[championName].totalLore
+    );
+    championProgress[championName].progress = 
+      (championProgress[championName].loreCollected / championProgress[championName].totalLore) * 100;
+    
+    localStorage.setItem('championProgress', JSON.stringify(championProgress));
+    
     // Check if Quest 9 is completed (Complete Quest List)
     if (questId === `${championName}_9`) {
       showNotification(`🎉 Quest Chain Complete! Unlocking new champion for Quest 2...`);
@@ -1754,7 +1780,7 @@ function completeQuest(questData, questId, championName) {
   }
 }
 
-function unlockLoreForQuest(championName, questPointIndex) {
+async function unlockLoreForQuest(championName, questPointIndex) {
   let championLore = JSON.parse(localStorage.getItem('championLore') || '{}');
   
   if (!championLore[championName]) {
@@ -1765,6 +1791,11 @@ function unlockLoreForQuest(championName, questPointIndex) {
     return;
   }
   
+  let championLoreData = JSON.parse(localStorage.getItem('championLoreData') || '{}');
+  if (!championLoreData[championName]) {
+    await fetchChampionLore(championName);
+  }
+  
   const loreId = `${championName}_lore_${questPointIndex}`;
   championLore[championName].push(loreId);
   localStorage.setItem('championLore', JSON.stringify(championLore));
@@ -1773,18 +1804,6 @@ function unlockLoreForQuest(championName, questPointIndex) {
   if (!collectedLore.includes(loreId)) {
     collectedLore.push(loreId);
     localStorage.setItem('collectedLore', JSON.stringify(collectedLore));
-  }
-  
-  let championProgress = JSON.parse(localStorage.getItem('championProgress') || '{}');
-  if (championProgress[championName]) {
-    championProgress[championName].loreCollected = Math.min(
-      championProgress[championName].loreCollected + 1,
-      championProgress[championName].totalLore
-    );
-    championProgress[championName].progress = 
-      (championProgress[championName].loreCollected / championProgress[championName].totalLore) * 100;
-    
-    localStorage.setItem('championProgress', JSON.stringify(championProgress));
   }
   
   showNotification(`📜 New lore unlocked for ${championName}!`);
@@ -2026,9 +2045,9 @@ async function initializeChampionProgress() {
 }
 
 // ===============================
-// 📜 CHAMPION-SPECIFIC LORE SYSTEM
+// 📜 CHAMPION-SPECIFIC LORE SYSTEM WITH WIKI SCRAPER
 // ===============================
-function initializeLoreSystem() {
+async function initializeLoreSystem() {
   const loreContainer = document.querySelector('#tab-lore .tab-content-inner');
   const selectedChampion = localStorage.getItem('selectedChampion');
   
@@ -2039,6 +2058,7 @@ function initializeLoreSystem() {
   
   let championLore = JSON.parse(localStorage.getItem('championLore') || '{}');
   let collectedLore = JSON.parse(localStorage.getItem('collectedLore') || '[]');
+  let championLoreData = JSON.parse(localStorage.getItem('championLoreData') || '{}');
   
   const championProgress = JSON.parse(localStorage.getItem('championProgress') || '{}');
   const progress = championProgress[selectedChampion];
@@ -2048,7 +2068,13 @@ function initializeLoreSystem() {
     return;
   }
   
-  const lorePieces = generateChampionLore(selectedChampion);
+  if (!championLoreData[selectedChampion]) {
+    loreContainer.innerHTML = '<p style="color: #aaa; text-align: center;">Loading lore from League of Legends Wiki...</p>';
+    await fetchChampionLore(selectedChampion);
+    championLoreData = JSON.parse(localStorage.getItem('championLoreData') || '{}');
+  }
+  
+  const lorePieces = generateChampionLore(selectedChampion, championLoreData[selectedChampion]);
   
   loreContainer.innerHTML = '';
   
@@ -2077,7 +2103,7 @@ function initializeLoreSystem() {
       `;
       
       loreItem.addEventListener('click', () => {
-        alert(`📖 ${lore.title}\n\n${lore.content}`);
+        showLoreCardOverlay(lore, selectedChampion);
       });
     } else {
       loreItem.innerHTML = `
@@ -2092,58 +2118,152 @@ function initializeLoreSystem() {
   });
 }
 
-function generateChampionLore(championName) {
-  const loreTemplates = {
-    default: [
-      {
-        title: `Quest 1: Profile Loaded`,
-        preview: `Welcome to the home room, summoner...`,
-        content: `You have successfully loaded your League of Legends profile and entered the Meta universe. Your journey begins here.`
-      },
-      {
-        title: `Quest 2: Champion Selected`,
-        preview: `${championName} has been chosen...`,
-        content: `${championName} emerges from the Champion Closet, ready to embark on this quest chain with you. Each champion brings their own unique story and power.`
-      },
-      {
-        title: `Quest 3: PC Visited`,
-        preview: `The digital realm opens before you...`,
-        content: `By accessing the PC, you've unlocked the gateway to Meta Reddit and other digital spaces where champions share their stories and connect with the world.`
-      },
-      {
-        title: `Quest 4: Profile Tabs Explored`,
-        preview: `Knowledge of the systems revealed...`,
-        content: `You've discovered the three pillars of progression: Quests drive your journey, Champion Progress tracks mastery, and the Lore Box holds ancient secrets.`
-      },
-      {
-        title: `Quest 5: Lore Loot Reviewed`,
-        preview: `The treasure vault beckons...`,
-        content: `Within the Lore Loot Box lie untold stories waiting to be discovered. Each card unlocks a fragment of ${championName}'s legend and the world they inhabit.`
-      },
-      {
-        title: `Quest 6: Messenger Accessed`,
-        preview: `Communication channels established...`,
-        content: `The LoL Messenger connects you to other summoners and champions across Runeterra. Through these connections, new opportunities and stories emerge.`
-      },
-      {
-        title: `Quest 7: Friends Connected`,
-        preview: `Bonds forged in the digital realm...`,
-        content: `By adding friends, you strengthen your network within the League community. Together, summoners share knowledge, strategies, and the lore of champions like ${championName}.`
-      },
-      {
-        title: `Quest 8: First Lore Unlocked`,
-        preview: `The treasure chest reveals its secrets...`,
-        content: `Your first lore card has been opened! This marks the beginning of your collection, unveiling the rich history and tales surrounding ${championName} and their world.`
-      },
-      {
-        title: `Quest 9: Quest Chain Complete`,
-        preview: `A cycle ends, another begins...`,
-        content: `You have completed the full quest chain with ${championName}! The cycle now returns to Quest 2, allowing you to choose a new champion and continue collecting lore across all of Runeterra.`
-      }
-    ]
-  };
+async function fetchChampionLore(championName) {
+  try {
+    const response = await fetch(`/.netlify/functions/lore-scraper?champion=${encodeURIComponent(championName)}`);
+    
+    if (!response.ok) {
+      console.warn(`Failed to fetch lore for ${championName}`);
+      return null;
+    }
+    
+    const loreData = await response.json();
+    
+    let championLoreData = JSON.parse(localStorage.getItem('championLoreData') || '{}');
+    championLoreData[championName] = loreData;
+    localStorage.setItem('championLoreData', JSON.stringify(championLoreData));
+    
+    console.log(`Lore fetched and cached for ${championName}`);
+    return loreData;
+  } catch (error) {
+    console.error(`Error fetching lore for ${championName}:`, error);
+    return null;
+  }
+}
+
+function generateChampionLore(championName, loreData) {
+  const lorePieces = [];
   
-  return loreTemplates.default;
+  if (loreData && loreData.loreSnippets && loreData.loreSnippets.length > 0) {
+    loreData.loreSnippets.slice(0, 9).forEach((snippet, index) => {
+      const preview = snippet.substring(0, 80) + (snippet.length > 80 ? '...' : '');
+      lorePieces.push({
+        title: `${championName} - Lore Fragment ${index + 1}`,
+        preview: preview,
+        content: snippet,
+        imageUrl: loreData.imageUrl,
+        questNumber: index + 1
+      });
+    });
+  }
+  
+  while (lorePieces.length < 9) {
+    const index = lorePieces.length;
+    lorePieces.push({
+      title: `${championName} - Quest ${index + 1}`,
+      preview: `Unlock this lore by completing quest ${index + 1}...`,
+      content: `Complete quest ${index + 1} to reveal more about ${championName}'s story and legend.`,
+      imageUrl: `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championName}_0.jpg`,
+      questNumber: index + 1
+    });
+  }
+  
+  return lorePieces;
+}
+
+function showLoreCardOverlay(lore, championName) {
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.background = 'rgba(0, 0, 0, 0.9)';
+  overlay.style.display = 'flex';
+  overlay.style.justifyContent = 'center';
+  overlay.style.alignItems = 'center';
+  overlay.style.zIndex = '99999';
+  overlay.style.animation = 'fadeIn 0.3s ease';
+  
+  const card = document.createElement('div');
+  card.style.position = 'relative';
+  card.style.maxWidth = '600px';
+  card.style.width = '90%';
+  card.style.maxHeight = '80vh';
+  card.style.background = 'rgba(20, 20, 20, 0.95)';
+  card.style.border = '3px solid #00ffff';
+  card.style.borderRadius = '12px';
+  card.style.padding = '20px';
+  card.style.boxShadow = '0 0 40px rgba(0, 255, 255, 0.6)';
+  card.style.overflowY = 'auto';
+  card.style.color = '#fff';
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '×';
+  closeBtn.style.position = 'absolute';
+  closeBtn.style.top = '10px';
+  closeBtn.style.right = '10px';
+  closeBtn.style.background = 'none';
+  closeBtn.style.border = 'none';
+  closeBtn.style.color = '#00ffff';
+  closeBtn.style.fontSize = '32px';
+  closeBtn.style.cursor = 'pointer';
+  closeBtn.style.transition = 'transform 0.2s ease';
+  closeBtn.addEventListener('mouseenter', () => {
+    closeBtn.style.transform = 'scale(1.2)';
+  });
+  closeBtn.addEventListener('mouseleave', () => {
+    closeBtn.style.transform = 'scale(1)';
+  });
+  closeBtn.addEventListener('click', () => {
+    overlay.remove();
+  });
+  
+  const cardImage = document.createElement('img');
+  cardImage.src = lore.imageUrl || `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championName}_0.jpg`;
+  cardImage.style.width = '100%';
+  cardImage.style.borderRadius = '8px';
+  cardImage.style.marginBottom = '16px';
+  cardImage.style.boxShadow = '0 0 20px rgba(0, 255, 255, 0.4)';
+  
+  const cardTitle = document.createElement('h2');
+  cardTitle.textContent = lore.title;
+  cardTitle.style.color = '#00ffff';
+  cardTitle.style.textShadow = '0 0 10px rgba(0, 255, 255, 0.8)';
+  cardTitle.style.marginBottom = '12px';
+  cardTitle.style.fontSize = '20px';
+  cardTitle.style.textAlign = 'center';
+  
+  const questLabel = document.createElement('div');
+  questLabel.textContent = `Quest ${lore.questNumber}/9`;
+  questLabel.style.fontSize = '12px';
+  questLabel.style.color = '#aaa';
+  questLabel.style.textAlign = 'center';
+  questLabel.style.marginBottom = '16px';
+  questLabel.style.textTransform = 'uppercase';
+  questLabel.style.letterSpacing = '1px';
+  
+  const cardContent = document.createElement('p');
+  cardContent.textContent = lore.content;
+  cardContent.style.color = 'rgba(255, 255, 255, 0.9)';
+  cardContent.style.lineHeight = '1.6';
+  cardContent.style.fontSize = '14px';
+  cardContent.style.textAlign = 'justify';
+  
+  card.appendChild(closeBtn);
+  card.appendChild(cardImage);
+  card.appendChild(cardTitle);
+  card.appendChild(questLabel);
+  card.appendChild(cardContent);
+  overlay.appendChild(card);
+  
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.remove();
+    }
+  });
+  
+  document.body.appendChild(overlay);
 }
 
 
