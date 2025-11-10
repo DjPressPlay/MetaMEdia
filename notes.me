@@ -187,44 +187,135 @@ The hybrid approach ensures comprehensive data coverage: the Riot API provides a
 Home Room Interactive Features
 ================================
 
-The home room interface has been enhanced with several immersive features that create a gamified user experience:
+The home room interface has been enhanced with several immersive features that create a gamified user experience with a strong emphasis on champion-specific progression and collectible lore rewards.
 
-1. Quest System
----------------
+1. Champion-Specific Quest System (Dynamic Quest Setup)
+--------------------------------------------------------
 
-Implementation: public/homeroom.html (lines 1580-1750)
+Implementation: public/homeroom.html (lines 1746-1935)
 
-A fully functional quest tracking system that monitors player progress and achievements:
+A revolutionary champion-specific quest tracking system that creates unique progression paths for each champion. This system allows for easy addition of new quests and provides a TCG pack opening experience through lore card rewards.
 
-Features:
-- Dynamic quest list with completion tracking
-- Quest progress bar showing advancement toward next level (0-5 points per level)
-- Visual notifications for quest completion and level-ups
-- Persistent storage via localStorage
-- Expandable dropdown tabs interface for quest viewing
+**QUEST SETUP ARCHITECTURE:**
 
-Current Quests:
-a) "Load Profile" - Automatically completes when summoner data is loaded
-b) "Select Champion" - Completes when player selects a champion from the style overlay
+The quest system is built on a modular, extensible architecture that makes adding new quests simple:
 
-Quest Progression:
+generateChampionQuests(championName) Function (lines 1776-1851):
+- Dynamically generates a unique quest chain for each champion
+- Returns an array of quest objects, each containing:
+  * id: Unique identifier (championName_questNumber)
+  * name: Display name for the quest
+  * description: Detailed instructions
+  * completed: Boolean tracking completion state
+  * active: Boolean showing if quest is currently available
+  * manual: Boolean indicating if quest requires manual completion
+- Currently configured with 9 progressive quests per champion
+- Easily extensible - simply add new quest objects to the return array
+
+**CURRENT QUEST CHAIN (Expandable to any number):**
+
+Quest 1: Load Profile (Auto-complete)
+Quest 2: Load Champion - [ChampionName] (Restart Point)
+Quest 3: Visit PC (Hotspot interaction)
+Quest 4: Check All Tabs in Profile App
+Quest 5: Review Lore Loot (Inspect collected lore)
+Quest 6: Visit LoL Messenger (Phone hotspot)
+Quest 7: Add Friends (Social feature)
+Quest 8: Open Lore Treasure Chest (First lore unlock)
+Quest 9: Complete Quest List (Cycle restart)
+
+**ADDING NEW QUESTS:**
+
+To add a new quest, simply add an object to generateChampionQuests():
+```javascript
+{
+  id: `${championName}_10`,
+  name: `Your Quest Name`,
+  description: `Your quest description with ${championName}`,
+  completed: false,
+  active: true,
+  manual: true
+}
+```
+
+Then implement completion logic in checkQuestCompletion() function.
+
+**QUEST PROGRESSION & REWARDS:**
+
+Quest Completion Flow (lines 1878-1935):
 - Each completed quest awards 1 quest point
-- 5 quest points required to advance to next quest level
-- Completion triggers animated notifications with cyan glow effects
-- Quest notification indicator (!) appears on quest tab when active/completed quests exist
+- 9 quest points total per champion cycle
+- Every quest completion unlocks a new lore card
+- Quest 9 completion triggers champion cycle restart
+- Returns player to Quest 2 (Load Champion) to select a new champion
+- Maintains quest level progression across champion switches
 
-Data Storage:
-- Key: "questData" in localStorage
-- Stores: quests array, completedQuests array, questLevel, questPoints
-- Auto-saves after each quest update
+Lore Card Unlocking (lines 1937-1964):
+- unlockLoreForQuest() function triggers on quest completion
+- Automatically fetches champion lore from League of Legends Wiki
+- Creates unique lore card IDs (championName_lore_questNumber)
+- Stores unlocked lore in localStorage
+- Displays notification with TCG-style reveal animation
+- Syncs with Champion Progress tracker
 
-Visual Elements:
-- Completed quests show green checkmark (✓) with green border
-- Active quests show circle (○) with cyan border
-- Progress bar displayed in HUD nameplate with fill animation
-- Dynamic quest level label updates in real-time
+**TCG PACK OPENING EXPERIENCE:**
 
-Files: public/homeroom.html (lines 389-442, 1270-1282, 1323-1329, 1580-1750)
+The quest system creates a trading card game pack opening experience:
+1. Player completes a quest
+2. Notification appears: "📜 New lore unlocked for [Champion]!"
+3. Lore appears in Lore Box tab with cyan glow effect
+4. Clicking the lore card reveals full content in overlay
+5. Champion Progress bar updates showing lore collection (X/9)
+6. Visual progression encourages continued play
+
+**QUEST PERSISTENCE:**
+
+Data Storage Structure:
+- Key: "championQuests" in localStorage
+- Structure: 
+  {
+    championName: {
+      quests: [...quest objects],
+      completedQuests: [questIds],
+      questLevel: number,
+      questPoints: number
+    }
+  }
+- Each champion maintains independent quest progress
+- Switching champions preserves previous champion's progress
+- Quest state persists across browser sessions
+
+**QUEST NOTIFICATION SYSTEM:**
+
+Visual Indicators (lines 1966-1990):
+- Animated cyan notification overlay on quest completion
+- Position: Fixed center screen
+- Duration: 3 seconds with fade-out
+- Shows quest name, completion status, level-ups
+- Quest tab indicator (!) when active quests exist
+- Flashing animation on quest tab when new quests available
+
+**CHAMPION CYCLE RESTART MECHANISM:**
+
+Quest 9 Special Behavior (lines 1909-1915):
+- Completing Quest 9 triggers "Quest Chain Complete" notification
+- System returns player to Quest 2 (Load Champion)
+- Player selects a new champion from Champion Closet
+- New champion gets its own independent quest chain
+- Previous champion's progress is preserved
+- Enables infinite progression across all champions
+
+**EXTENSIBILITY FEATURES:**
+
+The quest system is designed for easy expansion:
+- Add quest objects to generateChampionQuests() array
+- Implement quest-specific completion logic in checkQuestCompletion()
+- Quest IDs automatically namespace per champion
+- No limit on number of quests per champion
+- Support for both auto-complete and manual completion quests
+- Can integrate with any game feature or external API
+
+Files: public/homeroom.html (lines 389-442, 1270-1282, 1323-1329, 1746-1935, 1966-1990)
 
 2. Champion Progress Tracker
 -----------------------------
@@ -265,48 +356,147 @@ Integration:
 
 Files: public/homeroom.html (lines 617-693, 1285-1294, 1754-1860)
 
-3. Lore Collection System
---------------------------
+3. Dynamic Lore Collection System (TCG Card Experience)
+--------------------------------------------------------
 
-Implementation: public/homeroom.html (lines 1862-1960+)
+Implementation: public/homeroom.html (lines 2438-2530), netlify/functions/lore-scraper.js
 
-A collectible lore piece system featuring champion backstories and narrative content:
+A revolutionary dynamic lore piece system that scrapes real champion lore from the League of Legends Wiki and presents it as collectible trading cards. This creates an authentic TCG pack opening experience with real game content.
 
-Features:
-- Pre-defined lore pieces for multiple champions
-- Collection status tracking (collected/uncollected)
-- Interactive hover effects on lore items
-- Visual indication of collected lore with checkmark
-- Expandable preview text and full content
-- Persistent collection via localStorage
+**LORE SCRAPING ARCHITECTURE:**
 
-Lore Structure:
-Each lore piece contains:
-- Unique ID (lore_1, lore_2, etc.)
-- Associated champion name
-- Title (e.g., "The Nine-Tailed Fox")
-- Preview text snippet
-- Full content text
+Lore Scraper Serverless Function (netlify/functions/lore-scraper.js):
+- Fetches live champion lore from leagueoflegends.fandom.com
+- Endpoint: /.netlify/functions/lore-scraper?champion={championName}
+- Scrapes biography content from official League Wiki pages
+- Extracts multiple lore paragraphs (up to 10 snippets)
+- Retrieves champion splash art images
+- Implements 24-hour caching for performance optimization
+- Graceful fallback to default lore if scraping fails
 
-Champions Included:
-- Ahri: "The Nine-Tailed Fox"
-- Lux: "The Lady of Luminosity"
-- Yasuo: "The Unforgiven"
-- Jinx: "The Loose Cannon"
-- [Additional champions configurable]
+Extraction Process (lines 91-147):
+1. Fetches HTML from League Wiki champion page
+2. Parses biography content from mw-parser-output div
+3. Extracts clean text from paragraph tags
+4. Removes HTML entities and formatting
+5. Filters snippets longer than 50 characters
+6. Collects champion splash art URLs
+7. Returns structured JSON with lore snippets and images
 
-Visual Design:
-- Uncollected lore: Semi-transparent with cyan border
-- Collected lore: Full opacity with green checkmark prefix
-- Hover effect: Slight scale transform and glow
-- Organized in scrollable tab container
+**LORE CARD GENERATION:**
 
-Storage:
+generateChampionLore() Function (lines 2555-2583):
+- Creates exactly 9 lore cards per champion (matching 9 quests)
+- Each lore piece contains:
+  * title: "ChampionName - Lore Fragment X"
+  * preview: First 80 characters of lore snippet
+  * content: Full lore text from League Wiki
+  * imageUrl: Champion splash art from Data Dragon or Wiki
+  * questNumber: Tied to specific quest completion (1-9)
+
+Dynamic Content Generation:
+- Uses real scraped lore for first X quests completed
+- Fills remaining slots with placeholder content
+- Preview text truncates with ellipsis for card aesthetic
+- Full content revealed on card click/expansion
+- Champion-specific splash art enhances visual immersion
+
+**TCG PACK OPENING EXPERIENCE:**
+
+Lore Card Reveal System (lines 2585-2678):
+The showLoreCardOverlay() creates an authentic trading card reveal:
+
+Visual Elements:
+- Full-screen dark overlay (90% opacity)
+- Card container with cyan glow border (3px)
+- Box shadow creating card depth effect (40px blur)
+- Champion splash art at top of card
+- Quest number label (Quest X/9)
+- Lore title with cyan glow text effect
+- Scrollable lore content with justified text
+- Close button with hover animation
+
+Card Interaction:
+- Click lore item in Lore Box tab to reveal
+- Card animates into view with fadeIn effect
+- Full lore content displayed with champion image
+- Click outside card or close button to dismiss
+- Locked cards show "??? Locked Lore Piece X"
+- Unlocked cards show real champion lore text
+
+**PROGRESSIVE LORE UNLOCKING:**
+
+initializeLoreSystem() Function (lines 2438-2530):
+- Loads on page load and quest completion
+- Checks which quests are completed for selected champion
+- Unlocks corresponding lore cards (1 card per quest)
+- Syncs with championQuests localStorage
+- Displays "Loading lore from League of Legends Wiki..." during fetch
+- Renders lore items with locked/unlocked states
+
+Lore Unlock Flow:
+1. Player completes a quest
+2. unlockLoreForQuest() triggers (lines 1937-1964)
+3. Creates unique lore ID (championName_lore_questNumber)
+4. Fetches champion lore from Wiki (if not cached)
+5. Adds lore ID to collectedLore array
+6. Shows notification: "📜 New lore unlocked for [Champion]!"
+7. Lore card appears in Lore Box tab with full opacity
+8. Player clicks card to reveal TCG-style overlay
+
+**LORE CARD VISUAL STATES:**
+
+Collected State (lines 2510-2518):
+- Full opacity (1.0)
+- Shows actual lore title and preview text
+- Clickable with pointer cursor
+- Opens showLoreCardOverlay() on click
+- Cyan text with glow effect
+
+Locked State (lines 2519-2526):
+- Reduced opacity (0.5)
+- Shows "??? Locked Lore Piece X"
+- Generic unlock instructions
+- Non-clickable (cursor: not-allowed)
+- Gray text styling
+
+**LORE PERSISTENCE:**
+
+Storage Architecture:
 - Key: "collectedLore" in localStorage
 - Array of collected lore piece IDs
-- Syncs with champion progress system
+- Format: ["Ahri_lore_1", "Ahri_lore_2", "Ezreal_lore_1", ...]
 
-Files: public/homeroom.html (lines 694-768, 1296-1306, 1862-1960+)
+- Key: "championLore" in localStorage
+- Object mapping champions to their lore arrays
+- Format: { "Ahri": ["Ahri_lore_1", ...], "Ezreal": [...] }
+
+- Key: "championLoreData" in localStorage
+- Caches scraped lore content from Wiki
+- Prevents redundant scraping requests
+- Format: { "Ahri": { loreSnippets: [...], imageUrl: "...", success: true } }
+
+**INFINITE CONTENT GENERATION:**
+
+The system supports unlimited champion lore collection:
+- 160+ League champions available
+- Each champion has 9 unique lore cards
+- 1440+ total collectible lore cards possible
+- Real content scraped from official League Wiki
+- New champions automatically supported
+- No manual content creation required
+
+**TCG PACK OPENING PSYCHOLOGY:**
+
+The lore system employs TCG mechanics to drive engagement:
+1. Scarcity: Locked cards create desire to unlock
+2. Progressive Revelation: One card per quest completion
+3. Visual Reward: Beautiful card overlay with champion art
+4. Collection Tracking: Champion Progress shows X/9 completion
+5. Replayability: 160+ champions means endless collection
+6. Authenticity: Real lore from official League sources
+
+Files: public/homeroom.html (lines 694-768, 1296-1306, 1937-1964, 2438-2530, 2532-2583, 2585-2678), netlify/functions/lore-scraper.js
 
 4. Dropdown Tab Interface
 --------------------------
@@ -445,16 +635,164 @@ Files: public/homeroom.html (lines 32-96, 389-407)
 Technology Integration Summary
 ================================
 
-New Data Flows:
-1. Quest System: localStorage ↔ Quest State ↔ UI Updates
-2. Champion Progress: Riot Match API → Team Analysis → Progress Tracking → localStorage
-3. Lore Collection: Static Data → Collection State → localStorage → UI Rendering
-4. Background Scraper: Champion Selection → Serverless Function → Data Dragon CDN → Background Display
+**COMPLETE API & SCRAPING ARCHITECTURE:**
 
-Persistence Strategy:
-- All game progress stored in browser localStorage
-- Three separate storage keys: questData, championProgress, collectedLore
-- Auto-save on every state change
-- Restore on page load for seamless experience
+The application uses a hybrid multi-source data architecture combining official APIs, CDN resources, and web scraping:
 
-The enhanced home room creates an engaging, game-like experience that encourages exploration while providing meaningful progress tracking for League of Legends summoners.
+1. RIOT GAMES API (Official Authentication Required)
+   - Endpoint: /.netlify/functions/riot-api
+   - Purpose: Real-time player statistics and ranked data
+   - Requests: Platform status, summoner info, league rankings
+   - Caching: 5-minute response cache
+   - Rate Limits: 100 req/2 min, 20,000 req/10 sec
+
+2. DATA DRAGON CDN (Official Public Assets)
+   - Base URL: https://ddragon.leagueoflegends.com/cdn/
+   - Purpose: Champion images, profile icons, metadata
+   - Resources: Champion JSON, splash art, thumbnails
+   - Version: 14.1.1 (versioned for consistency)
+   - No authentication required
+
+3. LEAGUE OF GRAPHS SCRAPER (Supplementary Player Data)
+   - Endpoint: public/league-scraper.html
+   - Target: https://www.leagueofgraphs.com/summoner/{region}/{name}-{tag}
+   - Purpose: Additional profile stats not in official API
+   - Proxy: allorigins.win for CORS bypass
+   - Extraction: CSS selectors for level, rank, wins, losses
+
+4. LEAGUE OF LEGENDS WIKI SCRAPER (Dynamic Lore Content)
+   - Endpoint: /.netlify/functions/lore-scraper
+   - Target: https://leagueoflegends.fandom.com/wiki/{Champion}/LoL
+   - Purpose: Real champion lore for TCG card system
+   - Extraction: Biography paragraphs, splash art images
+   - Caching: 24-hour cache per champion
+   - Fallback: Default lore if scraping fails
+
+5. CHAMPION BACKGROUND SCRAPER (Visual Assets)
+   - Endpoint: /.netlify/functions/champion-bg-scraper
+   - Purpose: Dynamic champion backgrounds for home room
+   - Primary: Splash art (splash/{Champion}_0.jpg)
+   - Fallback: Loading screen art (loading/{Champion}_0.jpg)
+   - Caching: 24-hour cache headers
+
+**NEW DATA FLOWS:**
+
+Quest System Data Flow:
+1. Player action triggers quest completion check
+2. checkQuestCompletion() evaluates quest conditions
+3. completeQuest() updates localStorage (championQuests)
+4. unlockLoreForQuest() triggers lore fetch
+5. Lore scraper retrieves Wiki content
+6. generateChampionLore() creates lore cards
+7. initializeLoreSystem() renders lore in UI
+8. showLoreCardOverlay() displays TCG card reveal
+
+Champion Progress Data Flow:
+1. loadRiotProfile() fetches summoner data via Riot API
+2. Riot Match API returns recent game matchIds
+3. Match detail API returns team composition
+4. championId mapped to champion names via Data Dragon JSON
+5. Champion progress stored in localStorage
+6. Progress bar rendered showing lore collection (X/9)
+7. Updates on quest completion
+
+Lore Collection Data Flow:
+1. Quest completion triggers unlockLoreForQuest()
+2. fetchChampionLore() calls lore-scraper serverless function
+3. Function fetches HTML from leagueoflegends.fandom.com
+4. extractLoreData() parses biography content
+5. Returns JSON with loreSnippets array and images
+6. Data cached in championLoreData localStorage
+7. Lore IDs added to collectedLore array
+8. UI updates to show unlocked lore cards
+
+Champion Selection Flow:
+1. Player opens Champion Closet overlay
+2. loadClosetChampions() fetches champion.json from Data Dragon
+3. Populates dropdown with 160+ champions
+4. Player selects champion
+5. champion-bg-scraper fetches splash art background
+6. generateChampionQuests() creates quest chain
+7. initializeQuestSystem() initializes quest tracking
+8. Character image updates with render or thumbnail
+
+**PERSISTENCE STRATEGY:**
+
+All game progress stored in browser localStorage with multiple keys:
+
+- summonerData: Player profile (name, tag, level, rank, LP, wins, losses, puuid, profileIconUrl)
+- selectedChampion: Currently selected champion name
+- championQuests: Object mapping champions to quest data
+  * Structure: { championName: { quests, completedQuests, questLevel, questPoints } }
+- championProgress: Champion lore collection progress
+  * Structure: { championName: { loreCollected, totalLore, progress } }
+- collectedLore: Array of all unlocked lore IDs
+- championLore: Object mapping champions to their lore arrays
+- championLoreData: Cached lore content from Wiki scraper
+
+Auto-save triggers:
+- Every quest completion
+- Champion selection change
+- Profile data update
+- Lore unlock
+- Page navigation
+
+Restore triggers:
+- Page load (DOMContentLoaded)
+- Home room initialization
+- Quest system initialization
+- Lore system initialization
+
+**GAME MECHANICS SUMMARY:**
+
+Core Gameplay Loop:
+1. Player searches for League of Legends summoner
+2. Profile loads with real Riot API data
+3. Player enters home room with profile displayed
+4. Player selects champion from Champion Closet
+5. Champion-specific quest chain generates (9 quests)
+6. Player completes quests through UI interactions
+7. Each quest completion unlocks a lore card
+8. Lore cards contain real champion lore from League Wiki
+9. Player views lore cards in TCG-style overlay
+10. Champion Progress tracks X/9 lore collection
+11. Quest 9 completion triggers champion cycle restart
+12. Player returns to Quest 2 to select new champion
+13. Infinite progression across 160+ champions
+
+Quest Setup Mechanics:
+- generateChampionQuests() creates dynamic quest chains
+- Each champion gets independent 9-quest progression
+- Quests auto-complete or require manual interaction
+- Quest completion tracked per champion
+- Easy to add new quests by extending generateChampionQuests() array
+- Quest completion triggers lore unlocks
+
+Lore Card Collection Mechanics:
+- 1 lore card unlocked per quest completed
+- 9 total lore cards per champion
+- 1440+ total collectible lore cards (160 champions × 9 cards)
+- Real content dynamically scraped from League Wiki
+- TCG pack opening experience with card overlay reveal
+- Locked cards show "???" until quest completion
+- Unlocked cards clickable to reveal full lore content
+- Champion splash art displayed on each card
+- Collection persists across browser sessions
+
+Champion Progression Mechanics:
+- Visual progress bar showing X/9 lore collected
+- Separate progress tracking per champion
+- Progress syncs with quest completion
+- Displayed in Champion Progress tab
+- Encourages completionism and collection
+
+Replayability Mechanics:
+- 160+ champions available for selection
+- Each champion has unique quest chain
+- Quest 9 completion returns to Quest 2
+- Previous champion progress preserved
+- Can switch between champions at any time
+- Infinite content through champion rotation
+- Real lore content means authentic League experience
+
+The enhanced home room creates an engaging, game-like experience that combines official League of Legends data with TCG collection mechanics, quest-based progression, and dynamic content generation. The modular quest system allows for easy expansion, and the lore scraping system provides unlimited content across all League champions.
