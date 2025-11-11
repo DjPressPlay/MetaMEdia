@@ -405,7 +405,7 @@
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   text-align: center;
 }
@@ -936,6 +936,33 @@
     0 0 12px rgba(0,200,255,0.4);
 }
 
+.level-container {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  text-align: center;
+  box-shadow:
+    0 0 10px rgba(0,255,255,0.4),
+    inset 0 0 8px rgba(0,255,255,0.2);
+}
+
+.level-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #aaa;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.level-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  text-shadow: 0 0 8px rgba(0,255,255,0.6);
+}
+
 /* ============================= */
 /* 🔹 Hotspots (All Enhanced) */
 /* ============================= */
@@ -1417,6 +1444,10 @@
 <div class="rank-display" id="rank-display">
   <div class="rank-badge-large" id="rank-badge-large"></div>
   <div class="rank-text" id="rank-text"></div>
+  <div class="level-container">
+    <div class="level-label">Level</div>
+    <div class="level-value" id="summoner-level-display"></div>
+  </div>
 </div>
 
 <!-- 📋 Dropdown Tabs Container -->
@@ -1467,7 +1498,6 @@
   </div>
 
   <div class="stats-grid">
-    <div><div class="stat-value" id="summoner-level"></div><div class="stat-label">Level</div></div>
     <div><div class="stat-value" id="summoner-lp"></div><div class="stat-label">LP</div></div>
     <div><div class="stat-value" id="summoner-wins"></div><div class="stat-label">Wins</div></div>
     <div><div class="stat-value" id="summoner-losses"></div><div class="stat-label">Losses</div></div>
@@ -1646,7 +1676,7 @@
       const data = JSON.parse(summonerData);
       
       document.getElementById("summoner-name").textContent = `${data.name}#${data.tagLine}` || "Unknown";
-      document.getElementById("summoner-level").textContent = data.level || "—";
+      document.getElementById("summoner-level-display").textContent = data.level || "—";
       document.getElementById("summoner-lp").textContent = data.lp || "0 LP";
       document.getElementById("summoner-wins").textContent = data.wins || "0";
       document.getElementById("summoner-losses").textContent = data.losses || "0";
