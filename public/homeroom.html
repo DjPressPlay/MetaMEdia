@@ -1579,10 +1579,94 @@
     </div>
  
        
-  <!-- 🔹 App 3------------------>
-    <div class="mini-app-window" id="app-signalz" style="display: none;">
-      <h2>SignalZ Hub</h2>
-      <p>Future integration point for live SignalZ feed.</p>
+  <!-- 🔹 App 3 - SignalZ LINK ------------------>
+    <div class="app-window" id="app-signalz" style="display: none;">
+      <div class="app-header">
+        <span>SignalZ LINK</span>
+        <button class="close-app">×</button>
+      </div>
+      <div class="app-body" style="padding: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); height: calc(100% - 50px);">
+        <div id="signalz-phone-container" style="
+          width: 360px;
+          height: 640px;
+          background: linear-gradient(145deg, #2d2d44, #1a1a2e);
+          border: 8px solid #00ffff;
+          border-radius: 30px;
+          box-shadow: 
+            0 0 30px rgba(0, 255, 255, 0.5),
+            inset 0 0 20px rgba(0, 255, 255, 0.1);
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 40px 30px;
+          position: relative;
+          overflow: hidden;">
+          
+          <div style="position: absolute; top: 15px; left: 50%; transform: translateX(-50%); width: 100px; height: 25px; background: #000; border-radius: 0 0 15px 15px;"></div>
+          
+          <div id="signalz-screen" style="width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 25px;">
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h2 style="color: #00ffff; font-size: 28px; margin: 0 0 10px 0; text-shadow: 0 0 15px rgba(0, 255, 255, 0.8); font-weight: 700; letter-spacing: 2px;">SignalZ LINK</h2>
+              <p style="color: rgba(255, 255, 255, 0.7); font-size: 13px; margin: 0;">Connect your phone to unlock features</p>
+            </div>
+            
+            <button id="signalz-signin-btn" style="
+              width: 85%;
+              padding: 18px 25px;
+              background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 200, 255, 0.3));
+              border: 2px solid #00ffff;
+              border-radius: 12px;
+              color: #00ffff;
+              font-size: 16px;
+              font-weight: 700;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              text-transform: uppercase;
+              letter-spacing: 1.5px;
+              box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+            ">
+              Sign In
+            </button>
+            
+            <button id="signalz-link-btn" style="
+              width: 85%;
+              padding: 18px 25px;
+              background: linear-gradient(135deg, rgba(100, 100, 100, 0.2), rgba(80, 80, 80, 0.3));
+              border: 2px solid rgba(255, 255, 255, 0.3);
+              border-radius: 12px;
+              color: rgba(255, 255, 255, 0.4);
+              font-size: 16px;
+              font-weight: 700;
+              cursor: not-allowed;
+              text-transform: uppercase;
+              letter-spacing: 1.5px;
+              opacity: 0.5;
+              transition: all 0.3s ease;
+            " disabled>
+              <span style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span style="font-size: 20px;">🔒</span>
+                Link to Phone
+              </span>
+            </button>
+            
+            <div id="signalz-status" style="
+              margin-top: 20px;
+              padding: 12px 20px;
+              background: rgba(0, 0, 0, 0.3);
+              border: 1px solid rgba(0, 255, 255, 0.2);
+              border-radius: 8px;
+              color: rgba(255, 255, 255, 0.6);
+              font-size: 12px;
+              text-align: center;
+              max-width: 85%;
+            ">
+              Please sign in to continue
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -3167,7 +3251,23 @@ document.querySelectorAll('.app-icon').forEach(icon => {
 
 async function openApp(appName) {
   // close previous app windows inside the mini-pc
-  document.querySelectorAll('.app-window').forEach(w => w.remove());
+  document.querySelectorAll('.app-window').forEach(w => {
+    if (w.id !== 'app-signalz' && w.id !== 'app-items') {
+      w.remove();
+    } else {
+      w.style.display = 'none';
+    }
+  });
+
+  // 🧩 SignalZ LINK App
+  if (appName === "signalz") {
+    const signalzApp = document.getElementById('app-signalz');
+    if (signalzApp) {
+      signalzApp.style.display = 'flex';
+      initializeSignalZApp();
+    }
+    return;
+  }
 
   const win = document.createElement('div');
   win.className = 'app-window';
@@ -3496,6 +3596,130 @@ async function openApp(appName) {
   // 🔻 close-button logic
   win.querySelector('.close-app').addEventListener('click', () => win.remove());
 }
+
+//======SignalZ LINK Functionality============================================
+function initializeSignalZApp() {
+  const signInBtn = document.getElementById('signalz-signin-btn');
+  const linkBtn = document.getElementById('signalz-link-btn');
+  const statusDiv = document.getElementById('signalz-status');
+  
+  const signalzData = JSON.parse(localStorage.getItem('signalzData') || '{"signedIn": false, "phoneLinked": false}');
+  
+  if (signalzData.signedIn) {
+    updateSignalZUI(true, signalzData.phoneLinked);
+  }
+  
+  signInBtn.addEventListener('click', () => {
+    const summonerData = localStorage.getItem("summonerData");
+    if (!summonerData) {
+      statusDiv.innerHTML = '<span style="color: #ff6b6b;">❌ No Riot ID found. Please load your profile first.</span>';
+      return;
+    }
+    
+    const data = JSON.parse(summonerData);
+    const riotId = `${data.name}#${data.tagLine}`;
+    
+    signalzData.signedIn = true;
+    signalzData.riotId = riotId;
+    localStorage.setItem('signalzData', JSON.stringify(signalzData));
+    
+    statusDiv.innerHTML = `<span style="color: #00ffff;">✅ Signed in as ${riotId}</span>`;
+    
+    setTimeout(() => {
+      updateSignalZUI(true, signalzData.phoneLinked);
+    }, 1000);
+  });
+  
+  linkBtn.addEventListener('click', () => {
+    if (!signalzData.signedIn) {
+      statusDiv.innerHTML = '<span style="color: #ff9900;">⚠️ Please sign in first</span>';
+      return;
+    }
+    
+    const phoneLink = {
+      linkedAt: new Date().toISOString(),
+      riotId: signalzData.riotId,
+      linkKey: generateLinkKey()
+    };
+    
+    localStorage.setItem('phoneLink', JSON.stringify(phoneLink));
+    signalzData.phoneLinked = true;
+    localStorage.setItem('signalzData', JSON.stringify(signalzData));
+    
+    statusDiv.innerHTML = `
+      <span style="color: #00ff00;">✅ Phone Linked Successfully!</span><br>
+      <span style="color: rgba(255, 255, 255, 0.8); font-size: 11px; margin-top: 5px; display: block;">
+        Link Key: ${phoneLink.linkKey}
+      </span>
+    `;
+    
+    updateSignalZUI(true, true);
+  });
+  
+  const closeAppBtn = document.querySelector('#app-signalz .close-app');
+  if (closeAppBtn) {
+    closeAppBtn.addEventListener('click', () => {
+      document.getElementById('app-signalz').style.display = 'none';
+    });
+  }
+}
+
+function updateSignalZUI(signedIn, phoneLinked) {
+  const signInBtn = document.getElementById('signalz-signin-btn');
+  const linkBtn = document.getElementById('signalz-link-btn');
+  const statusDiv = document.getElementById('signalz-status');
+  
+  if (signedIn) {
+    signInBtn.style.background = 'linear-gradient(135deg, rgba(0, 255, 0, 0.2), rgba(0, 200, 0, 0.3))';
+    signInBtn.style.borderColor = '#00ff00';
+    signInBtn.style.color = '#00ff00';
+    signInBtn.innerHTML = '✓ Signed In';
+    signInBtn.disabled = true;
+    signInBtn.style.cursor = 'not-allowed';
+    signInBtn.style.opacity = '0.7';
+    
+    linkBtn.disabled = false;
+    linkBtn.style.cursor = 'pointer';
+    linkBtn.style.opacity = '1';
+    linkBtn.style.background = 'linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 200, 255, 0.3))';
+    linkBtn.style.borderColor = '#00ffff';
+    linkBtn.style.color = '#00ffff';
+    linkBtn.innerHTML = '<span style="display: flex; align-items: center; justify-content: center; gap: 8px;"><span style="font-size: 20px;">📱</span>Link to Phone</span>';
+    
+    const signalzData = JSON.parse(localStorage.getItem('signalzData') || '{}');
+    statusDiv.innerHTML = `<span style="color: #00ffff;">✅ Signed in as ${signalzData.riotId || 'User'}</span>`;
+  }
+  
+  if (phoneLinked) {
+    linkBtn.style.background = 'linear-gradient(135deg, rgba(0, 255, 0, 0.2), rgba(0, 200, 0, 0.3))';
+    linkBtn.style.borderColor = '#00ff00';
+    linkBtn.style.color = '#00ff00';
+    linkBtn.innerHTML = '<span style="display: flex; align-items: center; justify-content: center; gap: 8px;"><span style="font-size: 20px;">✓</span>Phone Linked</span>';
+    linkBtn.disabled = true;
+    linkBtn.style.cursor = 'not-allowed';
+    linkBtn.style.opacity = '0.7';
+    
+    const phoneLink = JSON.parse(localStorage.getItem('phoneLink') || '{}');
+    statusDiv.innerHTML = `
+      <span style="color: #00ff00;">✅ Phone Linked Successfully!</span><br>
+      <span style="color: rgba(255, 255, 255, 0.8); font-size: 11px; margin-top: 5px; display: block;">
+        Link Key: ${phoneLink.linkKey || 'N/A'}
+      </span>
+    `;
+  }
+}
+
+function generateLinkKey() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let key = '';
+  for (let i = 0; i < 8; i++) {
+    key += chars.charAt(Math.floor(Math.random() * chars.length));
+    if (i === 3) key += '-';
+  }
+  return key;
+}
+
+//======SignalZ LINK End======================================================
 
 //======MiniApps End==========================================================
 
