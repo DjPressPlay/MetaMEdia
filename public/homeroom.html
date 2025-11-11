@@ -3149,6 +3149,7 @@ async function openApp(appName) {
   const wins = summonerData.wins || "0";
   const losses = summonerData.losses || "0";
   const winRate = wins && losses ? Math.round((parseInt(wins) / (parseInt(wins) + parseInt(losses))) * 100) : 0;
+  const puuid = summonerData.puuid;
   
   let behaviorData = null;
   try {
@@ -3161,8 +3162,10 @@ async function openApp(appName) {
     console.warn('Could not load behavior data:', error);
   }
   
+  let matchHistoryHTML = '<div style="text-align: center; color: #aaa; padding: 20px;">Loading match history...</div>';
+  
   win.innerHTML = `
-    <div class="app-header">
+    <div class="app-header" style="background: #333; border-bottom: 2px solid #00ffff;">
       <span style="display: flex; align-items: center; gap: 8px;">
         <img src="METAMEDIA/League-of-Legends-Logo-2008.png" style="width: 20px; height: 20px;" alt="LoL">
         LoL ID Archive
@@ -3170,106 +3173,116 @@ async function openApp(appName) {
       <button class="close-app">×</button>
     </div>
 
-    <div class="app-body" style="padding: 20px; overflow-y: auto;">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <h2 style="color: #00ffff; margin-bottom: 10px; text-shadow: 0 0 10px rgba(0,255,255,0.8);">Riot ID Statistics</h2>
-        <div style="font-size: 18px; color: #fff; margin-bottom: 5px;">${summonerName}<span style="color: #888;">#${tagLine}</span></div>
-        <div style="font-size: 14px; color: #aaa;">Level ${level}</div>
+    <div class="app-body" style="padding: 0; overflow-y: auto; background: #ffffff;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h1 style="color: #ffffff; margin: 0 0 10px 0; font-size: 28px; font-weight: 700;">LoL ID Archive</h1>
+        <div style="font-size: 20px; color: #ffffff; margin-bottom: 5px; font-weight: 500;">${summonerName}<span style="color: #e0e0e0;">#${tagLine}</span></div>
+        <div style="font-size: 14px; color: #e0e0e0;">Level ${level} • ${rank} • ${lp} LP</div>
       </div>
-
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
-        <div style="background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; padding: 15px; text-align: center;">
-          <div style="font-size: 12px; color: #aaa; text-transform: uppercase; margin-bottom: 5px;">Rank</div>
-          <div style="font-size: 16px; color: #00ffff; font-weight: bold; text-shadow: 0 0 8px rgba(0,255,255,0.6);">${rank}</div>
-        </div>
-        <div style="background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; padding: 15px; text-align: center;">
-          <div style="font-size: 12px; color: #aaa; text-transform: uppercase; margin-bottom: 5px;">LP</div>
-          <div style="font-size: 16px; color: #00ffff; font-weight: bold; text-shadow: 0 0 8px rgba(0,255,255,0.6);">${lp}</div>
-        </div>
-      </div>
-
-      <div style="background: rgba(0, 255, 255, 0.05); border: 2px solid rgba(0, 255, 255, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-        <div style="font-size: 14px; color: #00ffff; text-transform: uppercase; margin-bottom: 15px; text-align: center; font-weight: bold;">Match Statistics</div>
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
-          <div>
-            <div style="font-size: 20px; color: #00ff00; font-weight: bold; margin-bottom: 5px;">${wins}</div>
-            <div style="font-size: 11px; color: #aaa; text-transform: uppercase;">Wins</div>
-          </div>
-          <div>
-            <div style="font-size: 20px; color: #ff6b6b; font-weight: bold; margin-bottom: 5px;">${losses}</div>
-            <div style="font-size: 11px; color: #aaa; text-transform: uppercase;">Losses</div>
-          </div>
-          <div>
-            <div style="font-size: 20px; color: #00ffff; font-weight: bold; margin-bottom: 5px;">${winRate}%</div>
-            <div style="font-size: 11px; color: #aaa; text-transform: uppercase;">Win Rate</div>
+      
+      <div style="padding: 30px 20px;">
+        <div style="background: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <h2 style="color: #333; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">Season Statistics</h2>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
+            <div style="background: #ffffff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+              <div style="font-size: 24px; color: #10b981; font-weight: bold; margin-bottom: 5px;">${wins}</div>
+              <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: 500;">Wins</div>
+            </div>
+            <div style="background: #ffffff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+              <div style="font-size: 24px; color: #ef4444; font-weight: bold; margin-bottom: 5px;">${losses}</div>
+              <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: 500;">Losses</div>
+            </div>
+            <div style="background: #ffffff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+              <div style="font-size: 24px; color: #667eea; font-weight: bold; margin-bottom: 5px;">${winRate}%</div>
+              <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: 500;">Win Rate</div>
+            </div>
           </div>
         </div>
-      </div>
-
-      ${behaviorData && !behaviorData.fallback ? `
-      <div style="background: rgba(138, 43, 226, 0.1); border: 2px solid rgba(138, 43, 226, 0.4); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-        <div style="font-size: 14px; color: #ba8bff; text-transform: uppercase; margin-bottom: 15px; text-align: center; font-weight: bold;">⚡ Behavior Patterns</div>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px;">
-          ${behaviorData.killParticipation ? `
-          <div style="background: rgba(138, 43, 226, 0.05); border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 8px; padding: 12px; text-align: center;">
-            <div style="font-size: 11px; color: #aaa; text-transform: uppercase; margin-bottom: 5px;">Kill Participation</div>
-            <div style="font-size: 16px; color: #ba8bff; font-weight: bold;">${behaviorData.killParticipation}</div>
+        
+        <div style="background: #f8f9fa; padding: 20px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <h2 style="color: #333; margin: 0 0 20px 0; font-size: 18px; font-weight: 600; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Recent Match History</h2>
+          <div id="match-history-container">
+            ${matchHistoryHTML}
           </div>
-          ` : ''}
-          ${behaviorData.goldPerMinute ? `
-          <div style="background: rgba(138, 43, 226, 0.05); border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 8px; padding: 12px; text-align: center;">
-            <div style="font-size: 11px; color: #aaa; text-transform: uppercase; margin-bottom: 5px;">Gold / Min</div>
-            <div style="font-size: 16px; color: #ba8bff; font-weight: bold;">${behaviorData.goldPerMinute}</div>
-          </div>
-          ` : ''}
-          ${behaviorData.visionPerMinute ? `
-          <div style="background: rgba(138, 43, 226, 0.05); border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 8px; padding: 12px; text-align: center;">
-            <div style="font-size: 11px; color: #aaa; text-transform: uppercase; margin-bottom: 5px;">Vision / Min</div>
-            <div style="font-size: 16px; color: #ba8bff; font-weight: bold;">${behaviorData.visionPerMinute}</div>
-          </div>
-          ` : ''}
-          ${behaviorData.matchesPerSession ? `
-          <div style="background: rgba(138, 43, 226, 0.05); border: 1px solid rgba(138, 43, 226, 0.3); border-radius: 8px; padding: 12px; text-align: center;">
-            <div style="font-size: 11px; color: #aaa; text-transform: uppercase; margin-bottom: 5px;">Matches / Session</div>
-            <div style="font-size: 16px; color: #ba8bff; font-weight: bold;">${behaviorData.matchesPerSession}</div>
-          </div>
-          ` : ''}
-        </div>
-        ${behaviorData.primaryRole ? `
-        <div style="text-align: center; margin-top: 10px;">
-          <span style="font-size: 11px; color: #aaa; text-transform: uppercase;">Primary Role: </span>
-          <span style="font-size: 12px; color: #ba8bff; font-weight: bold;">${behaviorData.primaryRole}</span>
-        </div>
-        ` : ''}
-        ${behaviorData.topChampions && behaviorData.topChampions.length > 0 ? `
-        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(138, 43, 226, 0.3);">
-          <div style="font-size: 11px; color: #aaa; text-transform: uppercase; text-align: center; margin-bottom: 8px;">Top Champions</div>
-          <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
-            ${behaviorData.topChampions.map(champ => `
-              <div style="background: rgba(138, 43, 226, 0.1); border: 1px solid rgba(138, 43, 226, 0.4); border-radius: 6px; padding: 6px 12px;">
-                <span style="font-size: 10px; color: #888;">#${champ.rank}</span>
-                <span style="font-size: 11px; color: #ba8bff; font-weight: bold; margin-left: 4px;">${champ.name}</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-        ` : ''}
-        ${behaviorData.totalTimePlayed ? `
-        <div style="text-align: center; margin-top: 10px; font-size: 10px; color: #888;">
-          Total Time Played: ${behaviorData.totalTimePlayed}
-        </div>
-        ` : ''}
-      </div>
-      ` : ''}
-
-      <div style="background: rgba(0, 255, 255, 0.05); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 8px; padding: 15px;">
-        <div style="font-size: 12px; color: #aaa; text-align: center; line-height: 1.5;">
-          <div style="margin-bottom: 8px;">📊 Statistics page showing your Riot ID performance metrics${behaviorData && !behaviorData.fallback ? ' with behavior patterns from LeagueOfGraphs' : ''}.</div>
-          <div style="font-size: 10px; color: #666;">Data synced from your League of Legends profile</div>
         </div>
       </div>
     </div>
   `;
+  
+  if (puuid) {
+    (async () => {
+      try {
+        const matchIdsRes = await fetch(`/.netlify/functions/riot-api?endpoint=/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=5&region=americas`);
+        if (!matchIdsRes.ok) throw new Error("Failed to fetch match IDs");
+        
+        const matchIds = await matchIdsRes.json();
+        
+        if (!matchIds || matchIds.length === 0) {
+          document.getElementById('match-history-container').innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">No recent matches found.</div>';
+          return;
+        }
+        
+        const matchDetailsPromises = matchIds.map(matchId => 
+          fetch(`/.netlify/functions/riot-api?endpoint=/lol/match/v5/matches/${matchId}&region=americas`)
+            .then(res => res.json())
+        );
+        
+        const matchesData = await Promise.all(matchDetailsPromises);
+        
+        let matchesHTML = '';
+        matchesData.forEach((matchData, index) => {
+          const participant = matchData.info.participants.find(p => p.puuid === puuid);
+          if (!participant) return;
+          
+          const won = participant.win;
+          const champion = participant.championName;
+          const kills = participant.kills;
+          const deaths = participant.deaths;
+          const assists = participant.assists;
+          const kda = deaths === 0 ? 'Perfect' : ((kills + assists) / deaths).toFixed(2);
+          const duration = Math.floor(matchData.info.gameDuration / 60);
+          const gameMode = matchData.info.gameMode;
+          
+          const borderColor = won ? '#10b981' : '#ef4444';
+          const bgColor = won ? '#f0fdf4' : '#fef2f2';
+          const resultText = won ? 'VICTORY' : 'DEFEAT';
+          const resultColor = won ? '#10b981' : '#ef4444';
+          
+          matchesHTML += `
+            <div style="background: ${bgColor}; border-left: 5px solid ${borderColor}; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="font-size: 14px; font-weight: 600; color: ${resultColor};">${resultText}</div>
+                <div style="font-size: 12px; color: #666;">${gameMode} • ${duration}m</div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 15px; align-items: center;">
+                <div style="text-align: center;">
+                  <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;">${champion}</div>
+                  <div style="font-size: 11px; color: #666; text-transform: uppercase;">Champion</div>
+                </div>
+                <div style="text-align: center; background: #ffffff; padding: 10px; border-radius: 6px;">
+                  <div style="font-size: 18px; font-weight: bold; color: #333;">${kills} / ${deaths} / ${assists}</div>
+                  <div style="font-size: 11px; color: #666; margin-top: 3px;">KDA: ${kda}</div>
+                </div>
+                <div style="text-align: center;">
+                  <div style="font-size: 12px; color: #666;">Game ${index + 1}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        document.getElementById('match-history-container').innerHTML = matchesHTML || '<div style="text-align: center; color: #999; padding: 20px;">No match data available.</div>';
+        
+      } catch (err) {
+        console.error('Error loading match history:', err);
+        document.getElementById('match-history-container').innerHTML = `<div style="text-align: center; color: #ef4444; padding: 20px;">Error loading match history: ${err.message}</div>`;
+      }
+    })();
+  } else {
+    setTimeout(() => {
+      document.getElementById('match-history-container').innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">PUUID not found. Please refresh your profile.</div>';
+    }, 100);
+  }
 }
 
 
