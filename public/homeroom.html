@@ -1309,10 +1309,12 @@
   bottom: -20px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 12px;
+  font-size: 10px;
   color: #00ffff;
   text-shadow: 0 0 6px rgba(0,255,255,0.8);
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 
@@ -1543,8 +1545,8 @@
 
   <div class="mini-pc-screen">
     <div class="desktop">
-      <div class="app-icon" data-app="reddit">
-        <img src="https://freelogopng.com/images/all_img/1658834095reddit-logo-png.png" alt="Reddit">
+      <div class="app-icon" data-app="lolid">
+        <img src="METAMEDIA/League-of-Legends-Logo-2008.png" alt="LoL ID Archive">
       </div>
 
       <div class="app-icon" data-app="notes">
@@ -3137,24 +3139,67 @@ function openApp(appName) {
   win.className = 'app-window';
 
   // 🧩 Reddit mini-app
- if (appName === "reddit") {
+ if (appName === "lolid") {
+  const summonerData = JSON.parse(localStorage.getItem("summonerData") || '{}');
+  const summonerName = summonerData.name || "Unknown";
+  const tagLine = summonerData.tagLine || "NA1";
+  const level = summonerData.level || "—";
+  const rank = summonerData.rank || "Unranked";
+  const lp = summonerData.lp || "0";
+  const wins = summonerData.wins || "0";
+  const losses = summonerData.losses || "0";
+  const winRate = wins && losses ? Math.round((parseInt(wins) / (parseInt(wins) + parseInt(losses))) * 100) : 0;
+  
   win.innerHTML = `
-    <div class="app-header reddit-nav">
-      <div class="reddit-left">
-        <img class="reddit-logo" src="https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-57x57.png" alt="reddit">
-        <span class="reddit-title">Reddit</span>
-      </div>
-      <div class="reddit-tabs">
-        <button class="tab active">Home</button>
-        <button class="tab">Popular</button>
-        <button class="tab">Explore</button>
-      </div>
+    <div class="app-header">
+      <span style="display: flex; align-items: center; gap: 8px;">
+        <img src="METAMEDIA/League-of-Legends-Logo-2008.png" style="width: 20px; height: 20px;" alt="LoL">
+        LoL ID Archive
+      </span>
       <button class="close-app">×</button>
     </div>
 
-    <div class="app-body reddit-body">
-      <div class="reddit-feed" id="reddit-feed">
-        ${generateRandomPosts()}
+    <div class="app-body" style="padding: 20px; overflow-y: auto;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #00ffff; margin-bottom: 10px; text-shadow: 0 0 10px rgba(0,255,255,0.8);">Riot ID Statistics</h2>
+        <div style="font-size: 18px; color: #fff; margin-bottom: 5px;">${summonerName}<span style="color: #888;">#${tagLine}</span></div>
+        <div style="font-size: 14px; color: #aaa;">Level ${level}</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+        <div style="background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; padding: 15px; text-align: center;">
+          <div style="font-size: 12px; color: #aaa; text-transform: uppercase; margin-bottom: 5px;">Rank</div>
+          <div style="font-size: 16px; color: #00ffff; font-weight: bold; text-shadow: 0 0 8px rgba(0,255,255,0.6);">${rank}</div>
+        </div>
+        <div style="background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px; padding: 15px; text-align: center;">
+          <div style="font-size: 12px; color: #aaa; text-transform: uppercase; margin-bottom: 5px;">LP</div>
+          <div style="font-size: 16px; color: #00ffff; font-weight: bold; text-shadow: 0 0 8px rgba(0,255,255,0.6);">${lp}</div>
+        </div>
+      </div>
+
+      <div style="background: rgba(0, 255, 255, 0.05); border: 2px solid rgba(0, 255, 255, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+        <div style="font-size: 14px; color: #00ffff; text-transform: uppercase; margin-bottom: 15px; text-align: center; font-weight: bold;">Match Statistics</div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
+          <div>
+            <div style="font-size: 20px; color: #00ff00; font-weight: bold; margin-bottom: 5px;">${wins}</div>
+            <div style="font-size: 11px; color: #aaa; text-transform: uppercase;">Wins</div>
+          </div>
+          <div>
+            <div style="font-size: 20px; color: #ff6b6b; font-weight: bold; margin-bottom: 5px;">${losses}</div>
+            <div style="font-size: 11px; color: #aaa; text-transform: uppercase;">Losses</div>
+          </div>
+          <div>
+            <div style="font-size: 20px; color: #00ffff; font-weight: bold; margin-bottom: 5px;">${winRate}%</div>
+            <div style="font-size: 11px; color: #aaa; text-transform: uppercase;">Win Rate</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background: rgba(0, 255, 255, 0.05); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 8px; padding: 15px;">
+        <div style="font-size: 12px; color: #aaa; text-align: center; line-height: 1.5;">
+          <div style="margin-bottom: 8px;">📊 This is a preloaded statistics page showing your Riot ID performance metrics.</div>
+          <div style="font-size: 10px; color: #666;">Data synced from your League of Legends profile</div>
+        </div>
       </div>
     </div>
   `;
