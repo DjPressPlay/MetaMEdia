@@ -2562,7 +2562,7 @@ function generateChampionLore(championName, loreData) {
         title: `${championName} - Lore Fragment ${index + 1}`,
         preview: preview,
         content: snippet,
-        imageUrl: loreData.imageUrl,
+        imageUrl: `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championName}_${index}.jpg`,
         questNumber: index + 1
       });
     });
@@ -2574,7 +2574,7 @@ function generateChampionLore(championName, loreData) {
       title: `${championName} - Quest ${index + 1}`,
       preview: `Unlock this lore by completing quest ${index + 1}...`,
       content: `Complete quest ${index + 1} to reveal more about ${championName}'s story and legend.`,
-      imageUrl: `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championName}_0.jpg`,
+      imageUrl: `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championName}_${index}.jpg`,
       questNumber: index + 1
     });
   }
@@ -2582,7 +2582,42 @@ function generateChampionLore(championName, loreData) {
   return lorePieces;
 }
 
-function showLoreCardOverlay(lore, championName) {
+async function getChampionMetadata(championName) {
+  try {
+    const cacheKey = `championMetadata_${championName}`;
+    const cached = localStorage.getItem(cacheKey);
+    
+    if (cached) {
+      const cachedData = JSON.parse(cached);
+      if (Date.now() - cachedData.timestamp < 86400000) {
+        return cachedData.data;
+      }
+    }
+    
+    const response = await fetch(`https://ddragon.leagueoflegends.com/cdn/14.1.1/data/en_US/champion/${championName}.json`);
+    
+    if (!response.ok) {
+      console.warn(`Failed to fetch metadata for ${championName}`);
+      return null;
+    }
+    
+    const data = await response.json();
+    const championData = data.data[championName];
+    
+    const cacheData = {
+      timestamp: Date.now(),
+      data: championData
+    };
+    localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    
+    return championData;
+  } catch (error) {
+    console.error(`Error fetching champion metadata for ${championName}:`, error);
+    return null;
+  }
+}
+
+async function showLoreCardOverlay(lore, championName) {
   const overlay = document.createElement('div');
   overlay.style.position = 'fixed';
   overlay.style.top = '0';
@@ -2634,8 +2669,33 @@ function showLoreCardOverlay(lore, championName) {
   cardImage.src = lore.imageUrl || `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championName}_0.jpg`;
   cardImage.style.width = '100%';
   cardImage.style.borderRadius = '8px';
-  cardImage.style.marginBottom = '16px';
+  cardImage.style.marginBottom = '12px';
   cardImage.style.boxShadow = '0 0 20px rgba(0, 255, 255, 0.4)';
+  
+  const imageDescription = document.createElement('div');
+  const skinNumber = lore.questNumber - 1;
+  
+  const championMetaData = await getChampionMetadata(championName);
+  const skinName = championMetaData?.skins?.[skinNumber]?.name || (skinNumber === 0 ? 'Classic' : `Skin ${skinNumber}`);
+  const championTitle = championMetaData?.title || '';
+  const championRoles = championMetaData?.tags?.join(', ') || '';
+  const championDifficulty = championMetaData?.info?.difficulty || 0;
+  
+  imageDescription.innerHTML = `
+    <div style="font-weight: bold; margin-bottom: 4px;">${championName}${championTitle ? ` - ${championTitle}` : ''}</div>
+    <div style="margin-bottom: 4px;">${skinName}</div>
+    ${championRoles ? `<div style="font-size: 11px; color: rgba(0, 255, 255, 0.8); margin-bottom: 4px;">${championRoles}</div>` : ''}
+    ${championDifficulty > 0 ? `<div style="font-size: 11px; color: rgba(255, 255, 255, 0.5);">Difficulty: ${'★'.repeat(championDifficulty)}${'☆'.repeat(10 - championDifficulty)}</div>` : ''}
+  `;
+  imageDescription.style.fontSize = '13px';
+  imageDescription.style.color = 'rgba(255, 255, 255, 0.7)';
+  imageDescription.style.textAlign = 'center';
+  imageDescription.style.marginBottom = '16px';
+  imageDescription.style.fontStyle = 'italic';
+  imageDescription.style.padding = '12px';
+  imageDescription.style.background = 'rgba(0, 255, 255, 0.05)';
+  imageDescription.style.borderRadius = '6px';
+  imageDescription.style.border = '1px solid rgba(0, 255, 255, 0.2)';
   
   const cardTitle = document.createElement('h2');
   cardTitle.textContent = lore.title;
@@ -2663,6 +2723,7 @@ function showLoreCardOverlay(lore, championName) {
   
   card.appendChild(closeBtn);
   card.appendChild(cardImage);
+  card.appendChild(imageDescription);
   card.appendChild(cardTitle);
   card.appendChild(questLabel);
   card.appendChild(cardContent);
