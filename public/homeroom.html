@@ -1309,10 +1309,12 @@
   bottom: -20px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 12px;
+  font-size: 10px;
   color: #00ffff;
   text-shadow: 0 0 6px rgba(0,255,255,0.8);
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 
@@ -1543,8 +1545,8 @@
 
   <div class="mini-pc-screen">
     <div class="desktop">
-      <div class="app-icon" data-app="reddit">
-        <img src="https://freelogopng.com/images/all_img/1658834095reddit-logo-png.png" alt="Reddit">
+      <div class="app-icon" data-app="lolid">
+        <img src="METAMEDIA/League-of-Legends-Logo-2008.png" alt="LoL ID Archive">
       </div>
 
       <div class="app-icon" data-app="notes">
@@ -3129,35 +3131,188 @@ document.querySelectorAll('.app-icon').forEach(icon => {
   });
 });
 
-function openApp(appName) {
+async function openApp(appName) {
   // close previous app windows inside the mini-pc
   document.querySelectorAll('.app-window').forEach(w => w.remove());
 
   const win = document.createElement('div');
   win.className = 'app-window';
 
-  // 🧩 Reddit mini-app
- if (appName === "reddit") {
+  // 🧩 LoL ID Archive mini-app
+ if (appName === "lolid") {
+  const summonerData = JSON.parse(localStorage.getItem("summonerData") || '{}');
+  const summonerName = summonerData.name || "Unknown";
+  const tagLine = summonerData.tagLine || "NA1";
+  const level = summonerData.level || "—";
+  const rank = summonerData.rank || "Unranked";
+  const lp = summonerData.lp || "0";
+  const wins = summonerData.wins || "0";
+  const losses = summonerData.losses || "0";
+  const winRate = wins && losses ? Math.round((parseInt(wins) / (parseInt(wins) + parseInt(losses))) * 100) : 0;
+  const puuid = summonerData.puuid;
+  
+  let behaviorData = null;
+  try {
+    const behaviorRes = await fetch(`/.netlify/functions/behavior-scraper?gameName=${encodeURIComponent(summonerName)}&tagLine=${encodeURIComponent(tagLine)}&region=na`);
+    if (behaviorRes.ok) {
+      behaviorData = await behaviorRes.json();
+      console.log('Behavior data loaded:', behaviorData);
+    }
+  } catch (error) {
+    console.warn('Could not load behavior data:', error);
+  }
+  
+  let matchHistoryHTML = '<div style="text-align: center; color: #aaa; padding: 20px;">Loading match history...</div>';
+  
   win.innerHTML = `
-    <div class="app-header reddit-nav">
-      <div class="reddit-left">
-        <img class="reddit-logo" src="https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-57x57.png" alt="reddit">
-        <span class="reddit-title">Reddit</span>
-      </div>
-      <div class="reddit-tabs">
-        <button class="tab active">Home</button>
-        <button class="tab">Popular</button>
-        <button class="tab">Explore</button>
-      </div>
+    <div class="app-header" style="background: #333; border-bottom: 2px solid #00ffff;">
+      <span style="display: flex; align-items: center; gap: 8px;">
+        <img src="METAMEDIA/League-of-Legends-Logo-2008.png" style="width: 20px; height: 20px;" alt="LoL">
+        LoL ID Archive
+      </span>
       <button class="close-app">×</button>
     </div>
 
-    <div class="app-body reddit-body">
-      <div class="reddit-feed" id="reddit-feed">
-        ${generateRandomPosts()}
+    <div class="app-body" style="padding: 0; overflow-y: auto; background: #ffffff;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h1 style="color: #ffffff; margin: 0 0 10px 0; font-size: 28px; font-weight: 700;">LoL ID Archive</h1>
+        <div style="font-size: 20px; color: #ffffff; margin-bottom: 5px; font-weight: 500;">${summonerName}<span style="color: #e0e0e0;">#${tagLine}</span></div>
+        <div style="font-size: 14px; color: #e0e0e0;">Level ${level} • ${rank} • ${lp} LP</div>
+        <div id="champion-icons-container" style="display: flex; justify-content: center; gap: 8px; margin-top: 15px;">
+        </div>
+      </div>
+      
+      <div style="padding: 30px 20px;">
+        <div style="background: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <h2 style="color: #333; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">Season Statistics</h2>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
+            <div style="background: #ffffff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+              <div style="font-size: 24px; color: #10b981; font-weight: bold; margin-bottom: 5px;">${wins}</div>
+              <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: 500;">Wins</div>
+            </div>
+            <div style="background: #ffffff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+              <div style="font-size: 24px; color: #ef4444; font-weight: bold; margin-bottom: 5px;">${losses}</div>
+              <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: 500;">Losses</div>
+            </div>
+            <div style="background: #ffffff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+              <div style="font-size: 24px; color: #667eea; font-weight: bold; margin-bottom: 5px;">${winRate}%</div>
+              <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: 500;">Win Rate</div>
+            </div>
+          </div>
+        </div>
+        
+        ${behaviorData ? `
+        <div style="background: linear-gradient(135deg, rgba(138, 43, 226, 0.1) 0%, rgba(75, 0, 130, 0.1) 100%); border-left: 4px solid rgba(138, 43, 226, 0.8); padding: 20px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <h2 style="color: rgba(138, 43, 226, 1); margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">Behavior Patterns</h2>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 14px; color: #333;">
+            ${behaviorData.killParticipation ? `<div style="background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 6px;"><strong style="color: rgba(138, 43, 226, 1);">Kill Participation:</strong> ${behaviorData.killParticipation}</div>` : ''}
+            ${behaviorData.goldPerMinute ? `<div style="background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 6px;"><strong style="color: rgba(138, 43, 226, 1);">Gold/Min:</strong> ${behaviorData.goldPerMinute}</div>` : ''}
+            ${behaviorData.visionPerMinute ? `<div style="background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 6px;"><strong style="color: rgba(138, 43, 226, 1);">Vision/Min:</strong> ${behaviorData.visionPerMinute}</div>` : ''}
+            ${behaviorData.matchesPerSession ? `<div style="background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 6px;"><strong style="color: rgba(138, 43, 226, 1);">Matches/Session:</strong> ${behaviorData.matchesPerSession}</div>` : ''}
+            ${behaviorData.primaryRole ? `<div style="background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 6px;"><strong style="color: rgba(138, 43, 226, 1);">Primary Role:</strong> ${behaviorData.primaryRole}</div>` : ''}
+            ${behaviorData.topChampions && behaviorData.topChampions.length > 0 ? `<div style="background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 6px;"><strong style="color: rgba(138, 43, 226, 1);">Top Champions:</strong> ${behaviorData.topChampions.join(', ')}</div>` : ''}
+            ${behaviorData.totalTimePlayed ? `<div style="background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 6px; grid-column: 1 / -1;"><strong style="color: rgba(138, 43, 226, 1);">Total Time Played:</strong> ${behaviorData.totalTimePlayed}</div>` : ''}
+          </div>
+        </div>
+        ` : ''}
+        
+        <div style="background: #f8f9fa; padding: 20px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <h2 style="color: #333; margin: 0 0 20px 0; font-size: 18px; font-weight: 600; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Recent Match History</h2>
+          <div id="match-history-container">
+            ${matchHistoryHTML}
+          </div>
+        </div>
       </div>
     </div>
   `;
+  
+  if (puuid) {
+    (async () => {
+      try {
+        const matchIdsRes = await fetch(`/.netlify/functions/riot-api?endpoint=/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=5&region=americas`);
+        if (!matchIdsRes.ok) throw new Error("Failed to fetch match IDs");
+        
+        const matchIds = await matchIdsRes.json();
+        
+        if (!matchIds || matchIds.length === 0) {
+          document.getElementById('match-history-container').innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">No recent matches found.</div>';
+          return;
+        }
+        
+        const matchDetailsPromises = matchIds.map(matchId => 
+          fetch(`/.netlify/functions/riot-api?endpoint=/lol/match/v5/matches/${matchId}&region=americas`)
+            .then(res => res.json())
+        );
+        
+        const matchesData = await Promise.all(matchDetailsPromises);
+        
+        let matchesHTML = '';
+        let championIcons = [];
+        matchesData.forEach((matchData, index) => {
+          const participant = matchData.info.participants.find(p => p.puuid === puuid);
+          if (!participant) return;
+          
+          const won = participant.win;
+          const champion = participant.championName;
+          const kills = participant.kills;
+          const deaths = participant.deaths;
+          const assists = participant.assists;
+          const kda = deaths === 0 ? 'Perfect' : ((kills + assists) / deaths).toFixed(2);
+          const duration = Math.floor(matchData.info.gameDuration / 60);
+          const gameMode = matchData.info.gameMode;
+          
+          championIcons.push(champion);
+          
+          const borderColor = won ? '#10b981' : '#ef4444';
+          const bgColor = won ? '#f0fdf4' : '#fef2f2';
+          const resultText = won ? 'VICTORY' : 'DEFEAT';
+          const resultColor = won ? '#10b981' : '#ef4444';
+          
+          matchesHTML += `
+            <div style="background: ${bgColor}; border-left: 5px solid ${borderColor}; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="font-size: 14px; font-weight: 600; color: ${resultColor};">${resultText}</div>
+                <div style="font-size: 12px; color: #666;">${gameMode} • ${duration}m</div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 15px; align-items: center;">
+                <div style="text-align: center;">
+                  <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;">${champion}</div>
+                  <div style="font-size: 11px; color: #666; text-transform: uppercase;">Champion</div>
+                </div>
+                <div style="text-align: center; background: #ffffff; padding: 10px; border-radius: 6px;">
+                  <div style="font-size: 18px; font-weight: bold; color: #333;">${kills} / ${deaths} / ${assists}</div>
+                  <div style="font-size: 11px; color: #666; margin-top: 3px;">KDA: ${kda}</div>
+                </div>
+                <div style="text-align: center;">
+                  <div style="font-size: 12px; color: #666;">Game ${index + 1}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        document.getElementById('match-history-container').innerHTML = matchesHTML || '<div style="text-align: center; color: #999; padding: 20px;">No match data available.</div>';
+        
+        const championIconsContainer = document.getElementById('champion-icons-container');
+        if (championIconsContainer && championIcons.length > 0) {
+          championIconsContainer.innerHTML = championIcons.map(champ => 
+            `<img src="https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${champ}.png" 
+                  alt="${champ}" 
+                  title="${champ}"
+                  style="width: 48px; height: 48px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">`
+          ).join('');
+        }
+        
+      } catch (err) {
+        console.error('Error loading match history:', err);
+        document.getElementById('match-history-container').innerHTML = `<div style="text-align: center; color: #ef4444; padding: 20px;">Error loading match history: ${err.message}</div>`;
+      }
+    })();
+  } else {
+    setTimeout(() => {
+      document.getElementById('match-history-container').innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">PUUID not found. Please refresh your profile.</div>';
+    }, 100);
+  }
 }
 
 
