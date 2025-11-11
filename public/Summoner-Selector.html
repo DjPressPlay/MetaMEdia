@@ -124,6 +124,28 @@ body {
 let currentSummoner = null;
 let apiOnline = false;
 
+// Function to reset all home room local save data
+function resetHomeRoomData() {
+  // Remove champion selection and progress
+  localStorage.removeItem("selectedChampion");
+  localStorage.removeItem("championQuests");
+  localStorage.removeItem("championProgress");
+  localStorage.removeItem("championLore");
+  localStorage.removeItem("collectedLore");
+  localStorage.removeItem("championLoreData");
+  localStorage.removeItem("championBackgrounds");
+  localStorage.removeItem("loreCardsList");
+  
+  // Remove phone and app data
+  localStorage.removeItem("phoneLink");
+  localStorage.removeItem("signalzData");
+  
+  // Remove quest tracking
+  localStorage.removeItem("lastActiveQuestId");
+  
+  console.log("✅ Home room local save data has been reset");
+}
+
 // 🔹 Step 1: check API status before allowing lookups
 async function checkRiotStatus(region = "NA1") {
   const note = document.getElementById("status-note");
@@ -185,16 +207,11 @@ async function fetchSummonerProfile(name, region = "NA1") {
       region,
       rank: solo || null,
     };
-    localStorage.setItem("selectedSummoner", JSON.stringify(currentSummoner));
     
-    localStorage.removeItem("selectedChampion");
-    localStorage.removeItem("championQuests");
-    localStorage.removeItem("championProgress");
-    localStorage.removeItem("championLore");
-    localStorage.removeItem("collectedLore");
-    localStorage.removeItem("championLoreData");
-    localStorage.removeItem("championBackgrounds");
-    localStorage.removeItem("loreCardsList");
+    // Reset all home room local save data when a new Riot ID is entered
+    resetHomeRoomData();
+    
+    localStorage.setItem("selectedSummoner", JSON.stringify(currentSummoner));
 
     // 5️⃣ Optional: show puuid visibly (for debug)
     note.innerHTML = `✅ Profile loaded. <br>PUUID: <span style="color:#00ffff;font-size:11px;">${summoner.puuid}</span>`;
@@ -226,14 +243,6 @@ document.getElementById("goto-home").addEventListener("click", () => {
     document.getElementById("status-note").textContent = "⚠️ Load or save a profile first.";
     return;
   }
-  localStorage.removeItem("selectedChampion");
-  localStorage.removeItem("championQuests");
-  localStorage.removeItem("championProgress");
-  localStorage.removeItem("championLore");
-  localStorage.removeItem("collectedLore");
-  localStorage.removeItem("championLoreData");
-  localStorage.removeItem("championBackgrounds");
-  localStorage.removeItem("loreCardsList");
   
   window.location.href = "homeroom.html";
 });

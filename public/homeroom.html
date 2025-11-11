@@ -1685,9 +1685,162 @@
     
 <div class="overlay-screen" id="screen3">
   <button class="close-btn">×</button>
-  <h2>Screen Three</h2>
-  <p>This is the third in-game screen.</p>
+  
+  <div id="phone-device" style="
+    width: 380px;
+    height: 720px;
+    background: linear-gradient(145deg, #1e1e2e, #0d0d1a);
+    border: 12px solid #222;
+    border-radius: 40px;
+    box-shadow: 
+      0 0 50px rgba(0, 0, 0, 0.8),
+      inset 0 0 30px rgba(0, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;">
+    
+    <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 140px; height: 30px; background: #000; border-radius: 0 0 20px 20px; z-index: 10;"></div>
+    
+    <div id="phone-locked-screen" style="position: absolute; inset: 0; background: linear-gradient(145deg, #1e1e2e, #0d0d1a); z-index: 5; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 50px 20px;">
+      <div style="text-align: center; margin-bottom: 50px; padding: 20px;">
+        <div style="font-size: 48px; color: rgba(255, 255, 255, 0.9); font-weight: 200; letter-spacing: 2px;">12:00</div>
+        <div style="font-size: 14px; color: rgba(255, 255, 255, 0.5); margin-top: 5px;">Tuesday, November 11</div>
+      </div>
+      
+      <div id="phone-notification-banner" style="
+        width: 90%;
+        background: rgba(20, 20, 20, 0.95);
+        border: 2px solid rgba(255, 100, 100, 0.8);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 40px;
+        box-shadow: 0 8px 32px rgba(255, 100, 100, 0.3);
+        animation: notificationSlideIn 0.6s ease-out;">
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 12px;">
+          <div style="font-size: 36px; filter: drop-shadow(0 0 10px rgba(255, 100, 100, 0.6));">🔒</div>
+          <div style="flex: 1;">
+            <div style="font-size: 14px; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">System</div>
+            <div style="font-size: 18px; color: #ff6464; font-weight: 700; text-shadow: 0 0 8px rgba(255, 100, 100, 0.6);">Phone Locked</div>
+          </div>
+        </div>
+        <div style="font-size: 14px; color: rgba(255, 255, 255, 0.8); line-height: 1.6; padding-left: 51px;">
+          Link your phone from the <span style="color: #00ffff; font-weight: 600;">PC SignalZ LINK</span> app to unlock.
+        </div>
+      </div>
+      
+      <div style="font-size: 100px; margin-bottom: 30px; opacity: 0.3; filter: drop-shadow(0 0 15px rgba(255, 100, 100, 0.4));">🔒</div>
+      
+      <div style="
+        background: rgba(20, 20, 20, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 20px;
+        max-width: 280px;
+        text-align: center;">
+        <div style="font-size: 12px; color: rgba(255, 255, 255, 0.5); line-height: 1.6;">
+          Visit the PC hotspot → Open SignalZ LINK → Sign In → Link to Phone
+        </div>
+      </div>
+    </div>
+    
+    <div id="phone-unlocked-screen" style="flex: 1; display: flex; flex-direction: column; padding: 50px 20px 20px 20px;">
+      
+      <div style="text-align: center; margin-bottom: 30px; padding: 20px;">
+        <div style="font-size: 48px; color: rgba(255, 255, 255, 0.9); font-weight: 200; letter-spacing: 2px;">12:00</div>
+        <div style="font-size: 14px; color: rgba(255, 255, 255, 0.5); margin-top: 5px;">Tuesday, November 11</div>
+      </div>
+      
+      <div style="flex: 1; display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; padding: 20px; align-content: center;">
+        
+        <div class="phone-app-icon" data-phone-app="signalz" style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          cursor: pointer;
+          transition: transform 0.2s ease;">
+          <div style="
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(145deg, #00ffff, #00cccc);
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;">
+            <img src="METAMEDIA/zetsu_cover-r22.png" alt="Signalz" style="width: 70%; height: 70%; object-fit: contain; filter: brightness(1.1);">
+            <div style="position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 60%);"></div>
+          </div>
+          <div style="font-size: 13px; color: rgba(255, 255, 255, 0.9); font-weight: 500; text-align: center;">Signalz</div>
+        </div>
+        
+        <div class="phone-app-icon" data-phone-app="msgs" style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          cursor: pointer;
+          transition: transform 0.2s ease;">
+          <div style="
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;">
+            <div style="font-size: 48px;">💬</div>
+            <div style="position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 60%);"></div>
+          </div>
+          <div style="font-size: 13px; color: rgba(255, 255, 255, 0.9); font-weight: 500; text-align: center;">MSGS</div>
+        </div>
+        
+      </div>
+      
+      <div style="height: 60px; display: flex; justify-content: center; align-items: center; padding-bottom: 10px;">
+        <div style="width: 120px; height: 5px; background: rgba(255, 255, 255, 0.3); border-radius: 3px;"></div>
+      </div>
+      
+    </div>
+  </div>
+  
 </div>
+
+<style>
+@keyframes popupBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) translateY(-20px);
+  }
+  50% {
+    transform: scale(1.05) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes notificationSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  60% {
+    transform: translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
 
 <div class="tutorial-info-box" id="tutorial-info-box">
   <button class="tutorial-info-box-close" id="tutorial-close">×</button>
@@ -1703,6 +1856,9 @@
 <script type="module" src="src/gameController.js"></script>
   <script>
   window.addEventListener("DOMContentLoaded", () => {
+    
+    // Check phone lock status on load
+    checkPhoneLockStatus();
     
     // Tab functionality
     const tabHeaders = document.querySelectorAll('.tab-header');
@@ -2408,7 +2564,7 @@ function updateTutorialForQuest(questData) {
           <p>Move to the <span class="tutorial-info-box-highlight">PHONE</span> hotspot (right side).</p>
         </div>
         <div class="tutorial-info-box-step">
-          <p>Click on it to open LoL Messenger.</p>
+          <p>⚠️ First, link your phone via the PC SignalZ LINK app!</p>
         </div>
         <p>Coming soon: Connect with other League players!</p>
       `
@@ -2469,6 +2625,46 @@ function updateTutorialForQuest(questData) {
         <p>${activeQuest.description}</p>
       `
     });
+  }
+}
+
+// ===============================
+// 🔒 PHONE LOCK STATUS CHECKER
+// ===============================
+function checkPhoneLockStatus() {
+  const phoneHotspot = document.getElementById('spot3');
+  const phoneLink = JSON.parse(localStorage.getItem('phoneLink') || '{}');
+  
+  if (!phoneHotspot) return;
+  
+  if (phoneLink.linkedAt && phoneLink.linkKey) {
+    // Phone is unlocked
+    phoneHotspot.setAttribute('data-label', 'PHONE');
+    phoneHotspot.style.background = 'radial-gradient(circle, rgba(0, 255, 0, 0.4) 0%, rgba(0, 200, 0, 0.3) 60%, transparent 100%)';
+    phoneHotspot.style.boxShadow = '0 0 12px rgba(0, 255, 0, 0.5), 0 0 24px rgba(0, 255, 0, 0.3)';
+  } else {
+    // Phone is locked
+    phoneHotspot.setAttribute('data-label', 'PHONE 🔒');
+    phoneHotspot.style.background = 'radial-gradient(circle, rgba(255, 100, 100, 0.4) 0%, rgba(200, 0, 0, 0.3) 60%, transparent 100%)';
+    phoneHotspot.style.boxShadow = '0 0 12px rgba(255, 100, 100, 0.5), 0 0 24px rgba(255, 100, 100, 0.3)';
+  }
+}
+
+function updatePhoneScreenState() {
+  const phoneLink = JSON.parse(localStorage.getItem('phoneLink') || '{}');
+  const lockedScreen = document.getElementById('phone-locked-screen');
+  const unlockedScreen = document.getElementById('phone-unlocked-screen');
+  
+  if (!lockedScreen || !unlockedScreen) return;
+  
+  if (phoneLink.linkedAt && phoneLink.linkKey) {
+    // Phone is unlocked - show apps
+    lockedScreen.style.display = 'none';
+    unlockedScreen.style.display = 'flex';
+  } else {
+    // Phone is locked - show lock screen with popup
+    lockedScreen.style.display = 'flex';
+    unlockedScreen.style.display = 'none';
   }
 }
 
@@ -3210,6 +3406,19 @@ const screens = document.querySelectorAll('.overlay-screen');
 
 hotspots.forEach((spot, i) => {
   spot.addEventListener('click', () => {
+    // Special check for phone hotspot (spot3 / screen3)
+    if (i === 2) { // Phone is the 3rd screen (index 2)
+      const phoneLink = JSON.parse(localStorage.getItem('phoneLink') || '{}');
+      
+      // Always show the screen
+      screens.forEach(s => s.classList.remove('active'));
+      screens[i].classList.add('active');
+      
+      // Show locked or unlocked state based on phone link status
+      updatePhoneScreenState();
+      return;
+    }
+    
     // Hide any open screen first
     screens.forEach(s => s.classList.remove('active'));
     // Show this one
@@ -3654,6 +3863,13 @@ function initializeSignalZApp() {
     `;
     
     updateSignalZUI(true, true);
+    
+    // Update phone lock status
+    checkPhoneLockStatus();
+    updatePhoneScreenState();
+    
+    // Show notification
+    showNotification('🔓 Phone Unlocked! You can now access the phone hotspot.');
   });
   
   const closeAppBtn = document.querySelector('#app-signalz .close-app');
@@ -3722,6 +3938,29 @@ function generateLinkKey() {
 //======SignalZ LINK End======================================================
 
 //======MiniApps End==========================================================
+
+//======Phone App Icons Interaction===========================================
+document.querySelectorAll('.phone-app-icon').forEach(icon => {
+  icon.addEventListener('mouseenter', () => {
+    icon.style.transform = 'scale(1.1) translateY(-5px)';
+  });
+  
+  icon.addEventListener('mouseleave', () => {
+    icon.style.transform = 'scale(1) translateY(0)';
+  });
+  
+  icon.addEventListener('click', () => {
+    const appName = icon.dataset.phoneApp;
+    
+    if (appName === 'signalz') {
+      alert('📱 Signalz App - Coming Soon!\n\nConnect with League players and sync your profile across devices.');
+    } else if (appName === 'msgs') {
+      alert('💬 MSGS App - Coming Soon!\n\nChat with friends and team members in real-time.');
+    }
+  });
+});
+
+//======Phone App Icons End===================================================
 
 
   //======================================================
