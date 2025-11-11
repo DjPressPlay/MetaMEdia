@@ -1,0 +1,79 @@
+🧩 Full Production Alternative (No Scraping)
+
+Instead of scraping external sites, the production system builds its own analytics and content pipeline directly from Riot’s official API data.
+
+1. Data Ingestion
+
+Continuously fetch raw match data from Riot’s /match/v5 endpoints:
+
+/matches/by-puuid/{puuid}/ids → list of recent match IDs
+
+/matches/{matchId} → full match detail + timeline
+
+Use serverless jobs or a worker pool to handle ingestion, queueing, retries, and rate limits.
+
+2. Aggregation & Computation
+
+Process raw match JSON into derived analytics:
+
+Win rates, champion synergy, KDA, role distribution, objective control, etc.
+
+Implement an aggregation layer using batch or streaming jobs (Python + Postgres/ClickHouse or Spark for scale).
+
+This replaces third-party stat scraping by computing all metrics internally and accurately.
+
+3. Storage & Access
+
+Store normalized raw data in a data lake (S3 or equivalent).
+
+Build aggregated “read models” in OLAP databases (ClickHouse, BigQuery, Redshift) for high-speed queries.
+
+Cache hot data (recent summoner or champion stats) in Redis for instant API responses.
+
+4. API & Frontend
+
+Create secure Netlify/Edge API functions that expose aggregated endpoints like:
+
+/api/summoner/{id}/analytics?window=30d
+
+Frontend reads only these endpoints—no direct data crawling or scraping.
+
+5. Lore & Content Pipeline
+
+Curate or license lore data instead of live-scraping fandom sources:
+
+Option 1: host your own curated text/media.
+
+Option 2: obtain permission or use cached, attributed copies.
+
+Option 3: generate or paraphrase lore content in-house.
+
+6. Rate Limits, Privacy & Compliance
+
+Respect Riot API limits with batching, caching, and exponential backoff.
+
+Keep API keys server-side only.
+
+Store only necessary IDs (no personal info).
+
+Offer opt-in for players who want persistent stats tracked.
+
+7. Reliability & Testing
+
+Unit-test aggregation logic on sample match data.
+
+Backfill and sanity-check calculated stats (e.g., global win-rate baselines).
+
+Monitor divergence or stale data through automated jobs.
+
+8. MVP Production Setup
+
+Build ingestion pipeline for last N matches per summoner.
+
+Implement core aggregations: win rate, pick rate, KDA, role share.
+
+Store aggregates in DB with Redis cache.
+
+Expose read-only endpoints to frontend.
+
+Add separate curated or licensed lore content system.
