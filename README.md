@@ -1,4 +1,4 @@
-# Myth Ledger - League of Legends Profile Explorer
+# Myth Ledger - League of Legends - Lore Quest 
 
 An interactive web application that allows users to explore League of Legends summoner profiles with an immersive visual interface.
 
