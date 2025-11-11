@@ -194,6 +194,7 @@ async function fetchSummonerProfile(name, region = "NA1") {
     localStorage.removeItem("collectedLore");
     localStorage.removeItem("championLoreData");
     localStorage.removeItem("championBackgrounds");
+    localStorage.removeItem("loreCardsList");
 
     // 5️⃣ Optional: show puuid visibly (for debug)
     note.innerHTML = `✅ Profile loaded. <br>PUUID: <span style="color:#00ffff;font-size:11px;">${summoner.puuid}</span>`;
@@ -232,6 +233,7 @@ document.getElementById("goto-home").addEventListener("click", () => {
   localStorage.removeItem("collectedLore");
   localStorage.removeItem("championLoreData");
   localStorage.removeItem("championBackgrounds");
+  localStorage.removeItem("loreCardsList");
   
   window.location.href = "homeroom.html";
 });
