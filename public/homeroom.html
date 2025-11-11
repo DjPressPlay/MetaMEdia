@@ -1317,6 +1317,10 @@
   white-space: nowrap;
 }
 
+.app-icon[data-app="items"]::before {
+  content: 'Items';
+}
+
 
 .app-icon:hover {
   transform: scale(1.15);
@@ -1549,8 +1553,8 @@
         <img src="METAMEDIA/League-of-Legends-Logo-2008.png" alt="LoL ID Archive">
       </div>
 
-      <div class="app-icon" data-app="notes">
-        <img src="https://cdn-icons-png.flaticon.com/512/2965/2965358.png" alt="Notes">
+      <div class="app-icon" data-app="items">
+        <img src="https://cdn-icons-png.flaticon.com/512/2504/2504929.png" alt="Items">
       </div>
 
       <div class="app-icon" data-app="signalz">
@@ -1563,10 +1567,15 @@
   <img src="https://upload.wikimedia.org/wikipedia/en/7/77/League_of_Legends_logo.png" alt="League">
 </div>
 
-  <!-- 🔹 App 2 ------------------>
-    <div class="mini-app-window" id="app-notes" style="display: none;">
-      <h2>Notes App</h2>
-      <textarea placeholder="Type your notes here..."></textarea>
+  <!-- 🔹 App 2 - Items (Lore Cards Viewer) ------------------>
+    <div class="app-window" id="app-items" style="display: none;">
+      <div class="app-header">
+        <span>Items - Lore Collection</span>
+        <button class="close-app">×</button>
+      </div>
+      <div class="app-body" id="items-app-body" style="padding: 20px; overflow-y: auto; max-height: calc(100% - 50px);">
+        <p style="text-align: center; color: #aaa;">Loading lore cards...</p>
+      </div>
     </div>
  
        
@@ -3137,6 +3146,160 @@ async function openApp(appName) {
 
   const win = document.createElement('div');
   win.className = 'app-window';
+
+  // 🧩 Items App - Lore Cards Viewer (Netflix/YouTube Style)
+  if (appName === "items") {
+    const collectedLore = JSON.parse(localStorage.getItem('collectedLore') || '[]');
+    const championLoreData = JSON.parse(localStorage.getItem('championLoreData') || '{}');
+    const championLore = JSON.parse(localStorage.getItem('championLore') || '{}');
+    
+    win.innerHTML = `
+      <div class="app-header" style="background: linear-gradient(135deg, #d4af37 0%, #f4a460 100%); border-bottom: 2px solid #00ffff;">
+        <span style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 20px;">📦</span>
+          Items - Lore Collection
+        </span>
+        <button class="close-app">×</button>
+      </div>
+
+      <div class="app-body" style="padding: 0; overflow-y: auto; background: #0a0a0a; max-height: calc(100vh - 200px);">
+        <div id="lore-cards-container">
+          <p style="text-align: center; color: #aaa; padding: 40px;">Loading lore cards...</p>
+        </div>
+      </div>
+    `;
+    
+    document.querySelector('.mini-pc-screen').appendChild(win);
+    win.querySelector('.close-app').addEventListener('click', () => win.remove());
+    
+    const loreCardsContainer = document.getElementById('lore-cards-container');
+    
+    if (collectedLore.length === 0) {
+      loreCardsContainer.innerHTML = '<p style="text-align: center; color: #aaa; padding: 40px;">Complete quests to unlock lore cards!</p>';
+      return;
+    }
+    
+    loreCardsContainer.innerHTML = '';
+    
+    const championSections = {};
+    collectedLore.forEach(loreId => {
+      const match = loreId.match(/(.+)_lore_(\d+)/);
+      if (match) {
+        const [, championName, loreIndex] = match;
+        if (!championSections[championName]) {
+          championSections[championName] = [];
+        }
+        championSections[championName].push({
+          championName,
+          loreIndex: parseInt(loreIndex),
+          loreId
+        });
+      }
+    });
+    
+    Object.keys(championSections).forEach(championName => {
+      const championLoreItems = championSections[championName].sort((a, b) => a.loreIndex - b.loreIndex);
+      const lorePieces = generateChampionLore(championName, championLoreData[championName]);
+      
+      const championSection = document.createElement('div');
+      championSection.style.cssText = `
+        margin-bottom: 40px;
+        padding: 0 20px;
+      `;
+      
+      const sectionHeader = document.createElement('div');
+      sectionHeader.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+      `;
+      sectionHeader.innerHTML = `
+        <img src="https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${championName}.png" 
+             style="width: 48px; height: 48px; border-radius: 8px; border: 2px solid #00ffff; box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);" 
+             alt="${championName}">
+        <h2 style="color: #00ffff; font-size: 20px; font-weight: 700; text-transform: uppercase; text-shadow: 0 0 10px rgba(0, 255, 255, 0.6); margin: 0;">
+          ${championName}
+        </h2>
+        <span style="font-size: 12px; color: #aaa; margin-left: auto;">
+          ${championLoreItems.length} ${championLoreItems.length === 1 ? 'Item' : 'Items'}
+        </span>
+      `;
+      
+      const cardsRow = document.createElement('div');
+      cardsRow.style.cssText = `
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 15px;
+        padding-bottom: 20px;
+      `;
+      
+      championLoreItems.forEach(item => {
+        const lore = lorePieces[item.loreIndex - 1];
+        if (!lore) return;
+        
+        const loreCard = document.createElement('div');
+        loreCard.style.cssText = `
+          background: linear-gradient(135deg, rgba(0, 255, 255, 0.05) 0%, rgba(0, 180, 255, 0.02) 100%);
+          border: 2px solid rgba(0, 255, 255, 0.3);
+          border-radius: 10px;
+          overflow: hidden;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+          position: relative;
+        `;
+        
+        loreCard.innerHTML = `
+          <div style="position: relative; width: 100%; padding-top: 56.25%; overflow: hidden;">
+            <img src="${lore.imageUrl || 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/' + championName + '_0.jpg'}" 
+                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" 
+                 alt="${lore.title}">
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%); padding: 20px 12px 10px 12px;">
+              <div style="font-size: 11px; font-weight: 700; color: #00ffff; text-transform: uppercase; text-shadow: 0 0 6px rgba(0, 255, 255, 0.8); margin-bottom: 2px;">
+                ${lore.title}
+              </div>
+              <div style="font-size: 9px; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 0.5px;">
+                Quest ${lore.questNumber}/9
+              </div>
+            </div>
+          </div>
+        `;
+        
+        loreCard.addEventListener('mouseenter', () => {
+          loreCard.style.transform = 'scale(1.05) translateY(-5px)';
+          loreCard.style.boxShadow = '0 12px 24px rgba(0, 255, 255, 0.4)';
+          loreCard.style.borderColor = 'rgba(0, 255, 255, 0.8)';
+          loreCard.style.zIndex = '10';
+        });
+        
+        loreCard.addEventListener('mouseleave', () => {
+          loreCard.style.transform = 'scale(1) translateY(0)';
+          loreCard.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.5)';
+          loreCard.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+          loreCard.style.zIndex = '1';
+        });
+        
+        loreCard.addEventListener('click', () => {
+          showLoreCardOverlay(lore, championName);
+        });
+        
+        cardsRow.appendChild(loreCard);
+      });
+      
+      championSection.appendChild(sectionHeader);
+      championSection.appendChild(cardsRow);
+      loreCardsContainer.appendChild(championSection);
+    });
+    
+    if (loreCardsContainer.children.length === 0) {
+      loreCardsContainer.innerHTML = '<p style="text-align: center; color: #aaa; padding: 40px;">No lore cards unlocked yet. Complete quests to unlock them!</p>';
+    }
+    
+    return;
+  }
 
   // 🧩 LoL ID Archive mini-app
  if (appName === "lolid") {
