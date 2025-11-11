@@ -1989,6 +1989,7 @@ async function unlockLoreForQuest(championName, questPointIndex) {
   let championLoreData = JSON.parse(localStorage.getItem('championLoreData') || '{}');
   if (!championLoreData[championName]) {
     await fetchChampionLore(championName);
+    championLoreData = JSON.parse(localStorage.getItem('championLoreData') || '{}');
   }
   
   const loreId = `${championName}_lore_${questPointIndex}`;
@@ -1999,6 +2000,30 @@ async function unlockLoreForQuest(championName, questPointIndex) {
   if (!collectedLore.includes(loreId)) {
     collectedLore.push(loreId);
     localStorage.setItem('collectedLore', JSON.stringify(collectedLore));
+  }
+  
+  const lorePieces = generateChampionLore(championName, championLoreData[championName]);
+  const loreCard = lorePieces[questPointIndex - 1];
+  
+  if (loreCard) {
+    let loreCardsList = JSON.parse(localStorage.getItem('loreCardsList') || '[]');
+    
+    const cardData = {
+      loreId: loreId,
+      championName: championName,
+      questNumber: questPointIndex,
+      title: loreCard.title,
+      preview: loreCard.preview,
+      content: loreCard.content,
+      imageUrl: loreCard.imageUrl,
+      unlockedAt: new Date().toISOString()
+    };
+    
+    const existingIndex = loreCardsList.findIndex(card => card.loreId === loreId);
+    if (existingIndex === -1) {
+      loreCardsList.push(cardData);
+      localStorage.setItem('loreCardsList', JSON.stringify(loreCardsList));
+    }
   }
   
   showNotification(`📜 New lore unlocked for ${championName}!`);
@@ -3149,9 +3174,7 @@ async function openApp(appName) {
 
   // 🧩 Items App - Lore Cards Viewer (Netflix/YouTube Style)
   if (appName === "items") {
-    const collectedLore = JSON.parse(localStorage.getItem('collectedLore') || '[]');
-    const championLoreData = JSON.parse(localStorage.getItem('championLoreData') || '{}');
-    const championLore = JSON.parse(localStorage.getItem('championLore') || '{}');
+    const loreCardsList = JSON.parse(localStorage.getItem('loreCardsList') || '[]');
     
     win.innerHTML = `
       <div class="app-header" style="background: linear-gradient(135deg, #d4af37 0%, #f4a460 100%); border-bottom: 2px solid #00ffff;">
@@ -3174,7 +3197,7 @@ async function openApp(appName) {
     
     const loreCardsContainer = document.getElementById('lore-cards-container');
     
-    if (collectedLore.length === 0) {
+    if (loreCardsList.length === 0) {
       loreCardsContainer.innerHTML = '<p style="text-align: center; color: #aaa; padding: 40px;">Complete quests to unlock lore cards!</p>';
       return;
     }
@@ -3182,24 +3205,15 @@ async function openApp(appName) {
     loreCardsContainer.innerHTML = '';
     
     const championSections = {};
-    collectedLore.forEach(loreId => {
-      const match = loreId.match(/(.+)_lore_(\d+)/);
-      if (match) {
-        const [, championName, loreIndex] = match;
-        if (!championSections[championName]) {
-          championSections[championName] = [];
-        }
-        championSections[championName].push({
-          championName,
-          loreIndex: parseInt(loreIndex),
-          loreId
-        });
+    loreCardsList.forEach(card => {
+      if (!championSections[card.championName]) {
+        championSections[card.championName] = [];
       }
+      championSections[card.championName].push(card);
     });
     
     Object.keys(championSections).forEach(championName => {
-      const championLoreItems = championSections[championName].sort((a, b) => a.loreIndex - b.loreIndex);
-      const lorePieces = generateChampionLore(championName, championLoreData[championName]);
+      const championLoreItems = championSections[championName].sort((a, b) => a.questNumber - b.questNumber);
       
       const championSection = document.createElement('div');
       championSection.style.cssText = `
@@ -3236,12 +3250,9 @@ async function openApp(appName) {
         padding-bottom: 20px;
       `;
       
-      championLoreItems.forEach(item => {
-        const lore = lorePieces[item.loreIndex - 1];
-        if (!lore) return;
-        
-        const loreCard = document.createElement('div');
-        loreCard.style.cssText = `
+      championLoreItems.forEach(loreCard => {
+        const cardElement = document.createElement('div');
+        cardElement.style.cssText = `
           background: linear-gradient(135deg, rgba(0, 255, 255, 0.05) 0%, rgba(0, 180, 255, 0.02) 100%);
           border: 2px solid rgba(0, 255, 255, 0.3);
           border-radius: 10px;
@@ -3252,41 +3263,41 @@ async function openApp(appName) {
           position: relative;
         `;
         
-        loreCard.innerHTML = `
+        cardElement.innerHTML = `
           <div style="position: relative; width: 100%; padding-top: 56.25%; overflow: hidden;">
-            <img src="${lore.imageUrl || 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/' + championName + '_0.jpg'}" 
+            <img src="${loreCard.imageUrl || 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/' + championName + '_0.jpg'}" 
                  style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" 
-                 alt="${lore.title}">
+                 alt="${loreCard.title}">
             <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%); padding: 20px 12px 10px 12px;">
               <div style="font-size: 11px; font-weight: 700; color: #00ffff; text-transform: uppercase; text-shadow: 0 0 6px rgba(0, 255, 255, 0.8); margin-bottom: 2px;">
-                ${lore.title}
+                ${loreCard.title}
               </div>
               <div style="font-size: 9px; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 0.5px;">
-                Quest ${lore.questNumber}/9
+                Quest ${loreCard.questNumber}/9
               </div>
             </div>
           </div>
         `;
         
-        loreCard.addEventListener('mouseenter', () => {
-          loreCard.style.transform = 'scale(1.05) translateY(-5px)';
-          loreCard.style.boxShadow = '0 12px 24px rgba(0, 255, 255, 0.4)';
-          loreCard.style.borderColor = 'rgba(0, 255, 255, 0.8)';
-          loreCard.style.zIndex = '10';
+        cardElement.addEventListener('mouseenter', () => {
+          cardElement.style.transform = 'scale(1.05) translateY(-5px)';
+          cardElement.style.boxShadow = '0 12px 24px rgba(0, 255, 255, 0.4)';
+          cardElement.style.borderColor = 'rgba(0, 255, 255, 0.8)';
+          cardElement.style.zIndex = '10';
         });
         
-        loreCard.addEventListener('mouseleave', () => {
-          loreCard.style.transform = 'scale(1) translateY(0)';
-          loreCard.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.5)';
-          loreCard.style.borderColor = 'rgba(0, 255, 255, 0.3)';
-          loreCard.style.zIndex = '1';
+        cardElement.addEventListener('mouseleave', () => {
+          cardElement.style.transform = 'scale(1) translateY(0)';
+          cardElement.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.5)';
+          cardElement.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+          cardElement.style.zIndex = '1';
         });
         
-        loreCard.addEventListener('click', () => {
-          showLoreCardOverlay(lore, championName);
+        cardElement.addEventListener('click', () => {
+          showLoreCardOverlay(loreCard, championName);
         });
         
-        cardsRow.appendChild(loreCard);
+        cardsRow.appendChild(cardElement);
       });
       
       championSection.appendChild(sectionHeader);
